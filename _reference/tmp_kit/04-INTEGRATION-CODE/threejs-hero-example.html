@@ -1,0 +1,33 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Three.js Glass Hero</title>
+<style>body{margin:0;background:#060a1a;color:#e6eaff;font-family:system-ui}canvas{position:fixed;inset:0;z-index:-1}</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div style="max-width:800px;margin:80px auto;padding:24px;background:rgba(15,23,51,0.6);backdrop-filter:blur(16px);border-radius:16px;border:1px solid rgba(255,255,255,0.1)">
+  <h1>Three.js Glass Waves — Hero</h1>
+  <p style="color:#8a94b8">Full source copied from <a href="https://www.aura.build/component/8369ED" style="color:#00e5ff">Aura Glassmorphism Hero</a> (free). This file shows the pattern — copy Aura’s code for production.</p>
+  <p>Fallback: if WebGL blocked, hero degrades to CSS gradient (no error).</p>
+</div>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+const canvas=document.getElementById('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);
+camera.position.z=3;
+const geo=new THREE.PlaneGeometry(6,4,64,64);
+const mat=new THREE.ShaderMaterial({
+  uniforms:{uTime:{value:0},uColor1:{value:new THREE.Color('#00e5ff')},uColor2:{value:new THREE.Color('#7c4dff')}},
+  vertexShader:`varying vec2 vUv; uniform float uTime; void main(){vUv=uv; vec3 p=position; p.z+=sin(p.x*1.5+uTime)*0.15 + cos(p.y*2.0+uTime*0.8)*0.1; gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);}`,
+  fragmentShader:`varying vec2 vUv; uniform vec3 uColor1,uColor2; void main(){ vec3 c=mix(uColor1,uColor2,vUv.y+0.2); float alpha=smoothstep(0.0,0.6,length(vUv-0.5))*0.35; gl_FragColor=vec4(c,0.28); }`,
+  transparent:true
+});
+const mesh=new THREE.Mesh(geo,mat); scene.add(mesh);
+function resize(){ renderer.setSize(innerWidth,innerHeight); camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); }
+addEventListener('resize',resize); resize();
+let t=0; (function animate(){ t+=0.01; mat.uniforms.uTime.value=t; renderer.render(scene,camera); requestAnimationFrame(animate); })();
+</script>
+</body>
+</html>

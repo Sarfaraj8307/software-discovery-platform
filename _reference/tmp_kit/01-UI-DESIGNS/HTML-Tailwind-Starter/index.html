@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Futuristic Software Marketplace — Starter</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+<style>body{font-family:Inter,system-ui,sans-serif;background:#060a1a;color:#e6eaff}</style>
+</head>
+<body class="antialiased">
+<!-- NAV -->
+<nav class="sticky top-0 z-50 backdrop-blur-xl bg-[#060a1a]/70 border-b border-white/10">
+  <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+    <div class="flex items-center gap-2 font-extrabold tracking-tight"><span class="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-400 to-violet-600 grid place-items-center">◈</span> SoftMarket</div>
+    <div class="hidden md:flex gap-6 text-sm text-slate-400"><a href="#" class="text-white">Browse</a><a href="#">Compare</a><a href="#">Vendors</a></div>
+    <a href="#" class="px-4 py-2 rounded-full bg-gradient-to-r from-cyan-400 to-violet-600 text-slate-900 font-bold text-sm">List Your Software — Free</a>
+  </div>
+</nav>
+
+<!-- HERO — futuristic -->
+<section class="relative overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-br from-violet-900/20 via-transparent to-cyan-900/20"></div>
+  <div class="absolute inset-0 opacity-30" style="background: radial-gradient(600px 300px at 70% 20%, rgba(0,229,255,0.15), transparent)"></div>
+  <div class="relative max-w-6xl mx-auto px-6 py-14 md:py-20 grid md:grid-cols-2 gap-10 items-center">
+    <div>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-400/10 border border-cyan-400/20 text-cyan-300 text-xs tracking-widest">✦ FUTURISTIC • INTERACTIVE • FREE ANIMATIONS</div>
+      <h1 class="text-4xl md:text-5xl font-extrabold leading-tight mt-4">Discover, <span class="bg-gradient-to-r from-cyan-400 to-violet-500 bg-clip-text text-transparent">Compare</span> & Buy the Best Software</h1>
+      <p class="text-slate-400 mt-3">CRMs, ERPs, HRMs — listed by vendors. Compare side-by-side, read verified reviews, pick the right stack.</p>
+      <div class="flex gap-3 mt-6">
+        <input placeholder="Search CRMs, ERPs, project tools…" class="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 outline-none placeholder:text-slate-500">
+        <button class="px-6 py-3 rounded-xl bg-cyan-400 text-slate-900 font-bold">Search</button>
+      </div>
+      <div class="flex gap-2 mt-4 flex-wrap">
+        <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs">CRM</span>
+        <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs">ERP</span>
+        <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs">HRM</span>
+        <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs">Accounting</span>
+      </div>
+    </div>
+    <div class="relative">
+      <!-- Replace src with any lottie in 02-ANIMATIONS/lottie/ -->
+      <div class="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 shadow-2xl">
+        <lottie-player src="../../02-ANIMATIONS/lottie/computer-workspace.json" background="transparent" speed="1" loop autoplay style="width:100%;height:320px"></lottie-player>
+        <p class="text-xs text-center text-slate-500 mt-2">↑ Replace with <code>futuristic-dashboard.json</code> or Spline iframe — see 04-INTEGRATION-CODE/</p>
+      </div>
+      <div class="absolute -bottom-4 -left-4 px-4 py-3 rounded-xl bg-[#0f1733] border border-white/10 shadow-xl hidden md:block">
+        <div class="text-xs text-slate-400">Compared this week</div><div class="font-mono font-bold text-cyan-300">1,284 softwares</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GRID -->
+<section class="max-w-6xl mx-auto px-6 py-10">
+  <div class="flex items-center justify-between">
+    <h2 class="font-bold text-lg">Trending Software</h2>
+    <a href="#" class="text-cyan-400 text-sm">View all →</a>
+  </div>
+  <div class="grid md:grid-cols-3 gap-4 mt-4">
+    <!-- Card -->
+    <div class="rounded-2xl border border-white/10 bg-[#0f1733] p-5 hover:border-cyan-400/30 hover:-translate-y-1 transition">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-violet-600"></div>
+      <h3 class="font-semibold mt-3">Nimbus CRM</h3><p class="text-xs text-slate-400">by Nimbus Labs • CRM • Cloud</p>
+      <div class="flex gap-2 mt-3"><span class="text-xs px-2 py-1 rounded-full bg-cyan-400/10 border border-cyan-400/20">AI</span><span class="text-xs px-2 py-1 rounded-full bg-white/5 border border-white/10">Free trial</span></div>
+      <div class="flex items-center justify-between mt-4"><span class="font-mono text-sm">$29/mo</span><button class="px-3 py-1.5 rounded-full border border-cyan-400/30 text-cyan-300 text-xs hover:bg-cyan-400 hover:text-slate-900 transition">+ Compare</button></div>
+    </div>
+    <div class="rounded-2xl border border-white/10 bg-[#0f1733] p-5 hover:border-cyan-400/30 hover:-translate-y-1 transition">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500"></div>
+      <h3 class="font-semibold mt-3">FlowHR</h3><p class="text-xs text-slate-400">by FlowSystems • HRM • On-prem</p>
+      <div class="flex gap-2 mt-3"><span class="text-xs px-2 py-1 rounded-full bg-emerald-400/10 border border-emerald-400/20">4.8★</span><span class="text-xs px-2 py-1 rounded-full bg-white/5 border border-white/10">SOC2</span></div>
+      <div class="flex items-center justify-between mt-4"><span class="font-mono text-sm">$49/mo</span><button class="px-3 py-1.5 rounded-full border border-cyan-400/30 text-cyan-300 text-xs hover:bg-cyan-400 hover:text-slate-900 transition">+ Compare</button></div>
+    </div>
+    <div class="rounded-2xl border border-white/10 bg-[#0f1733] p-5 hover:border-cyan-400/30 hover:-translate-y-1 transition">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-400"></div>
+      <h3 class="font-semibold mt-3">LedgerPro ERP</h3><p class="text-xs text-slate-400">by Ledger • ERP • Hybrid</p>
+      <div class="flex gap-2 mt-3"><span class="text-xs px-2 py-1 rounded-full bg-cyan-400/10 border border-cyan-400/20">New</span><span class="text-xs px-2 py-1 rounded-full bg-white/5 border border-white/10">API</span></div>
+      <div class="flex items-center justify-between mt-4"><span class="font-mono text-sm">$99/mo</span><button class="px-3 py-1.5 rounded-full border border-cyan-400/30 text-cyan-300 text-xs">+ Compare</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARE TEASER -->
+<section class="max-w-6xl mx-auto px-6 pb-16">
+  <div class="rounded-2xl border border-violet-500/20 bg-gradient-to-br from-violet-600/10 to-cyan-500/10 p-6 grid md:grid-cols-[1fr_auto] gap-6 items-center">
+    <div>
+      <h3 class="font-bold">Compare up to 3 softwares side-by-side</h3>
+      <p class="text-sm text-slate-400">Tick “Compare” on any card → see pricing, features, integrations, reviews in one sticky table.</p>
+    </div>
+    <lottie-player src="../../02-ANIMATIONS/lottie/comparison-animation.json" background="transparent" speed="1" loop autoplay style="width:220px;height:120px"></lottie-player>
+  </div>
+  <p class="text-xs text-slate-500 text-center mt-8">Starter by SoftMarket Kit • Replace copy, colors, data • Tailwind CDN — no build step • See 00-START-HERE.html for full guide</p>
+</section>
+</body>
+</html>

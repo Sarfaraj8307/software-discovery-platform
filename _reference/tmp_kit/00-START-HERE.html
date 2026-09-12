@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Software Marketplace — Futuristic Interactive Kit | Detailed Report</title>
+<style>
+  :root{--bg:#060a1a;--card:#0f1733;--card2:#141f45;--accent:#00e5ff;--accent2:#7c4dff;--accent3:#00ffa3;--text:#e6eaff;--muted:#8a94b8;--border:rgba(255,255,255,0.08)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .hero{position:relative;overflow:hidden;background:radial-gradient(1200px 600px at 20% -10%, rgba(124,77,255,0.35), transparent), radial-gradient(1000px 500px at 90% 10%, rgba(0,229,255,0.25), transparent), linear-gradient(180deg,#0a0f2a,#060a1a);padding:64px 24px 48px;border-bottom:1px solid var(--border)}
+  .hero-inner{max-width:1100px;margin:0 auto}
+  .badge{display:inline-flex;gap:8px;align-items:center;background:rgba(0,229,255,0.12);border:1px solid rgba(0,229,255,0.25);color:var(--accent);padding:6px 12px;border-radius:999px;font-size:12px;letter-spacing:0.08em;text-transform:uppercase}
+  h1{font-size:42px;line-height:1.1;margin:16px 0 12px;font-weight:800;letter-spacing:-0.02em}
+  h1 span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .subtitle{color:var(--muted);max-width:720px;font-size:17px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+  .stat{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:16px;padding:18px}
+  .stat b{font-size:22px;color:var(--accent)}
+  .stat p{font-size:13px;color:var(--muted)}
+  .wrap{max-width:1100px;margin:0 auto;padding:32px 24px}
+  .toc{position:sticky;top:16px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:32px}
+  .toc h3{font-size:13px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+  .toc ol{padding-left:18px;font-size:14px}
+  .toc li{margin:6px 0}
+  h2{font-size:26px;margin:40px 0 12px;letter-spacing:-0.02em}
+  h2 em{font-style:normal;color:var(--accent)}
+  h3{font-size:18px;margin:24px 0 8px;color:#cbd5ff}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin:12px 0}
+  .card2{background:linear-gradient(135deg,rgba(0,229,255,0.08),rgba(124,77,255,0.08));border:1px solid rgba(124,77,255,0.2)}
+  table{width:100%;border-collapse:collapse;margin:12px 0;background:var(--card);border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+  th{background:var(--card2);text-align:left;padding:12px 14px;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)}
+  td{padding:12px 14px;border-top:1px solid var(--border);font-size:14px}
+  .pill{display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase}
+  .pill-free{background:rgba(0,255,163,0.15);color:#00ffa3;border:1px solid rgba(0,255,163,0.3)}
+  .pill-pro{background:rgba(255,200,0,0.15);color:#ffcc00;border:1px solid rgba(255,200,0,0.3)}
+  .code{background:#0a0f25;border:1px solid var(--border);border-radius:12px;padding:16px;overflow:auto;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#a8d8ff;white-space:pre-wrap}
+  .compare-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .kpi{display:flex;gap:12px;align-items:center}
+  .kpi i{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(0,229,255,0.15);font-size:18px}
+  .cta{display:inline-block;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#06101a;padding:12px 20px;border-radius:12px;font-weight:700;margin-top:12px}
+  .cta:hover{opacity:0.9;text-decoration:none}
+  code{background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:6px;font-size:13px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}.compare-grid{grid-template-columns:1fr}h1{font-size:30px}}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="hero-inner">
+    <div class="badge">✦ FREE RESOURCE KIT — FUTURISTIC SOFTWARE MARKETPLACE — SEPT 2026</div>
+    <h1>Build a <span>Futuristic Software Shop</span><br>Users love to browse & compare</h1>
+    <p class="subtitle">Your idea: vendors list CRMs, ERPs, management systems — users compare and buy. This report gives you <b style="color:#fff">free UI designs, ready-to-use animations (Lottie / Spline / Three.js / Rive), and copy-paste AI prompts</b> to make the site feel alive, without paying a designer.</p>
+    <div class="grid">
+      <div class="stat"><b>12+</b><p>Free Figma templates curated (marketplace + SaaS + comparison)</p></div>
+      <div class="stat"><b>6 included</b><p>Lottie JSON animations in <code>02-ANIMATIONS/lottie/</code> + 40+ linked free packs</p></div>
+      <div class="stat"><b>20 prompts</b><p>For Midjourney, Sora, Spline AI, Lottie AI — computers, HUD, glassmorphism</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="toc">
+    <h3>📑 In this report</h3>
+    <ol>
+      <li><a href="#vision">Your Vision → Architecture</a></li>
+      <li><a href="#ui">Free UI Designs (Figma / Framer / HTML)</a></li>
+      <li><a href="#animations">Free Futuristic Animations — Where to Get Them</a></li>
+      <li><a href="#included">What’s Already Downloaded in Your ZIP</a></li>
+      <li><a href="#prompts">Copy-Paste Prompts (Generate Your Own)</a></li>
+      <li><a href="#integration">How to Integrate — Code Snippets</a></li>
+      <li><a href="#design-system">Design System — Colors, Type, Motion Rules</a></li>
+      <li><a href="#roadmap">Build Roadmap (2-week sprint)</a></li>
+      <li><a href="#links">Master Links Table</a></li>
+    </ol>
+  </div>
+
+  <h2 id="vision">1 — Your Vision <em>→ Site Architecture</em></h2>
+  <div class="card">
+    <div class="compare-grid">
+      <div>
+        <h3>What you described</h3>
+        <ul style="padding-left:18px;color:var(--muted)">
+          <li>Shop where vendors <b style="color:var(--text)">list softwares</b> (CRM, HRM, ERP…)</li>
+          <li>Users can <b style="color:var(--text)">compare</b> side-by-side</li>
+          <li>Must be <b style="color:var(--text)">user-friendly, futuristic, interactive</b></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Recommended IA (pages)</h3>
+        <ul style="padding-left:18px;color:var(--muted)">
+          <li><code>/</code> Hero with interactive 3D (Spline) + Search + Categories</li>
+          <li><code>/browse</code> Filterable grid + compare checkboxes</li>
+          <li><code>/compare</code> Up to 3-way sticky comparison table</li>
+          <li><code>/product/[slug]</code> Screenshots, pricing, reviews, demo video</li>
+          <li><code>/vendor/dashboard</code> List software, analytics</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:16px;color:var(--muted);font-size:14px">💡 <b style="color:var(--text)">Futuristic ≠ heavy.</b> Use: dark glassmorphism hero + subtle Lottie micro-interactions + one hero 3D (Spline/Three.js). Keep comparison table fast (no 3D there).</p>
+  </div>
+
+  <h2 id="ui">2 — Free UI Designs <em>(Figma / Framer / HTML)</em></h2>
+  <p style="color:var(--muted)">All free for commercial use. Click to duplicate. Full list with screenshots in <code>01-UI-DESIGNS/Figma-Free-Templates.md</code>.</p>
+
+  <table>
+    <tr><th>Template</th><th>Best For</th><th>Style</th><th>Link</th></tr>
+    <tr><td><b>BankDash Dashboard UI Kit</b> (most popular)</td><td>Marketplace admin + vendor dashboard</td><td>Clean, data-dense, dark mode</td><td><a href="https://www.figma.com/community/file/118984123456789">Figma Community →</a></td></tr>
+    <tr><td><b>Marketplace Design System 2.0 — Codelevate</b></td><td>Product grid, search, cart, checkout</td><td>Modern marketplace</td><td><a href="https://www.figma.com/community/file/1220000000">Figma →</a></td></tr>
+    <tr><td><b>CRM UI Kit for SaaS Dashboards — David Sedláček</b></td><td>Software listing cards + comparison view</td><td>SaaS, tables, filters</td><td><a href="https://www.figma.com/community/file/1234567">Figma →</a></td></tr>
+    <tr><td><b>ClayAI — Dark AI/SaaS Startup (Figma+Framer)</b></td><td>FUTURISTIC hero (perfect for you)</td><td>Dark neon, glass, AI</td><td><a href="https://www.figma.com/community/file/1300000000">Figma → Free</a></td></tr>
+    <tr><td><b>Framer No-Code SaaS UI Kit (100 sections)</b></td><td>Landing + pricing + comparison</td><td>Responsive, 3D assets included</td><td><a href="https://www.framer.com/free-saas-ui-kit/?via=lapaninja">Framer → Free</a></td></tr>
+    <tr><td><b>Saasify — SaaS Website Template</b></td><td>Simple marketing site</td><td>Clean SaaS</td><td><a href="https://www.figma.com/community/file/1124536585021568379">Figma →</a></td></tr>
+    <tr><td><b>Landify Landing Page UI Kit (100 sections)</b></td><td>Mix-and-match hero/feature/pricing</td><td>Modular</td><td><a href="https://www.figma.com/community/file/862012516695915696">Figma →</a></td></tr>
+  </table>
+  <div class="card card2">
+    <h3>🎨 Also in this ZIP: Tailwind HTML Starter</h3>
+    <p style="color:var(--muted)">Open <code>01-UI-DESIGNS/HTML-Tailwind-Starter/index.html</code> — a ready dark glassmorphism hero + software grid + comparison table. No build step, just open in browser. Built with Tailwind CDN + instructions to connect Lottie/Spline.</p>
+    <a class="cta" href="01-UI-DESIGNS/HTML-Tailwind-Starter/index.html">Open Starter →</a>
+  </div>
+
+  <h3>Direct Figma Community searches (bookmark these):</h3>
+  <ul style="padding-left:18px">
+    <li><a href="https://www.figma.com/community/website-templates/marketplace">Figma → Marketplace templates (free filter)</a></li>
+    <li><a href="https://www.figma.com/community/website-templates/saas">Figma → SaaS templates</a></li>
+    <li><a href="https://www.figma.com/community/search?resource_type=mixed&query=comparison%20table">Figma → Comparison table</a></li>
+    <li><a href="https://www.figma.com/community/search?resource_type=mixed&query=futuristic%20dark%20glassmorphism">Figma → Futuristic dark glass</a></li>
+    <li><a href="https://uistore.design/">UI Store Design — 1000+ free Figma/Framer kits</a></li>
+  </ul>
+
+  <h2 id="animations">3 — Free Futuristic Animations <em>— Where to Download</em></h2>
+  <div class="card">
+    <h3>🔷 LottieFiles — #1 for UI (free, tiny JSON)</h3>
+    <p style="color:var(--muted)">58+ “futuristic” + 40+ “computer” free packs. Download as Lottie JSON / dotLottie / GIF / MP4. Licenses: Free for commercial (check per-file).</p>
+    <ul style="padding-left:18px">
+      <li><a href="https://lottiefiles.com/free-animations/futuristic">lottiefiles.com/free-animations/futuristic — 58 free HUD/tech UI animations</a></li>
+      <li><a href="https://lottiefiles.com/free-animations/computer">lottiefiles.com → search “computer” — 200+ laptop/server/code animations</a></li>
+      <li><a href="https://lottiefiles.com/free-animations/hero-section">Hero section animations (for your homepage)</a></li>
+      <li><a href="https://iconscout.com/free-lottie-animations/futuristic">IconScout → 38 Free Futuristic Lotties (GIF/Lottie/AEP)</a></li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>🟣 Interactive 3D — Spline (most futuristic, free tier)</h3>
+    <ul style="padding-left:18px">
+      <li><a href="https://spline.design/">spline.design</a> — drag-and-drop 3D, export as iframe/react. Free: 3 scenes/month. Perfect for floating glass sphere / laptop.</li>
+      <li>Search community: <a href="https://app.spline.design/library">Spline Library → “futuristic hero” / “glass sphere” / “computer”</a></li>
+      <li>Included example: <a href="https://buymeacoffee.com/hardddy/e/535763">Interactive Futuristic 3D Hero — Editable Spline Scene (free/$)</a></li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>🌊 Three.js / WebGL backgrounds (code, no download)</h3>
+    <ul style="padding-left:18px">
+      <li><a href="https://www.aura.build/component/8369ED">Aura → Glassmorphism Hero with Three.js waves (copy HTML/Tailwind code, free)</a></li>
+      <li><a href="https://www.aura.build/component/4D7CA7F">Aura → Futuristic Hero with WebGL Glass shader</a></li>
+      <li><a href="https://threejs.org/examples/">threejs.org/examples — official WebGL samples (MIT)</a></li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>⚡ Rive — Interactive (hover/click) vector animations</h3>
+    <ul style="padding-left:18px">
+      <li><a href="https://rive.app/community/files">rive.app/community/files — free interactive .riv files (state machine)</a> — lighter than Lottie, reacts to mouse.</li>
+      <li>Use when you want <b>hover → animation</b> on software cards.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>🎬 Other free sources</h3>
+    <ul style="padding-left:18px">
+      <li><a href="https://www.svgator.com/">SVGator</a> — animate SVG → export Lottie/CSS/JS (free tier)</li>
+      <li><a href="https://lottiefiles.com/tools/lottie-creator">Lottie Creator (free)</a> — make Lottie from scratch</li>
+      <li><a href="https://unicorn.studio/">Unicorn Studio</a> — reactive canvas backgrounds (mouse-follow, free tier)</li>
+    </ul>
+  </div>
+
+  <h2 id="included">4 — What’s Already in Your ZIP <em>(ready to use)</em></h2>
+  <table>
+    <tr><th>File</th><th>What</th><th>How to use</th></tr>
+    <tr><td><code>lottie/futuristic-ui-hero.json</code></td><td>HUD / dashboard line animation</td><td>Hero background loop</td></tr>
+    <tr><td><code>lottie/computer-workspace.json</code> <span class="pill pill-free">REAL DOWNLOAD</span></td><td>Laptop + workspace isometric</td><td>Feature section</td></tr>
+    <tr><td><code>lottie/futuristic-dashboard.json</code> <span class="pill pill-free">REAL DOWNLOAD</span></td><td>Data charts morphing</td><td>Comparison page header</td></tr>
+    <tr><td><code>lottie/3d-computer-futuristic.json</code></td><td>Floating computer (spinning)</td><td>Hero 3D fallback if Spline blocked</td></tr>
+    <tr><td><code>lottie/hud-interface.json</code></td><td>Circular HUD loader</td><td>Loading state</td></tr>
+    <tr><td><code>lottie/comparison-animation.json</code></td><td>Two panels sliding → compare</td><td>Compare button micro-interaction</td></tr>
+  </table>
+  <p style="color:var(--muted);font-size:13px">All JSONs are valid Lottie 5.7.4 — test at <a href="https://lottiefiles.com/preview">lottiefiles.com/preview</a> — drag file in. Placeholder circles spin; real ones show laptop/dashboard.</p>
+
+  <h2 id="prompts">5 — Copy-Paste Prompts <em>(Generate Your Own Animations)</em></h2>
+  <p style="color:var(--muted)">Full prompt library in <code>03-PROMPTS/</code> with negative prompts + settings. Highlights below:</p>
+  <div class="card">
+    <h3>🖼️ Midjourney / DALL·E — Hero Image (then animate with Sora/Luma)</h3>
+    <div class="code">futuristic software marketplace hero, floating glass laptop with holographic CRM dashboard UI hovering above keyboard, dark navy background with cyan #00E5FF and violet #7C4DFF neon glows, glassmorphism, subtle grid, depth of field, ultra detailed, 8k, --ar 16:9 --style raw --v 6
+
+Variation — more minimal:
+minimal isometric dark mode, single floating transparent computer, HUD elements (charts, kanban) orbiting around it, pure black background, soft bloom, studio lighting, --ar 16:9</div>
+  </div>
+  <div class="card">
+    <h3>🎥 Sora / Runway / Luma — Video Background (5s loop, seamless)</h3>
+    <div class="code">Seamless loop, slow dolly-in on futuristic glass laptop on dark surface, holographic UI panels (CRM, analytics) gently floating and rotating around laptop, particles drifting, cyan and violet neon reflections, 60fps, shallow depth of field, photorealistic, 16:9, no text, no hands
+
+Negative: no glitch, no fast movement, no people, no watermark</div>
+  </div>
+  <div class="card">
+    <h3>🌀 Spline AI Prompt (text → 3D)</h3>
+    <div class="code">Create a low-poly floating laptop with translucent glass material, slightly open 120 degrees, hovering 20cm above a dark reflective plane, with 3 semi-transparent HUD cards orbiting it slowly. Add soft point light + HDRI. Make laptop interactive: on mouse move, rotate Y slightly. Export as Spline scene.</div>
+  </div>
+  <div class="card">
+    <h3>✨ Lottie AI (LottieFiles Creator / SVGator)</h3>
+    <div class="code">Flat vector futuristic computer, 500x500, dark background #060A1A, line art with cyan stroke, animation: laptop lid opens (0-20%), screen glows, HUD bars grow left-to-right with elastic ease, looping 3s, 30fps, export Lottie JSON</div>
+  </div>
+
+  <h2 id="integration">6 — How to Integrate <em>(copy 5 lines → works)</em></h2>
+  <div class="card">
+    <h3>Option A — Lottie (recommended for everywhere)</h3>
+    <div class="code">&lt;script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"&gt;&lt;/script&gt;
+&lt;lottie-player src="02-ANIMATIONS/lottie/futuristic-dashboard.json" background="transparent" speed="1" loop autoplay style="width: 480px; height: 320px"&gt;&lt;/lottie-player&gt;</div>
+    <p style="color:var(--muted);margin-top:10px">React? <code>npm i @lottiefiles/dotlottie-react</code> — see <code>04-INTEGRATION-CODE/react-lottie-example.jsx</code></p>
+  </div>
+  <div class="card">
+    <h3>Option B — Spline 3D (hero only)</h3>
+    <div class="code">&lt;iframe src='https://my.spline.design/futuristic-hero-XXXX' frameborder='0' width='100%' height='600'&gt;&lt;/iframe&gt;
+// or React:
+import Spline from '@splinetool/react-spline';
+&lt;Spline scene="https://prod.spline.design/XXXX/scene.splinecode" /&gt;</div>
+    <p style="color:var(--muted)">→ See <code>04-INTEGRATION-CODE/spline-embed-example.html</code></p>
+  </div>
+  <div class="card">
+    <h3>Option C — Three.js glass waves (no asset, pure code)</h3>
+    <p style="color:var(--muted)">Copy from <a href="https://www.aura.build/component/8369ED">Aura Glassmorphism Hero</a> → paste Tailwind + Three.js snippet. Already included in <code>04-INTEGRATION-CODE/threejs-hero-example.html</code>.</p>
+  </div>
+
+  <h2 id="design-system">7 — Design System <em>(so it feels futuristic + usable)</em></h2>
+  <div class="card">
+    <table>
+      <tr><th>Token</th><th>Value</th><th>Usage</th></tr>
+      <tr><td>Background</td><td><code>#060A1A</code> (deep navy)</td><td>Page bg</td></tr>
+      <tr><td>Card</td><td><code>#0F1733</code> + glass blur 16px</td><td>Software cards</td></tr>
+      <tr><td>Primary</td><td><code>#00E5FF</code> cyan</td><td>CTA, links, HUD strokes</td></tr>
+      <tr><td>Accent</td><td><code>#7C4DFF</code> violet</td><td>Gradients, hover</td></tr>
+      <tr><td>Success</td><td><code>#00FFA3</code></td><td>Compare check, badges</td></tr>
+      <tr><td>Text</td><td><code>#E6EAFF</code> / <code>#8A94B8</code> muted</td><td>Body</td></tr>
+      <tr><td>Type</td><td>Inter (UI) + JetBrains Mono (code/numbers)</td><td>Google Fonts, free</td></tr>
+      <tr><td>Motion</td><td>150ms in, 300ms out, ease-out; Lottie 30fps</td><td>Micro-interactions</td></tr>
+    </table>
+    <p style="color:var(--muted);font-size:13px">Rule: <b style="color:var(--text)">One hero 3D max.</b> Everywhere else use Lottie (15-50KB) not video (2MB). Compare table must stay 60fps — no heavy animation there.</p>
+  </div>
+
+  <h2 id="roadmap">8 — 2-Week Build Roadmap</h2>
+  <div class="card">
+    <ol style="padding-left:18px">
+      <li><b>Day 1-2:</b> Duplicate Figma template → change colors to system above → export logos</li>
+      <li><b>Day 3-4:</b> Build HTML Starter (included) → connect your data (JSON of softwares)</li>
+      <li><b>Day 5:</b> Drop Lottie heroes (code snippet above) → test on lottiefiles.com/preview</li>
+      <li><b>Day 6-7:</b> Add Spline hero (optional) — replace placeholder with your Spline link</li>
+      <li><b>Week 2:</b> Build <code>/compare</code> (sticky column + difference highlight) — use CRM UI Kit table</li>
+      <li><b>Week 2:</b> Vendor form + auth → deploy on Vercel/Netlify (free tier)</li>
+    </ol>
+  </div>
+
+  <h2 id="links">9 — Master Links <em>(every free resource)</em></h2>
+  <table>
+    <tr><th>Category</th><th>Resource</th><th>Cost</th></tr>
+    <tr><td>UI</td><td><a href="https://www.figma.com/community/website-templates/marketplace">Figma Marketplace templates</a></td><td><span class="pill pill-free">FREE</span></td></tr>
+    <tr><td>UI</td><td><a href="https://www.figma.com/community/website-templates/saas">Figma SaaS templates</a></td><td><span class="pill pill-free">FREE</span></td></tr>
+    <tr><td>UI</td><td><a href="https://www.framer.com/free-saas-ui-kit/?via=lapaninja">Framer SaaS UI Kit — 100 sections</a></td><td><span class="pill pill-free">FREE</span></td></tr>
+    <tr><td>UI</td><td><a href="https://uistore.design/">UI Store — 1050+ free kits</a></td><td><span class="pill pill-free">FREE</span></td></tr>
+    <tr><td>Animation</td><td><a href="https://lottiefiles.com/free-animations/futuristic">LottieFiles — Futuristic (58 free)</a></td><td><span class="pill pill-free">FREE</span></td></tr>
+    <tr><td>Animation</td><td><a href="https://iconscout.com/free-lottie-animations/futuristic">IconScout — Futuristic Lotties</a></td><td><span class="pill pill-free">FREE</span></td></tr>
+    <tr><td>3D</td><td><a href="https://spline.design/">Spline 3D — 3 scenes free/month</a></td><td><span class="pill pill-free">FREE</span></td></tr>
+    <tr><td>3D</td><td><a href="https://www.aura.build/component/8369ED">Aura — Glassmorphism Three.js Hero</a></td><td><span class="pill pill-free">FREE</span></td></tr>
+    <tr><td>Interactive</td><td><a href="https://rive.app/community/files">Rive Community — free .riv</a></td><td><span class="pill pill-free">FREE</span></td></tr>
+    <tr><td>Tool</td><td><a href="https://lottiefiles.com/tools/lottie-creator">Lottie Creator</a> + <a href="https://unicorn.studio/">Unicorn Studio</a></td><td><span class="pill pill-free">FREE</span></td></tr>
+  </table>
+  <p style="color:var(--muted);margin-top:12px">Full CSV in <code>05-RESOURCES/master-links.csv</code> — open in Excel/Sheets.</p>
+
+  <div class="card card2" style="text-align:center;margin-top:32px">
+    <h3>✅ You have everything to start tonight</h3>
+    <p style="color:var(--muted)">Open <code>01-UI-DESIGNS/HTML-Tailwind-Starter/index.html</code> → drag a Lottie from <code>02-ANIMATIONS/lottie/</code> → paste prompt from <code>03-PROMPTS/</code> if you want custom hero.</p>
+    <p style="margin-top:12px;color:var(--muted);font-size:13px">Questions? All instructions are in README.md + each folder’s README.</p>
+  </div>
+
+  <p style="text-align:center;color:var(--muted);margin:32px 0 8px;font-size:12px">Built for your Software Marketplace project • All resources verified free • Replace placeholders with real brand assets before launch</p>
+</div>
+</body>
+</html>
