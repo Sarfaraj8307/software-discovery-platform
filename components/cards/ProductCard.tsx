@@ -8,7 +8,7 @@ import type { Product } from "@/lib/data/types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/form-controls";
 import { Badge } from "@/components/ui/badge";
-import { ProductLogo } from "@/components/ui/avatar";
+import { ProductThumb } from "@/components/ui/avatar";
 import { Chip, RatingLine, ScoreBadge, VerifiedPublisherBadge } from "@/components/domain/atoms";
 import { useCompare } from "@/components/compare/CompareProvider";
 import { useToast } from "@/components/ui/feedback";
@@ -65,7 +65,12 @@ export function ProductCard({
         className,
       )}
     >
-      <ProductLogo name={product.name} domain={product.logoDomain} size="md" className="mt-0.5" />
+      <ProductThumb
+        name={product.name}
+        categorySlug={product.primaryCategorySlug}
+        size="md"
+        className="mt-0.5"
+      />
 
       <div className="min-w-0 flex-1">
         {/* ---------------------------------------------------- identity row */}
