@@ -22,7 +22,7 @@ import {
 import type { SearchParams } from "@/lib/data/queries";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ProductLogo } from "@/components/ui/avatar";
+import { ProductThumb } from "@/components/ui/avatar";
 import {
   Chip,
   DemoDataNotice,
@@ -211,13 +211,19 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
 
       <main id="main">
         {/* ============================================================== HERO */}
-        <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
-          <Breadcrumbs items={breadcrumbItems} />
+        <section className="border-b border-border bg-subtle bg-gradient-hero">
+          <div className="mx-auto max-w-7xl px-4 pt-6 pb-8 sm:px-6">
+            <Breadcrumbs items={breadcrumbItems} />
 
           <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
             <div className="min-w-0">
               <div className="flex flex-wrap items-start gap-4">
-                <ProductLogo name={product.name} domain={product.logoDomain} size="lg" />
+                <ProductThumb
+                  name={product.name}
+                  categorySlug={product.primaryCategorySlug}
+                  size="lg"
+                  className="mt-0.5"
+                />
 
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -383,6 +389,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
             </StickySidebar>
           </div>
         </div>
+        </section>
 
         {/* ============================================================== TABS */}
         {/*
