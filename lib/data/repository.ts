@@ -463,6 +463,15 @@ export function getRecentReviews(limit = 12): Review[] {
     .slice(0, limit);
 }
 
+/** Top-rated, identity-verified reviews — for social-proof surfaces (homepage). */
+export function getFeaturedReviews(limit = 3): Review[] {
+  return dataset.reviews
+    .filter((r) => r.status === "APPROVED")
+    .filter((r) => r.verification === "VALIDATED" || r.verification === "CURRENT_USER")
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, limit);
+}
+
 /* ==========================================================================
    COMPARISONS
    ========================================================================= */

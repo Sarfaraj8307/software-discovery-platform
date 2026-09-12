@@ -3,12 +3,14 @@ import Link from "next/link";
 import { ArrowRight, BadgeCheck, Camera, ShieldCheck, Sparkles, TrendingUp, Users } from "lucide-react";
 import { formatCompact, formatCount, monthYear } from "@/lib/utils";
 import { getHomePageData } from "@/lib/data/queries";
+import { getFeaturedReviews, getProduct } from "@/lib/data/repository";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProductLogo } from "@/components/ui/avatar";
 import { RatingLine } from "@/components/domain/atoms";
 import { CategoryCard, CategoryChip } from "@/components/cards/CategoryCard";
 import { ProductCard } from "@/components/cards/ProductCard";
+import { TestimonialCard } from "@/components/reviews/TestimonialCard";
 import { SearchAutocomplete } from "@/components/search/SearchAutocomplete";
 import { SectionHeading, SectionLink } from "@/components/ui/content";
 import { DemoDataNotice } from "@/components/domain/atoms";
@@ -23,6 +25,8 @@ export const metadata: Metadata = {
 export default function HomePage() {
   const data = getHomePageData();
   const updated = monthYear(data.socialProof ? "2026-09-12" : "2026-09-12");
+
+  const voices = getFeaturedReviews(3);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -358,10 +362,35 @@ export default function HomePage() {
                 ))}
               </div>
             </div>
-          </section>
-        )}
+        </section>
+      )}
 
-        {/* ======================================================== SEO / METHOD (dark contrast band) */}
+      {/* ===================================================== BUYER VOICES */}
+      {voices.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+          <SectionHeading
+            eyebrow="Buyer voices"
+            title="What verified buyers say"
+            description="Unedited quotes from people who use the software day to day. Identity-verified reviews only."
+          />
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {voices.map((review) => {
+              const product = getProduct(review.productSlug);
+              return (
+                <TestimonialCard
+                  key={review.id}
+                  review={review}
+                  productName={product?.name}
+                  productSlug={review.productSlug}
+                />
+              );
+            })}
+          </div>
+          <DemoDataNotice variant="inline" className="mt-4" />
+        </section>
+      )}
+
+      {/* ======================================================== SEO / METHOD (dark contrast band) */}
         <section className="bg-surface-inverse text-surface-inverse-foreground">
           <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
             <div className="flex items-start gap-3">
