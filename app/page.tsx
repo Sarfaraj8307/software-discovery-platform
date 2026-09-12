@@ -14,6 +14,7 @@ import { TestimonialCard } from "@/components/reviews/TestimonialCard";
 import { SearchAutocomplete } from "@/components/search/SearchAutocomplete";
 import { SectionHeading, SectionLink } from "@/components/ui/content";
 import { DemoDataNotice } from "@/components/domain/atoms";
+import { Reveal } from "@/components/motion/Reveal";
 
 export const metadata: Metadata = {
   title: "Software Discovery — compare business software on evidence",
@@ -374,15 +375,16 @@ export default function HomePage() {
             description="Unedited quotes from people who use the software day to day. Identity-verified reviews only."
           />
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {voices.map((review) => {
+            {voices.map((review, i) => {
               const product = getProduct(review.productSlug);
               return (
-                <TestimonialCard
-                  key={review.id}
-                  review={review}
-                  productName={product?.name}
-                  productSlug={review.productSlug}
-                />
+                <Reveal key={review.id} delay={i * 80}>
+                  <TestimonialCard
+                    review={review}
+                    productName={product?.name}
+                    productSlug={review.productSlug}
+                  />
+                </Reveal>
               );
             })}
           </div>

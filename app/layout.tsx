@@ -55,6 +55,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to main content
         </a>
 
+        {/* No-JS safety: scroll-reveal starts hidden, so force it visible when JS is off.
+            (The `@media (scripting: none)` guard in globals.css covers modern browsers too.) */}
+        <noscript>
+          <style>{`.reveal{opacity:1!important;transform:none!important}`}</style>
+        </noscript>
+
         <TooltipProvider delayDuration={200} skipDelayDuration={300}>
           <ToastProvider>
             <CompareProvider>

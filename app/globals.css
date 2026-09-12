@@ -338,6 +338,40 @@
   }
 }
 
+/* Scroll-reveal: a section fades + lifts into place as it enters the viewport.
+   Safety: the hidden initial state must never be able to trap content. Two
+   guards cover that — (1) reduced-motion users get the final state with no
+   transition, and (2) `scripting: none` (JS disabled) also shows the final
+   state, so SSR content is never invisible if the observer never runs. The
+   `Reveal` component adds `.is-visible` via IntersectionObserver. */
+@utility reveal {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 520ms var(--ease-out-quiet),
+    transform 520ms var(--ease-out-quiet);
+
+  &.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+@media (scripting: none) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* Editorial prose for SEO content blocks at page bottom (max 68ch). */
 @utility prose-editorial {
   max-width: 68ch;
