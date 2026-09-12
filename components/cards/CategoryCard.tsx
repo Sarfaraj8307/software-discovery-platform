@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { cn, formatCount } from "@/lib/utils";
 import type { Category } from "@/lib/data/types";
-import { CategoryIcon } from "@/components/domain/icon";
+import { CategoryArt, CategoryArtSm } from "@/components/brand/CategoryArt";
 
 /** Compact pill used for the "Most Popular Categories" strip on the homepage. */
 export function CategoryChip({ category, className }: { category: Category; className?: string }) {
@@ -14,7 +14,7 @@ export function CategoryChip({ category, className }: { category: Category; clas
         className,
       )}
     >
-      <CategoryIcon name={category.icon} className="size-3.5 text-muted-foreground" />
+      <CategoryArtSm category={category} />
       {category.name}
       <span className="text-2xs text-muted-foreground tnum">{formatCount(category.productCount)}</span>
     </Link>
@@ -31,9 +31,7 @@ export function CategoryCard({ category, className }: { category: Category; clas
         className,
       )}
     >
-      <span className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-[7px] border border-border bg-subtle text-muted-foreground transition-colors group-hover:border-primary-border group-hover:bg-primary-subtle group-hover:text-primary">
-        <CategoryIcon name={category.icon} className="size-4" />
-      </span>
+      <CategoryArt category={category} className="mt-0.5" />
       <span className="min-w-0 flex-1">
         <span className="flex items-baseline justify-between gap-2">
           <span className="text-sm font-semibold leading-tight">{category.name}</span>
