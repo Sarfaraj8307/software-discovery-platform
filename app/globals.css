@@ -338,6 +338,33 @@
   }
 }
 
+/* Sticky-header elevation. The header sits flat at the top of the page and gains
+   this quiet shadow only once the page has scrolled — so it reads as a surface
+   holding content, not a permanent line. Transitioned via `transition-shadow`. */
+@utility shadow-sticky {
+  box-shadow: var(--shadow-sticky);
+}
+
+/* Loading placeholder. A quiet opacity pulse; a reduced-motion user gets a static
+   fill instead. Used by `.skeleton` (components/ui/skeleton.tsx) and route
+   loading.tsx files. */
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@utility skeleton {
+  display: block;
+  background-color: var(--color-muted);
+  border-radius: var(--radius-control);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
 /* Scroll-reveal: a section fades + lifts into place as it enters the viewport.
    Safety: the hidden initial state must never be able to trap content. Two
    guards cover that — (1) reduced-motion users get the final state with no
@@ -362,6 +389,9 @@
     opacity: 1;
     transform: none;
     transition: none;
+  }
+  .skeleton {
+    animation: none;
   }
 }
 
