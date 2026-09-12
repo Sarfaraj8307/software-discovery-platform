@@ -361,16 +361,19 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* ======================================================== SEO / METHOD */}
-        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-          <div className="rounded-card border border-border bg-card p-6">
+        {/* ======================================================== SEO / METHOD (dark contrast band) */}
+        <section className="bg-surface-inverse text-surface-inverse-foreground">
+          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
             <div className="flex items-start gap-3">
-              <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+              <Sparkles
+                className="mt-0.5 size-4 shrink-0 text-surface-inverse-accent"
+                aria-hidden="true"
+              />
               <div className="min-w-0">
-                <h2 className="text-base font-semibold tracking-[-0.01em]">
+                <h2 className="text-base font-semibold tracking-[-0.01em] text-surface-inverse-foreground">
                   How these rankings are produced
                 </h2>
-                <div className="prose-editorial mt-2">
+                <div className="mt-2 space-y-2 text-13 leading-relaxed text-surface-inverse-muted">
                   <p>
                     Every ranking on this page is derived from three inputs: the volume of verified
                     reviews a product has accumulated, its satisfaction scores across four
@@ -384,7 +387,12 @@ export default function HomePage() {
                     review is weighted lower.
                   </p>
                   <p>
-                    <Link href="/methodology">Read the full methodology →</Link>
+                    <Link
+                      href="/methodology"
+                      className="text-surface-inverse-accent underline-offset-4 hover:underline"
+                    >
+                      Read the full methodology →
+                    </Link>
                   </p>
                 </div>
               </div>
@@ -393,18 +401,18 @@ export default function HomePage() {
         </section>
 
         {/* ================================================================ CTA */}
-        <section className="border-t border-border bg-subtle">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-10 sm:px-6">
+        <section className="bg-gradient-cta">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-12 sm:px-6">
             <div className="flex items-start gap-3">
-              <Users className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+              <Users className="mt-0.5 size-4 shrink-0 text-white" aria-hidden="true" />
               <div>
-                <p className="text-sm font-semibold">Are you a software vendor?</p>
-                <p className="mt-0.5 text-13 text-muted-foreground">
+                <p className="text-sm font-semibold text-white">Are you a software vendor?</p>
+                <p className="mt-0.5 text-13 text-white/80">
                   Claim your listing, respond to reviews and manage inbound leads.
                 </p>
               </div>
             </div>
-            <Button asChild>
+            <Button asChild className="bg-card text-foreground hover:bg-background">
               <Link href="/vendor">
                 Open the vendor portal
                 <ArrowRight className="size-3.5" aria-hidden="true" />
