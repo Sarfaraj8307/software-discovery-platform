@@ -27,7 +27,7 @@ export function CategoryCard({ category, className }: { category: Category; clas
     <Link
       href={`/categories/${category.slug}`}
       className={cn(
-        "group flex items-start gap-3 rounded-card border border-border bg-card p-4 shadow-card transition-[box-shadow,border-color,transform] duration-150 ease-out hover:-translate-y-px hover:border-border-strong hover:shadow-sticky",
+        "group flex items-start gap-3 rounded-card border border-border bg-card p-4 shadow-card card-lift",
         className,
       )}
     >

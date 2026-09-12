@@ -60,7 +60,7 @@ export function ProductCard({
   return (
     <article
       className={cn(
-        "group relative flex gap-3 rounded-card border border-border bg-card p-4 shadow-card transition-[box-shadow,border-color] duration-150 ease-out hover:border-border-strong hover:shadow-sticky",
+        "group relative flex gap-3 rounded-card border border-border bg-card p-4 shadow-card card-lift",
         checked && "border-primary-border bg-primary-subtle/40",
         className,
       )}

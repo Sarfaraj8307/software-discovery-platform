@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/brand/BrandMark";
 import { SearchAutocomplete } from "@/components/search/SearchAutocomplete";
 import { CompareCountBadge } from "@/components/compare/ComparisonBucket";
 import { MegaMenu, type PillarWithChildren } from "./MegaMenu";
@@ -31,15 +31,7 @@ export function Header({
           className="flex shrink-0 items-center gap-2 rounded-[5px] py-1"
           aria-label="Software Discovery — home"
         >
-          <span
-            className="inline-flex size-7 items-center justify-center rounded-[7px] bg-primary text-primary-foreground"
-            aria-hidden="true"
-          >
-            <Scale className="size-4" strokeWidth={2.25} />
-          </span>
-          <span className="hidden text-sm font-semibold tracking-[-0.02em] sm:inline">
-            Software Discovery
-          </span>
+          <BrandLogo wordmarkClassName="hidden sm:inline" />
         </Link>
 
         <MegaMenu pillars={pillars} />

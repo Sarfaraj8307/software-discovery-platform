@@ -45,11 +45,11 @@ export default function HomePage() {
 
       <main id="main">
         {/* ================================================================ HERO */}
-        <section className="border-b border-border bg-subtle">
+        <section className="relative overflow-hidden border-b border-border bg-subtle bg-gradient-hero">
           <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:py-16">
             <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
               <div className="lg:col-span-7">
-                <h1 className="text-4xl font-semibold tracking-[-0.03em] text-balance">
+                <h1 className="text-display font-semibold text-balance">
                   Where you go for software
                 </h1>
                 <p className="mt-3 max-w-xl text-body leading-relaxed text-muted-foreground">
@@ -82,7 +82,7 @@ export default function HomePage() {
               </div>
 
               {/* -------------------------------------------- featured products */}
-              <div className="lg:col-span-5">
+              <div className="relative lg:col-span-5">
                 <div className="rounded-card border border-border bg-card p-4 shadow-card">
                   <div className="flex items-baseline justify-between gap-2">
                     <h2 className="label-caps text-muted-foreground">Highest rated this month</h2>
@@ -123,6 +123,32 @@ export default function HomePage() {
                   </ul>
 
                   <DemoDataNotice className="mt-3 border-t border-border pt-3" />
+                </div>
+
+                {/* Floating score card. Stacks underneath on small screens; from lg
+                    it overlaps the column gap so the hero reads as layered rather
+                    than as two boxes side by side. */}
+                <div className="mt-3 rounded-card border border-border bg-card p-3 shadow-overlay lg:absolute lg:-bottom-6 lg:-left-6 lg:mt-0 lg:w-[62%]">
+                  <p className="label-caps text-muted-foreground">Composite score</p>
+                  <ul className="mt-2 space-y-1.5">
+                    {data.featured.slice(0, 3).map((product) => (
+                      <li key={product.slug} className="flex items-center gap-2">
+                        <span className="w-20 shrink-0 truncate text-2xs">{product.name}</span>
+                        <span
+                          className="h-1.5 min-w-0 flex-1 rounded-pill bg-muted"
+                          aria-hidden="true"
+                        >
+                          <span
+                            className="block h-1.5 rounded-pill bg-gradient-cta"
+                            style={{ width: `${Math.round((product.ratingAvg / 5) * 100)}%` }}
+                          />
+                        </span>
+                        <span className="tnum text-2xs font-medium">
+                          {product.ratingAvg.toFixed(1)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             </div>

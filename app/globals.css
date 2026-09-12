@@ -3,8 +3,17 @@
 /* ============================================================================
    SOFTWARE DISCOVERY PLATFORM — DESIGN TOKENS
    Source of truth: ENTERPRISE-UI-DESIGN-SYSTEM.md §2
-   Rule: ONE accent. Everything else grayscale. This is what makes it feel
-   expensive. Do not introduce a second saturated colour.
+
+   Rule: ONE interactive accent (--color-primary). Everything a user can click
+   or that reads as "brand" is that single blue. This is what makes it feel
+   expensive. Do not introduce a second saturated colour *as an interactive
+   colour*.
+
+   Two narrow exceptions, both non-interactive:
+     1. --color-brand-2 — exists ONLY as the far stop of a gradient. It is
+        never a button, never a link, never text. See §BRAND EXTENSION.
+     2. Category hues (--color-cat-*) — data visualisation only: chip tints
+        and their label ink. They carry no affordance.
    ========================================================================= */
 
 @theme {
@@ -17,6 +26,25 @@
 
   --color-popover: #ffffff;
   --color-popover-foreground: #18181b;
+
+  /* ------------------------------------------------------------- SURFACES */
+  /* Explicit elevation ladder. surface-2/3 alias the existing grays rather
+     than introducing new values — one source of truth, no drift. */
+  --color-surface-1: var(--color-background); /* #ffffff — cards, sheets */
+  --color-surface-2: var(--color-subtle); /* #fafafa — inset, alternating rows */
+  --color-surface-3: var(--color-muted); /* #f4f4f5 — page bed behind cards */
+
+  /* Inverse band for the CTA strip / footer. Every value below was measured,
+     not eyeballed:
+       inverse-foreground  #f4f4f7 on #0b1020  = 17.25:1  (AA text)
+       inverse-muted       #a9b1c7 on #0b1020  =  8.84:1  (AA text)
+       inverse-accent      #93c5fd on #0b1020  = 10.50:1  (AA text)
+     --color-primary on the inverse surface measures 3.66:1 and FAILS AA.
+     On dark, use --color-surface-inverse-accent — never --color-primary. */
+  --color-surface-inverse: #0b1020;
+  --color-surface-inverse-foreground: #f4f4f7;
+  --color-surface-inverse-muted: #a9b1c7;
+  --color-surface-inverse-accent: #93c5fd;
 
   --color-subtle: #fafafa; /* zinc-50 — alternating rows, inset panels */
   --color-muted: #f4f4f5; /* zinc-100 — page bg behind cards, chips */
@@ -58,13 +86,64 @@
   --color-destructive-subtle: #fef2f2;
   --color-destructive-border: #fecaca;
 
+  /* ------------------------------------------------------ BRAND EXTENSION */
+  /* brand-2 is the FAR STOP of a gradient only. It is deliberately absent
+     from every interactive role — no button, no link, no text, no focus ring.
+     If you find yourself writing `text-brand-2` or `bg-brand-2`, stop: that
+     is the second-accent failure mode this file exists to prevent. */
+  --color-brand-2: #4f46e5; /* indigo-600 — gradient partner, never text */
+
+  /* The one place blue is allowed to go dark: headings, deep accents, and
+     text on light tints. Measured 10.36:1 on white, 9.92:1 on surface-2,
+     9.42:1 on surface-3 — comfortably AA at every size. */
+  --color-brand-ink: #1e3a8a;
+
+  /* ---------------------------------------------------------------- INFO */
+  /* Semantic "informational" blue. It intentionally shares the primary hue
+     family — that is standard practice for enterprise systems, where an
+     info callout should read as system voice, not as a third brand colour.
+     Subtle/border reference the primary pair so the two cannot drift. */
+  --color-info: #1d4ed8; /* 6.70:1 on white, 6.16:1 on info-subtle */
+  --color-info-subtle: var(--color-primary-subtle);
+  --color-info-border: var(--color-primary-border);
+
+  /* -------------------------------------------------------- CATEGORY HUES */
+  /* Data visualisation only: `bg-cat-N` tints and `text-cat-N-fg` label ink.
+     Every -fg was measured on three grounds and passes AA on all of them
+     (white, its own tint, and surface-3 where chips commonly sit):
+        1 blue    6.70 / 6.16 / 6.10      5 violet   7.10 / 6.48 / 6.46
+        2 indigo  7.90 / 7.07 / 7.19      6 emerald  5.48 / 5.21 / 4.99
+        3 teal    5.47 / 5.25 / 4.98      7 rose     6.29 / 5.72 / 5.72
+        4 amber   5.02 / 4.84 / 4.57      8 slate   10.35 / 9.90 / 9.42
+     The tints themselves are decorative fills, not UI boundaries, so WCAG
+     1.4.11 does not apply to them — but never use a tint as a border that
+     conveys state. */
+  --color-cat-1: #eff6ff;
+  --color-cat-1-fg: #1d4ed8;
+  --color-cat-2: #eef2ff;
+  --color-cat-2-fg: #4338ca;
+  --color-cat-3: #f0fdfa;
+  --color-cat-3-fg: #0f766e;
+  --color-cat-4: #fffbeb;
+  --color-cat-4-fg: #b45309;
+  --color-cat-5: #f5f3ff;
+  --color-cat-5-fg: #6d28d9;
+  --color-cat-6: #ecfdf5;
+  --color-cat-6-fg: #047857;
+  --color-cat-7: #fff1f2;
+  --color-cat-7-fg: #be123c;
+  --color-cat-8: #f8fafc;
+  --color-cat-8-fg: #334155;
+
   /* ------------------------------------------------------------ TYPOGRAPHY */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: var(--font-mono-stack), ui-monospace, SFMono-Regular, "SF Mono",
     Menlo, Consolas, monospace;
 
-  /* Scale is exactly 10/12/13/14/15/16/20/24/30/36 — never 18, never 22. */
+  /* Scale is 10/12/13/14/15/16/20/24/30/36 + one display tier (56).
+     Never 18, never 22. The display tier exists so hero presence comes from
+     size + weight + tracking within Inter, not from adding a typeface. */
   --text-2xs: 0.625rem;
   --text-2xs--line-height: 1.4;
   --text-xs: 0.75rem;
@@ -86,6 +165,14 @@
   --text-4xl: 2.25rem;
   --text-4xl--line-height: 1.1;
 
+  /* Display tier: hero H1 only. One per page, maximum.
+     Fluid rather than fixed 56px: 56px is right at 1440 but blows out a 390px
+     viewport. Clamped to the existing scale — floor is text-4xl (2.25rem),
+     ceiling 3.5rem, reached at ~1169px. One token, no responsive juggling. */
+  --text-display: clamp(2.25rem, 1.6rem + 2.6vw, 3.5rem);
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.035em;
+
   /* -------------------------------------------------------- RADII / ELEV. */
   /* Never 16px on a card — reads consumer, not enterprise. */
   --radius-control: 6px; /* buttons, inputs */
@@ -95,10 +182,39 @@
 
   --shadow-card: 0 1px 2px 0 rgb(24 24 27 / 0.04),
     0 1px 3px 0 rgb(24 24 27 / 0.06);
+
+  /* Hover elevation for cards. Until now the only states were resting and
+     overlay — there was nothing between them, so hover had nowhere to go and
+     cards felt dead. Pair with translateY(-1px), 160ms, --ease-out-quiet. */
+  --shadow-lift: 0 2px 4px -1px rgb(24 24 27 / 0.06),
+    0 10px 24px -8px rgb(24 24 27 / 0.14);
+
   --shadow-sticky: 0 1px 3px 0 rgb(24 24 27 / 0.06),
     0 4px 12px -2px rgb(24 24 27 / 0.08);
   --shadow-overlay: 0 10px 32px -6px rgb(24 24 27 / 0.14),
     0 2px 8px -2px rgb(24 24 27 / 0.06);
+
+  /* ------------------------------------------------------------ GRADIENTS */
+  /* Two rules: (1) never more than two hues, (2) never fully saturated at
+     both stops. These are washes and fills, not decoration for its own sake.
+     The rgba() hero/mesh washes sit BEHIND content — never under text unless
+     the text is on surface-1 or the inverse band. */
+  --background-image-gradient-brand: linear-gradient(135deg, #2563eb, #4f46e5);
+  --background-image-gradient-cta: linear-gradient(100deg, #1d4ed8, #4f46e5);
+  --background-image-gradient-hero: radial-gradient(
+      1100px 520px at 12% -12%,
+      rgb(37 99 235 / 0.1),
+      transparent 62%
+    ),
+    radial-gradient(880px 460px at 88% -4%, rgb(79 70 229 / 0.09), transparent 60%);
+  --background-image-gradient-mesh: radial-gradient(
+      760px 420px at 8% 0%,
+      rgb(37 99 235 / 0.08),
+      transparent 60%
+    ),
+    radial-gradient(620px 380px at 92% 8%, rgb(79 70 229 / 0.07), transparent 58%),
+    radial-gradient(520px 320px at 50% 100%, rgb(13 148 136 / 0.05), transparent 60%);
+  --background-image-surface-tint: linear-gradient(135deg, #f0f7ff, #faf5ff);
 
   /* -------------------------------------------------------------- MOTION */
   --ease-out-quiet: cubic-bezier(0.22, 1, 0.36, 1);
@@ -196,6 +312,30 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   line-height: 1.4;
+}
+
+/* Interactive card elevation: the resting → lift step.
+   Replaces the ad-hoc `hover:shadow-sticky hover:-translate-y-px` pairs that
+   were duplicated across card components.
+   The translate is gated explicitly: the global reduced-motion block zeroes
+   *durations* but cannot cancel a transform, so without this scoping a
+   reduced-motion user still gets the shift, just instantly. */
+@utility card-lift {
+  transition:
+    box-shadow 160ms var(--ease-out-quiet),
+    border-color 160ms var(--ease-out-quiet),
+    transform 160ms var(--ease-out-quiet);
+
+  &:hover {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-lift);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    &:hover {
+      transform: translateY(-1px);
+    }
+  }
 }
 
 /* Editorial prose for SEO content blocks at page bottom (max 68ch). */

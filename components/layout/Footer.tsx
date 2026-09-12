@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Scale } from "lucide-react";
 import { formatCount } from "@/lib/utils";
+import { BrandLogo } from "@/components/brand/BrandMark";
 import { getPillarsWithChildren, getSocialProof } from "@/lib/data/queries";
 import { DemoDataNotice } from "@/components/domain/atoms";
 
@@ -35,13 +35,7 @@ export function Footer() {
         <div className="grid gap-8 lg:grid-cols-5">
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-2" aria-label="Software Discovery — home">
-              <span
-                className="inline-flex size-7 items-center justify-center rounded-[7px] bg-primary text-primary-foreground"
-                aria-hidden="true"
-              >
-                <Scale className="size-4" strokeWidth={2.25} />
-              </span>
-              <span className="text-sm font-semibold tracking-[-0.02em]">Software Discovery</span>
+              <BrandLogo />
             </Link>
 
             <p className="mt-3 max-w-sm text-13 leading-relaxed text-muted-foreground">
