@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { AlertTriangle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ErrorArt } from "@/components/brand/StateArt";
 
 /**
  * Route-level error boundary.
@@ -27,6 +28,7 @@ export default function Error({
 
   return (
     <main id="main" className="mx-auto flex max-w-2xl flex-col px-4 py-16 sm:px-6">
+      <ErrorArt className="mb-4 size-28" />
       <p className="label-caps text-muted-foreground">Something went wrong</p>
       <h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em]">
         This page could not be loaded

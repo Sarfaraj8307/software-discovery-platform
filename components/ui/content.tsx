@@ -62,13 +62,16 @@ export function SectionLink({ href, children }: { href: string; children: React.
 
 export function EmptyState({
   icon,
+  illustration,
   title,
   description,
   primaryAction,
   secondaryAction,
   className,
 }: {
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
+  /** Larger generated illustration (state-art). Supersedes `icon` when present. */
+  illustration?: React.ReactNode;
   title: string;
   description?: string;
   primaryAction?: React.ReactNode;
@@ -82,9 +85,13 @@ export function EmptyState({
         className,
       )}
     >
-      <span className="text-faint" aria-hidden="true">
-        {icon}
-      </span>
+      {illustration ? (
+        illustration
+      ) : (
+        <span className="text-faint" aria-hidden="true">
+          {icon}
+        </span>
+      )}
       <p className="mt-3 text-base font-semibold">{title}</p>
       {description && (
         <p className="mt-1 max-w-sm text-13 leading-relaxed text-muted-foreground">

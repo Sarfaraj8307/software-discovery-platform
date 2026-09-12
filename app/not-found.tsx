@@ -3,6 +3,7 @@ import { ArrowRight, Compass, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getTopCategories } from "@/lib/data/repository";
 import { CategoryIcon } from "@/components/domain/icon";
+import { EmptyArt } from "@/components/brand/StateArt";
 
 /**
  * Global 404.
@@ -16,6 +17,7 @@ export default function NotFound() {
 
   return (
     <main id="main" className="mx-auto flex max-w-2xl flex-col px-4 py-16 sm:px-6">
+      <EmptyArt className="mb-5 size-28" />
       <p className="label-caps text-muted-foreground">Error 404</p>
       <h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em]">
         We could not find that page

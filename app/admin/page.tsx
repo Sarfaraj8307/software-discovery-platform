@@ -8,6 +8,7 @@ import {
 } from "@/lib/data/repository";
 import { KpiCard, SectionHeading, EmptyState } from "@/components/ui/content";
 import { StatusPill } from "@/components/ui/table";
+import { EmptyArt } from "@/components/brand/StateArt";
 
 /** Queues older than this are surfaced as breaching the review SLA. */
 const SLA_DAYS = 7;
@@ -168,7 +169,7 @@ export default function AdminOverviewPage() {
         {reviewQueue.length === 0 ? (
           <EmptyState
             className="mt-4"
-            icon={<ShieldCheck className="size-12" />}
+            illustration={<EmptyArt className="mb-1 size-28" />}
             title="The review queue is empty"
             description="Nothing is waiting for a decision. New submissions will appear here."
           />
