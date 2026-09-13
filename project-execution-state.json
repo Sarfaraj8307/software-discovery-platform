@@ -1,0 +1,107 @@
+{
+  "$comment": "Persistent execution state for the visual-transformation + productionization program. Read this FIRST at the start of any session, before inspecting anything else. Update after every meaningful milestone. Keep it small and honest.",
+  "project": "Software Discovery Platform",
+  "repo": "https://github.com/Sarfaraj8307/software-discovery-platform",
+  "updatedAt": "2026-09-13",
+  "mode": "autonomous",
+
+  "currentPhase": "W5 — Core surfaces (product page)",
+  "currentObjective": "Replace the bare-text composite score with a real visualisation, kill the empty right-hand rail, and replace the grey screenshot placeholders with procedural UI plates.",
+
+  "decisionsLocked": {
+    "designDirection": "LIGHT ENTERPRISE + RICH VISUAL STORYTELLING. 'Restraint by choice' is SUPERSEDED. Still forbidden: dark/neon/cyberpunk/heavy glassmorphism.",
+    "threeD": "Procedural ONLY. No .glb/.gltf/.riv assets — this environment cannot generate 3D models or video. Deterministic geometry from seeded IDs.",
+    "bundleBudget": "Initial JS <= 1.5 MB. Three.js + Recharts + heavy motion MUST be dynamic-imported and client-only.",
+    "sequencing": "UI first; backend P0 deferred behind the visual program.",
+    "mcp": "Install NONE. agent-browser covers Playwright; fs/git/fetch are native tools.",
+    "prngBoundary": "lib/data/seed.ts keeps its OWN private mulberry32/FNV-1a and must NOT be refactored onto lib/procedural.ts. Its PRNG defines the dataset; swapping it would regenerate all 230 products and invalidate every recorded number. lib/procedural.ts is the shared implementation for the RENDERING layer only.",
+    "tierThresholds": "Rank tiers derive from lib/ranking.ts. Leader = score >= 87, deliberately equal to the data layer's `product.leader`. Do not change one without the other."
+  },
+
+  "approvedStack": [
+    "three", "motion", "gsap", "@gsap/react", "recharts"
+  ],
+  "approvedStackDev": ["@types/three"],
+  "approvedStackNote": "@react-three/fiber, @react-three/drei and @react-three/postprocessing were DROPPED after install failed. Every R3F version (9.7.0 stable and all 10.0.0 canaries) declares peer react \">=19 <19.3\"; this project is on React 19.3.0. Forcing it with --legacy-peer-deps would put an explicitly unsupported reconciler into production. Plain `three` has no React peer dependency, is lighter, and OrbitControls ships in three/examples/jsm/.",
+
+  "rejectedStack": {
+    "react-spring": "redundant with motion",
+    "lenis": "scroll hijacking vs accessibility",
+    "theatre.js": "needs AGPL Studio GUI; cannot be driven here",
+    "pixi.js": "second renderer, no unique job",
+    "@react-three/rapier": "physics fights determinism + SSR",
+    "@react-three/uikit": "forbidden to replace HTML UI with 3D UI"
+  },
+  "deferredStack": {
+    "gltfjsx": "no .glb assets exist or can be generated",
+    "rive": "no .riv assets can be authored here",
+    "nivo": "adopt only if recharts genuinely cannot render the chart",
+    "visx": "hand-written SVG likely lighter for ScoreRing",
+    "@xyflow/react": "prototype only for a future discovery graph"
+  },
+
+  "phases": {
+    "W0_foundation": "DONE — audit + baseline (commit 9875b80)",
+    "W1_design_system": "DONE — 10-hue viz palette, chart chrome, 3D materials, gradients, durations, 8 utilities; contrast-audited",
+    "W2_visual_primitives": "DONE — ScoreRing, ScoreBar, AnimatedMetric, NodeField, ScreenshotPlate; PRNG extracted to lib/procedural.ts",
+    "W3_3d_foundation": "TODO — plain three.js wrapper (R3F replacement), SoftwareUniverse, lazy + mobile tier",
+    "W4_homepage": "PARTIAL — hero rebuilt (aurora, viz-grid, NodeField, animated metric strip)",
+    "W5_core_surfaces": "IN PROGRESS — product page: ScoreRing in hero, sticky score rail replacing dead column, procedural screenshot plates. Remaining: categories, category quadrant grid, compare bars, search, graph framing",
+    "W6_portals": "TODO — vendor + admin charts (recharts)",
+    "W7_trust_polish": "TODO"
+  },
+
+  "baseline": {
+    "gitHead": "9875b80",
+    "jsPayload": "1.3 MB total; homepage first-load 801.6 KB / 1536 KB budget (PASS)",
+    "cssPayload": "68 KB baseline -> 71.8 KB after W1",
+    "pages": 283,
+    "sitemapUrls": 489,
+    "tsc": 0,
+    "eslint": 0,
+    "smoke": "25/25",
+    "contrast": "16/16 AA; all 10 viz hues pass 3:1 graphical and 4.5:1 text",
+    "tokensEmitted": "14/14 in-use tokens present in built CSS",
+    "screenshots": "qa-screenshots/baseline/ (17 PNGs)"
+  },
+
+  "knownIssues": {
+    "visual": [
+      "No imagery anywhere — monogram plates + tinted placeholders. (PARTLY ADDRESSED: product screenshots now render procedural UI plates.)",
+      "No data visualisation on any route. (PARTLY ADDRESSED: ScoreRing + ScoreBar on /product/[slug].)",
+      "/product/[slug] was an 819-line text scroll with empty grey screenshot boxes and a bare-text score. (ADDRESSED in W5.)",
+      "/admin and /vendor are flat KPI boxes with no charts. (OPEN — W6.)",
+      "No spatial composition on /categories — 72 categories read as a flat list. (OPEN — W5.)"
+    ],
+    "performance": [
+      "Baseline 1.3 MB JS. Every new lib must be dynamic-imported to stay <= 1.5 MB.",
+      "recharts is installed but not yet imported anywhere — it must stay behind a dynamic import when W6 uses it."
+    ],
+    "accessibility": [],
+    "seo": [
+      "SOFT 404 — VERIFIED, NOT ASSUMED. /product/<invalid-slug> returns HTTP 200 while rendering the not-found page. Evidence: the response body contains class=\"skeleton...\" x12 and a <!--$--> React Suspense marker, i.e. app/product/[slug]/loading.tsx flushed the shell (and committed the 200 status) before notFound() could run. Same pattern applies to every dynamic route that has both a loading.tsx and a notFound(): /product/[slug], /categories/[slug], /compare/[slugs]. Impact: search engines can index unlimited junk URLs as valid pages. NOT FIXED — two viable fixes exist and both trade something away, so this needs a decision: (a) delete loading.tsx on those routes -> correct 404s, but loses the loading skeleton (measured on-demand render is 74-130ms locally, so the skeleton barely shows here, but it would matter on a real deployment with network latency); (b) add middleware.ts that validates slugs against a committed slug manifest -> keeps the skeletons and returns a real 404, but needs a generated lib/data/slug-manifest.json (~4KB) plus a drift guard so the manifest cannot fall out of sync with the dataset."
+    ],
+    "deployment": [
+      "No database, no auth, no RLS. Portals are ungated shells (deferred by decision, not a bug)."
+    ]
+  },
+
+  "lastValidation": {
+    "at": "2026-09-13",
+    "result": "W1/W2: tsc 0 · eslint 0 · 283 pages · homepage first-load 801.6 KB (budget 1536 KB) · 14/14 tokens emitted · smoke PASS=25 FAIL=0 · hero screenshotted at 1440 and 390"
+  },
+  "lastCheckpoint": "9875b80",
+
+  "nextAutonomousAction": "Finish W5: wire the product page (done), verify visually at 1440/390, then move to the /categories spatial composition and the category quadrant grid (Leader / High Performer / Contender / Niche) using lib/ranking.ts. Do NOT stop for approval.",
+
+  "environmentGotchas": [
+    "Never chain `rm` before a build — the delete guard blocks it and `&&` short-circuits, leaving a stale log.",
+    "Clear NODE_OPTIONS for builds; set CODEBUDDY_SAFE_DELETE_BULK_THRESHOLD=1000000 for npm install.",
+    "agent-browser HANGS behind HTTP_PROXY on localhost — strip proxy env vars.",
+    "The sandbox blocks writes to .git/refs/remotes — verify push sync against the GitHub API, not `rev-parse origin/master`.",
+    "Confirm the PID owning a port before trusting an HTTP 200.",
+    "Reuse scripts/qa/visual-shots.sh for the per-phase screenshot gate.",
+    "Tailwind v4 TREE-SHAKES @theme tokens: a declared token is only emitted if some scanned source references it via a class or a literal string. lib/viz.ts holds the literal class strings for exactly this reason.",
+    "Tailwind has no --duration-* theme namespace — durations live in a plain :root block."
+  ]
+}

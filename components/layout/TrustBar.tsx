@@ -50,19 +50,27 @@ export function TrustBar({
 /**
  * Right-rail sticky container. Top offset clears the sticky header plus the product tab
  * bar so the rail never slides underneath them.
+ *
+ * `ariaLabel` is a prop rather than a constant because the product page uses two
+ * of these with different jobs: the hero rail is the contact panel, and the rail
+ * below the tabs is the score panel. Two `<aside>` landmarks with the same
+ * accessible name are indistinguishable in a screen reader's landmark list, so
+ * the label has to describe which one you are in.
  */
 export function StickySidebar({
   children,
   className,
   topOffset = "top-28",
+  ariaLabel = "Contact and quick facts",
 }: {
   children: React.ReactNode;
   className?: string;
   topOffset?: string;
+  ariaLabel?: string;
 }) {
   return (
     <aside
-      aria-label="Contact and quick facts"
+      aria-label={ariaLabel}
       className={cn("lg:sticky lg:self-start", topOffset, className)}
     >
       {children}

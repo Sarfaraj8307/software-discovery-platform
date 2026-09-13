@@ -11,7 +11,7 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import { formatCompact, formatCount, formatPrice, formatRating, monthYear } from "@/lib/utils";
+import { cn, formatCompact, formatCount, formatPrice, formatRating, monthYear } from "@/lib/utils";
 import { getProductPageData } from "@/lib/data/queries";
 import {
   getCategoryProducts,
@@ -29,7 +29,6 @@ import {
   MetaDot,
   NoteLine,
   RatingLine,
-  ScoreBadge,
   StarRating,
   VerifiedPublisherBadge,
 } from "@/components/domain/atoms";
@@ -44,6 +43,9 @@ import { IntegrationGrid } from "@/components/product/IntegrationGrid";
 import { MediaGallery } from "@/components/product/MediaGallery";
 import { LeadForm } from "@/components/forms/LeadForm";
 import { ProductCard } from "@/components/cards/ProductCard";
+import { ScoreRing } from "@/components/viz/ScoreRing";
+import { ProductScorePanel } from "@/components/product/ProductScorePanel";
+import { rankTier } from "@/lib/ranking";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -183,6 +185,33 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
     { label: "Functionality", value: product.functionalityAvg, sampleSize: Math.round(product.ratingCount * 0.44) },
   ];
 
+  // Tier comes from the shared `rankTier()` helper rather than a local
+  // threshold, so the chip here and the quadrant on the category page cannot
+  // drift apart. `leader` is anchored to the same 87 the data layer uses.
+  const tier = rankTier(product.score);
+
+  // Anchors for the sticky rail's on-page navigation. Kept in one list so the
+  // rail and the section headings below cannot fall out of sync.
+  const onPageSections = [
+    { id: "overview", label: "Overview" },
+    { id: "reviews", label: "Reviews" },
+    { id: "pricing", label: "Pricing" },
+    { id: "integrations", label: "Integrations" },
+    { id: "alternatives", label: "Alternatives" },
+    { id: "qa", label: "Q&A" },
+  ];
+
+  // Category context for the rail. The count comes from the same repository
+  // accessor the category page uses, so the two can never disagree about how
+  // many products a category holds.
+  const categoryContext = category
+    ? {
+        name: category.name,
+        slug: category.slug,
+        productCount: getCategoryProducts(category.slug).length,
+      }
+    : null;
+
   const reviewFilters = [
     { label: `All (${reviewSummary.total})`, href: basePath, active: !reviewQuery.rating && !reviewQuery.verifiedOnly && !reviewQuery.currentUserOnly },
     ...[5, 4, 3, 2, 1].map((star) => ({
@@ -277,15 +306,45 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
                   <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
                     <RatingLine rating={product.ratingAvg} count={product.ratingCount} size={15} />
 
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className="text-2xs text-muted-foreground">Score</span>
-                      <ScoreBadge score={product.score} />
-                    </span>
-
                     <span className="text-13 text-muted-foreground tnum">
                       From <span className="font-medium text-foreground">{formatPrice(product.startingPrice)}</span>
                       {product.startingPrice ? ` ${product.pricingNote}` : ""}
                     </span>
+                  </div>
+
+                  {/* ------------------------------------------- score cluster
+                      The composite score is the platform's own metric, so it gets
+                      a graphic rather than a number in a box. `ScoreRing` is a
+                      server component whose arc is driven by CSS custom
+                      properties, so this costs no JavaScript on any of the 230
+                      product pages. The tier chip beside it carries the label, so
+                      the meaning is not left to the ring alone. */}
+                  <div className="mt-3 flex items-center gap-3">
+                    <ScoreRing
+                      value={product.score}
+                      size={52}
+                      thickness={5}
+                      className="shrink-0"
+                      valueClassName="text-base"
+                    />
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded-pill px-2 py-0.5 text-2xs font-medium",
+                            tier.tintClass,
+                            tier.ink,
+                          )}
+                          title={tier.blurb}
+                        >
+                          {tier.label}
+                        </span>
+                        <span className="text-2xs text-muted-foreground">composite score</span>
+                      </div>
+                      <p className="mt-1 text-2xs leading-snug text-muted-foreground">
+                        Weighted on verified review volume, satisfaction and feature coverage.
+                      </p>
+                    </div>
                   </div>
 
                   <p className="mt-3 max-w-2xl text-body leading-relaxed text-muted-foreground">
@@ -796,8 +855,20 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
               </section>
             </div>
 
-            {/* ================================================ desktop rail gap */}
-            <div className="hidden lg:block" aria-hidden="true" />
+            {/* ================================================ sticky rail
+                This column used to be an empty placeholder spanning the whole
+                scroll — roughly 800px of dead space on a wide viewport. It now
+                carries the composite score, the satisfaction breakdown and
+                on-page navigation, all of it server-rendered. */}
+            <StickySidebar className="hidden lg:block" ariaLabel="Composite score and on-page navigation">
+              <ProductScorePanel
+                score={product.score}
+                ratingAvg={product.ratingAvg}
+                ratingCount={product.ratingCount}
+                category={categoryContext}
+                sections={onPageSections}
+              />
+            </StickySidebar>
           </div>
         </div>
 

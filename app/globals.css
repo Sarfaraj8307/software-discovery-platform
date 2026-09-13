@@ -221,8 +221,144 @@
     radial-gradient(520px 320px at 50% 100%, rgb(13 148 136 / 0.05), transparent 60%);
   --background-image-surface-tint: linear-gradient(135deg, #f0f7ff, #faf5ff);
 
+  /* ========================================================================
+     DATA-VISUALISATION PALETTE  (visual transformation, wave 1)
+     ========================================================================
+     Ten series colours for charts, category identity, 3D materials and
+     decorative data graphics.
+
+     RULE: these are NOT interactive colours. Nothing here becomes a button,
+     a link, or a focus ring — --color-primary remains the only affordance.
+     That rule is what stops this file turning into the "second accent"
+     failure mode the header warns about.
+
+     Three roles per hue, and the role decides the contrast requirement:
+       --color-viz-N       graphical only. Bars, strokes, dots, 3D materials.
+                           Needs >= 3:1 (WCAG 1.4.11 non-text).
+       --color-viz-N-fg    text-safe ink. Needs >= 4.5:1 on BOTH white and
+                           its own tint, because chips put them together.
+       --color-viz-N-tint  decorative fill. Not a UI boundary — never use a
+                           tint as a border that conveys state.
+
+     Every value below was measured, not eyeballed (scripts/qa/contrast-audit.py):
+       hue       solid/white   fg/white   fg/tint
+       blue          5.17         6.70      6.16
+       cyan          3.68         5.36      5.15
+       violet        5.70         7.10      6.48
+       emerald       3.77         5.48      5.21
+       amber         3.19         5.02      4.84
+       rose          4.70         6.29      5.72
+       indigo        6.29         7.90      7.07
+       teal          3.74         5.47      5.25
+       fuchsia       4.71         6.32      5.89
+       slate         7.58        10.35      9.90
+     All ten pass graphical 3:1 and AA text 4.5:1 on white and on tint. */
+  --color-viz-1: #2563eb;
+  --color-viz-1-fg: #1d4ed8;
+  --color-viz-1-tint: #eff6ff;
+  --color-viz-2: #0891b2;
+  --color-viz-2-fg: #0e7490;
+  --color-viz-2-tint: #ecfeff;
+  --color-viz-3: #7c3aed;
+  --color-viz-3-fg: #6d28d9;
+  --color-viz-3-tint: #f5f3ff;
+  --color-viz-4: #059669;
+  --color-viz-4-fg: #047857;
+  --color-viz-4-tint: #ecfdf5;
+  --color-viz-5: #d97706;
+  --color-viz-5-fg: #b45309;
+  --color-viz-5-tint: #fffbeb;
+  --color-viz-6: #e11d48;
+  --color-viz-6-fg: #be123c;
+  --color-viz-6-tint: #fff1f2;
+  --color-viz-7: #4f46e5;
+  --color-viz-7-fg: #4338ca;
+  --color-viz-7-tint: #eef2ff;
+  --color-viz-8: #0d9488;
+  --color-viz-8-fg: #0f766e;
+  --color-viz-8-tint: #f0fdfa;
+  --color-viz-9: #c026d3;
+  --color-viz-9-fg: #a21caf;
+  --color-viz-9-tint: #fdf4ff;
+  --color-viz-10: #475569;
+  --color-viz-10-fg: #334155;
+  --color-viz-10-tint: #f8fafc;
+
+  /* ---------------------------------------------------------- CHART CHROME */
+  /* Axis ink is muted-foreground's value, not a new grey — one source of
+     truth. Gridlines are the standard border so charts sit in the same
+     visual system as every other 1px rule on the site. */
+  --color-chart-axis: var(--color-muted-foreground);
+  --color-chart-grid: var(--color-border);
+  --color-chart-grid-strong: var(--color-border-strong);
+  --color-chart-tooltip: #ffffff;
+  --color-chart-tooltip-border: var(--color-border-strong);
+  --color-chart-cursor: rgb(37 99 235 / 0.06);
+
+  /* ------------------------------------------------------------ 3D MATERIALS */
+  /* Read from CSS by the Three.js scenes (lib/viz.ts resolves these), so the
+     3D layer cannot drift away from the light-enterprise palette. Values are
+     deliberately desaturated — matte over glossy, per the 3D design language. */
+  --viz3d-node: #2563eb;
+  --viz3d-node-alt: #7c3aed;
+  --viz3d-node-warm: #0891b2;
+  --viz3d-node-quiet: #94a3b8;
+  --viz3d-edge: #cbd5e1;
+  --viz3d-edge-active: #93c5fd;
+  --viz3d-surface: #e2e8f0;
+  --viz3d-field: #f8fafc;
+
   /* -------------------------------------------------------------- MOTION */
   --ease-out-quiet: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Overshoot for score counters and metric reveals — used sparingly, never
+     on layout, because a bouncing layout reads as consumer, not enterprise. */
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --ease-in-out-quiet: cubic-bezier(0.65, 0, 0.35, 1);
+  /* Long, slow drift for ambient 3D. Anything faster reads as a game. */
+  --ease-drift: cubic-bezier(0.37, 0, 0.63, 1);
+
+  /* ------------------------------------------------------------- GRADIENTS */
+  /* Aurora is the editorial page wash — three cool hues at very low alpha,
+     always behind content. Spectrum is for the thin accent rules and the
+     score ring only, never behind text. */
+  --background-image-gradient-aurora: linear-gradient(
+    135deg,
+    #eff6ff 0%,
+    #f5f3ff 45%,
+    #ecfeff 100%
+  );
+  --background-image-gradient-spectrum: linear-gradient(
+    90deg,
+    #2563eb 0%,
+    #7c3aed 50%,
+    #0891b2 100%
+  );
+  --background-image-gradient-score: conic-gradient(
+    from 200deg,
+    #2563eb,
+    #7c3aed,
+    #0891b2,
+    #2563eb
+  );
+  /* Bottom-fade for media plates: keeps a caption legible over any fill. */
+  --background-image-gradient-plate: linear-gradient(
+    180deg,
+    rgb(15 23 42 / 0) 45%,
+    rgb(15 23 42 / 0.55) 100%
+  );
+}
+
+/* Motion durations live outside @theme deliberately: Tailwind has no
+   `--duration-*` theme namespace (duration-* takes bare values), so putting
+   them in @theme would create tokens that generate nothing. As plain custom
+   properties they are usable from var() in the @utility blocks below and from
+   inline styles / GSAP timelines. */
+:root {
+  --duration-instant: 80ms;
+  --duration-fast: 140ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --duration-slower: 520ms;
 }
 
 /* ============================================================================
@@ -514,6 +650,124 @@
     box-shadow: var(--shadow-overlay);
     font-size: 0.875rem;
     font-weight: 500;
+  }
+}
+
+/* ============================================================================
+   VISUAL LAYER UTILITIES  (wave 1)
+   Backdrops, accent rules and ambient motion for the visual transformation.
+   Everything decorative lives here so components stay free of ad-hoc values.
+   ========================================================================= */
+
+/* Faint engineering grid. Sits behind hero and section content at very low
+   contrast — it should read as texture, never as a table. */
+@utility viz-grid {
+  background-image:
+    linear-gradient(to right, rgb(24 24 27 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(24 24 27 / 0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+/* Dot field — the softer alternative for dense sections where a grid would
+   fight the content. */
+@utility viz-dots {
+  background-image: radial-gradient(rgb(24 24 27 / 0.09) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Soft radial bloom used behind score rings and feature icons. Purely
+   decorative fill — never a boundary, so 1.4.11 does not apply. */
+@utility viz-bloom {
+  position: relative;
+  isolation: isolate;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -35%;
+    z-index: -1;
+    background: radial-gradient(closest-side, rgb(37 99 235 / 0.14), transparent 72%);
+    pointer-events: none;
+  }
+}
+
+/* Thin spectrum accent rule. The one place three hues meet in a line. */
+@utility spectrum-rule {
+  height: 2px;
+  background-image: var(--background-image-gradient-spectrum);
+}
+
+/* Bottom fade for media plates so a caption stays legible over any fill. */
+@utility plate-fade {
+  background-image: var(--background-image-gradient-plate);
+}
+
+/* Score-ring ink: the conic gradient is the ring's stroke source. */
+@utility score-gradient {
+  background-image: var(--background-image-gradient-score);
+}
+
+/* Ambient drift for decorative 3D-adjacent elements. Deliberately very slow
+   (18s) and tiny in amplitude — anything faster reads as a game, which the
+   brief explicitly forbids. Gated on no-preference so reduced-motion users
+   get a completely static element rather than a frozen mid-animation one. */
+@utility float-drift {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: float-drift 18s var(--ease-drift) infinite;
+  }
+}
+
+@keyframes float-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -8px, 0);
+  }
+}
+
+/* Value-change reveal for animated metrics. Runs once on mount/viewport entry,
+   never continuously — the brief is explicit that numbers must not animate
+   forever. */
+@utility metric-in {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: metric-in var(--duration-slower) var(--ease-out-quiet) both;
+  }
+}
+
+@keyframes metric-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Score-ring arc draw. Driven by two custom properties set inline on the
+   circle, so one keyframe serves every possible score instead of generating a
+   rule per value. Both are read at animation start; the global reduced-motion
+   block collapses the duration, which lands the arc on its final offset. */
+@keyframes ring-draw {
+  from {
+    stroke-dashoffset: var(--ring-circumference);
+  }
+  to {
+    stroke-dashoffset: var(--ring-offset);
+  }
+}
+
+/* Comparison bar grow. `transform-origin: left` keeps it on the compositor —
+   animating `width` would trigger layout on every frame, and the comparison
+   matrix stacks several of these per row. */
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
   }
 }
 

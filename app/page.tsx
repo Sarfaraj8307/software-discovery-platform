@@ -15,6 +15,8 @@ import { SearchAutocomplete } from "@/components/search/SearchAutocomplete";
 import { SectionHeading, SectionLink } from "@/components/ui/content";
 import { DemoDataNotice } from "@/components/domain/atoms";
 import { Reveal } from "@/components/motion/Reveal";
+import { NodeField } from "@/components/viz/NodeField";
+import { AnimatedMetric } from "@/components/viz/AnimatedMetric";
 
 export const metadata: Metadata = {
   title: "Software Discovery — compare business software on evidence",
@@ -50,10 +52,58 @@ export default function HomePage() {
 
       <main id="main">
         {/* ================================================================ HERO */}
-        <section className="relative overflow-hidden border-b border-border bg-subtle bg-gradient-hero">
-          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:py-16">
+        <section className="relative overflow-hidden border-b border-border bg-subtle">
+          {/* Visual backdrop. Three aria-hidden layers: an aurora wash, an
+              engineering grid at very low contrast, and a procedural node field
+              standing in for the software ecosystem. All decoration — the
+              information in this hero is the text and the search box.
+
+              The scrim below is not cosmetic. On narrow screens the text column
+              spans the full width, so the node field would sit directly behind
+              body copy; fading it out under the text keeps the decoration from
+              costing legibility. Measured on a 390px render before this was
+              added — the headline was readable but the paragraph was not. */}
+          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div className="absolute inset-0 bg-gradient-aurora" />
+            <div className="absolute inset-0 viz-grid opacity-40" />
+            <div className="absolute -top-28 -right-24 h-[420px] w-[420px] opacity-45 sm:h-[520px] sm:w-[520px] sm:opacity-55 lg:-top-44 lg:-right-24 lg:h-[720px] lg:w-[720px] lg:opacity-85">
+              <NodeField seed="hero-ecosystem" count={64} />
+            </div>
+
+            {/* Narrow screens: fade the field out vertically, above the copy. */}
+            <div
+              className="absolute inset-0 lg:hidden"
+              style={{
+                backgroundImage:
+                  "linear-gradient(180deg, transparent 0%, rgb(250 250 250 / 0.75) 30%, var(--color-subtle) 52%)",
+              }}
+            />
+            {/* Desktop: the field sits clear of the text column, so only a
+                light left-to-right wash is needed. */}
+            <div
+              className="absolute inset-0 hidden lg:block"
+              style={{
+                backgroundImage:
+                  "linear-gradient(90deg, rgb(250 250 250 / 0.92) 0%, rgb(250 250 250 / 0.55) 34%, transparent 58%)",
+              }}
+            />
+
+            <div
+              className="absolute inset-x-0 bottom-0 h-24"
+              style={{
+                backgroundImage:
+                  "linear-gradient(180deg, transparent, var(--color-background))",
+              }}
+            />
+          </div>
+
+          <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:py-16">
             <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
               <div className="lg:col-span-7">
+                <p className="label-caps mb-3 inline-flex items-center gap-2 text-viz-1-fg">
+                  <span className="spectrum-rule w-8 rounded-pill" aria-hidden="true" />
+                  Independent software comparison
+                </p>
                 <h1 className="text-display font-semibold text-balance">
                   Where you go for software
                 </h1>
@@ -84,6 +134,25 @@ export default function HomePage() {
                     Vendors cannot pay for rank
                   </li>
                 </ul>
+
+                {/* Directory scale. Numbers count up once on entry — the brief
+                    forbids continuous animation, and reduced-motion users get
+                    the final value with no transition at all. */}
+                <dl className="mt-8 grid max-w-xl grid-cols-2 gap-x-6 gap-y-4 border-t border-border pt-6 sm:grid-cols-4">
+                  {[
+                    { label: "Products", value: data.socialProof.totalProducts },
+                    { label: "Reviews", value: data.socialProof.totalReviews },
+                    { label: "Categories", value: data.socialProof.totalCategories },
+                    { label: "Vendors", value: data.socialProof.totalCompanies },
+                  ].map((stat) => (
+                    <div key={stat.label}>
+                      <dd className="text-xl font-semibold tracking-tight text-foreground">
+                        <AnimatedMetric value={stat.value} srLabel={stat.label} />
+                      </dd>
+                      <dt className="label-caps mt-1 text-muted-foreground">{stat.label}</dt>
+                    </div>
+                  ))}
+                </dl>
               </div>
 
               {/* -------------------------------------------- featured products */}
