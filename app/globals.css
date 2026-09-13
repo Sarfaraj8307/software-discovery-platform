@@ -365,6 +365,12 @@
   animation: skeleton-pulse 1.4s ease-in-out infinite;
 }
 
+/* Icon nudge: a forward arrow that eases right when its link is hovered/focused.
+   Pair with `group-hover:translate-x-0.5` (or `group-focus-visible:`) on the icon. */
+@utility nudge {
+  transition: transform 150ms var(--ease-out-quiet);
+}
+
 /* Scroll-reveal: a section fades + lifts into place as it enters the viewport.
    Safety: the hidden initial state must never be able to trap content. Two
    guards cover that — (1) reduced-motion users get the final state with no
