@@ -2,9 +2,9 @@
   "$comment": "Persistent execution state for the visual-transformation + productionization program. Read this FIRST at the start of any session, before inspecting anything else. Update after every meaningful milestone. Keep it small and honest.",
   "project": "Software Discovery Platform",
   "repo": "https://github.com/Sarfaraj8307/software-discovery-platform",
-  "updatedAt": "2026-09-13T17:59:55.145Z",
+  "updatedAt": "2026-09-13T18:13:45.485Z",
   "mode": "autonomous",
-  "currentPhase": "W7 COMPLETE (commits 7da2897, 10de437, 265cc1d) — trust-signal accuracy, both W6 cleanups, and the /admin composition panel. Overflow re-verified across 7 routes x 4 breakpoints (28/28). All remaining work is decisions awaiting the user.",
+  "currentPhase": "W7 COMPLETE. Backend P0 unblocked by the 'UI first' sequencing and B1 (moderation decisions + audit log) is DONE. Next backend P0 candidates, in order of what the UI currently admits is missing: score/sourcing behaviours that are copy-only (Guest exclusion, sponsored exclusion), then auth.",
   "currentObjective": "Portals were assessed rather than decorated: /vendor already has labelled dependency-free charts and /admin has no time series to chart, so no charting library was added. Instead the work went into a real defect — a consistency gate that could not fail, hiding a three-way indexation inconsistency for /graph.",
   "decisionsLocked": {
     "designDirection": "LIGHT ENTERPRISE + RICH VISUAL STORYTELLING. 'Restraint by choice' is SUPERSEDED. Still forbidden: dark/neon/cyberpunk/heavy glassmorphism.",
@@ -48,15 +48,29 @@
     "W3_3d_foundation": "DONE (commit 95c5314) — plain three.js, NOT R3F. SoftwareUniverse (Fibonacci-sphere InstancedMesh nodes + LineSegments edges, seeded, paused on hidden/off-screen, fully disposed on unmount) + HeroScene (the gate: WebGL, >=1024px, unmetered connection, no reduced-motion/reduced-data; all checks in an effect so SSR and first client render agree). Reduced motion renders ONE STATIC FRAME rather than removing the scene. three stays in its own 529 KB lazy chunk; homepage first-load 801.6 -> 808.7 KB.",
     "W4_homepage": "PARTIAL — hero rebuilt (aurora, viz-grid, NodeField, animated metric strip) and now carries the W3 3D layer under the scrims.",
     "W5_core_surfaces": "DONE (commits a477cc4, 0b7ed04) — product page (ScoreRing in hero, sticky score rail replacing a dead column, procedural screenshot plates); compare (MetricBar on a shared 0-100 scale); /graph (framed viewer, build-time stats derived from graph.json, width gate so phones never download the 1.4 MB viewer). /categories INVESTIGATED AND CLOSED — a treemap was built, rendered, then rejected as premise-false; see knownIssues.visual. /search SURVEYED and found already dense (filters, sort, non-product matches, empty states) — nothing obvious to add.",
-    "W6_portals": "IN PROGRESS (commit 2794c13) — RECONNAISSANCE FIRST, and it overturned the inherited audit. The audit claimed /vendor and /admin were 'flat KPI boxes with no charts'; that is true of neither. /vendor already has a labelled 8-week bar chart, a lead-source breakdown with ProgressBar, four KPI cards and a recent-leads list, with a code comment explaining why eight labelled points need no charting dependency. /admin has four KPI cards, an SLA-breach callout, four work-queue cards, two queues, and copy disclosing that approve/reject/flag are not wired up. getAdminMetrics() returns ONLY scalars — no time series — so a chart there would have required inventing data. NO CHARTING LIBRARY WAS ADDED; recharts is still installed and imported nowhere. What WAS done: /admin/seo's consistency gate was tautological and is now real (see knownIssues.seo).",
+    "W6_portals": "IN PROGRESS (commit 2794c13) — RECONNAISSANCE FIRST, and it overturned the inherited audit. The audit claimed /vendor and /admin were 'flat KPI boxes with no charts'; that is true of neither. /vendor already has a labelled 8-week bar chart, a lead-source breakdown with ProgressBar, four KPI cards and a recent-leads list, with a code comment explaining why eight labelled points need no charting dependency. /admin has four KPI cards, an SLA-breach callout, four work-queue cards, two queues, and copy disclosing that approve/reject/flag are not wired up. getAdminMetrics() returns ONLY scalars — no time series — so a chart there would have required inventing data. NO CHARTING LIBRARY WAS ADDED; recharts is still installed and imported nowhere. What WAS done: /admin/seo's consistency gate was tautological and is now real (see knownIssues.seo). CLOSED 2026-09-13 — the two cleanups are done.",
     "W7_trust_polish": {
-      "status": "NEARLY COMPLETE",
+      "status": "COMPLETE",
       "startedAt": "2026-09-13",
       "hypothesis": "The site makes trust claims about verified reviews while all data is synthetic. The valuable question is not 'add more badges' but 'does any existing trust signal make a claim the data layer cannot back?'",
       "disclosureCoverage": "CHECKED FIRST and found adequate: DemoDataNotice is in the root Footer (so every page) and as a banner in app/vendor/layout.tsx and app/admin/layout.tsx, so portal sub-routes are covered too. No change needed.",
       "defectsFound": 3,
       "defectsFixed": 3,
       "adminCharts": "getAdminMetrics() returns only scalars, and getVendorMetrics() (which owns viewsTrend and leadsBySource) is already charted on /vendor. So /admin gained a panel over data it actually has: getReviewBreakdowns() tallies review status (pending/approved/rejected/flagged) and verification (validated/current user/incentivized/guest) over the real 1,176 records. Rendered with the same dependency-free ProgressBar list /vendor uses — no recharts, no new dependency, aria-label per bar. Verified rendered: Approved 1,093 (93%), Pending 53 (5%), Validated reviewer 604 (51%), Current user 303 (26%)."
+    },
+    "B1_moderation": {
+      "status": "DONE (first backend P0)",
+      "startedAt": "2026-09-13",
+      "why": "The locked sequencing was 'UI first; backend P0 deferred behind the visual program'. W7 was the last visual wave, so backend P0 is now unblocked. The moderation queue was chosen first because the UI had been openly disclosing that its actions did nothing.",
+      "what": [
+        "POST /api/moderation — Zod-validated (targetType, targetId, action, optional note), returns 200/400/404/422. Applies APPROVE / REJECT / FLAG to a review or a product.",
+        "Append-only audit log on globalThis (same pattern and same reason as the lead store), recording action, note, fromStatus, toStatus, timestamp and actor.",
+        "components/admin/ModerationActions.tsx — client component; refreshes the route so the row leaves the queue via the server rather than hiding itself locally.",
+        "Decision-log section on /admin/moderation, newest first."
+      ],
+      "actorHonesty": "There is no auth in this build, so the route records the literal actor 'unauthenticated' rather than inventing a moderator identity. An audit trail that looks trustworthy while recording a fiction is worse than none. Both the API and the page say so plainly. Wiring a session principal in is the only change needed later.",
+      "gotchaFound": "getPendingProducts() derives its queue from a deterministic slice (every third row synthesised as PENDING) rather than from stored status, so decideProduct() would have mutated the underlying product and then appeared to do nothing on the next render. Fixed with a globalThis Map of product decisions that overrides the synthesised status. Without this the buttons would have looked broken — shipped only after catching it.",
+      "verified": "scripts/qa/moderation-api.mjs PASS: valid decision 200 (PENDING -> FLAGGED), invalid action 422, invalid targetType 422, unknown id 404, malformed JSON 400. End-to-end confirmed in the rendered page: log row 'flag · <title> · PENDING → FLAGGED', buttons carry per-target aria-labels, stale 'not wired up' copy removed. Smoke 25/25, tsc 0, eslint 0, /admin/moderation first-load 752.4 KB (budget 1536 KB, +1.6 KB over /admin)."
     }
   },
   "baseline": {
@@ -97,7 +111,7 @@
       "DEAD DATA — AdminMetrics.indexedPages is computed by the repository and consumed nowhere. queuedPages (hardcoded 148) and blockedPages (hardcoded 9) are used on exactly one card on /admin/seo. Worth cleaning up when the portals get real data."
     ],
     "deployment": [
-      "No database, no auth, no RLS. Portals are ungated shells (deferred by decision, not a bug)."
+      "No database, no auth, no RLS. Portals are ungated shells (deferred by decision, not a bug). MODERATION IS NOW THE EXCEPTION: decisions are live and audited, but unauthenticated — every entry is recorded against a single 'unauthenticated' actor, stated on the page and in the route."
     ],
     "artifacts": [
       "The committed knowledge graph is STALE: public/graphify/graph.json records built_at_commit 91a419c, while HEAD is now several commits past it. The /graph page discloses the commit it was built from instead of hiding it, so the staleness is visible rather than silent. Regenerating is a deliberate, separate step (scripts/graphify-build.sh) that rewrites a 1.4 MB generated HTML file, so it was NOT folded into the /graph framing work. Refresh it when the diff is worth paying for."
@@ -123,7 +137,7 @@
     "result": "W6 SEO gate committed as 2794c13. tsc 0 · eslint 0 · build 0 · smoke PASS=25 FAIL=0 · overflow PASS=12 FAIL=0 (3 widths x 4 routes incl. /admin/seo and /graph) · all routes under the 1536 KB budget. The gate was deliberately broken and observed going red with two findings, then restored and observed green. Prior: /graph committed as 0b7ed04; W3 committed as 95c5314."
   },
   "lastCheckpoint": "2794c13",
-  "nextAutonomousAction": "W7 is complete and fully verified. Everything outstanding is a decision awaiting the user: soft 404, /graph indexation, stale graph artifact, and pendingProducts/pendingClaims being hardcoded. Do NOT add recharts. Do NOT stop for approval — if continuing, pick up backend P0 work or confirm those decisions first.",
+  "nextAutonomousAction": "Continue backend P0. Remaining known gaps, roughly in order: (1) the composite score ignores the Guest-exclusion and sponsored-exclusion policies the copy promises — note this needs care because ratingCount is generated independently of the review records, so 'fixing' it may mean changing the generator, which regenerates the dataset and invalidates recorded numbers; decide that deliberately. (2) Auth, which gates everything else. Still awaiting the user: soft 404, /graph indexation, stale graph artifact, pendingProducts/pendingClaims hardcoded. Do NOT add recharts. Do NOT stop for approval.",
   "environmentGotchas": [
     "Never chain `rm` before a build — the delete guard blocks it and `&&` short-circuits, leaving a stale log.",
     "Clear NODE_OPTIONS for builds; set CODEBUDDY_SAFE_DELETE_BULK_THRESHOLD=1000000 for npm install.",

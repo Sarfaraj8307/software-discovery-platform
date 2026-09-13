@@ -23,6 +23,9 @@ import type {
   Lead,
   LeadStatus,
   LeadType,
+  ModerationAction,
+  ModerationDecision,
+  ProductStatus,
   Paginated,
   Product,
   ProductFilters,
@@ -81,6 +84,125 @@ for (const [, list] of reviewsByProduct) {
  */
 const globalForLeads = globalThis as unknown as { __leadStore?: Lead[] };
 const leadStore: Lead[] = (globalForLeads.__leadStore ??= [...dataset.leads]);
+
+/* ==========================================================================
+   MODERATION
+   ========================================================================= */
+
+/**
+ * Audit log for moderation decisions, parked on `globalThis` for the same reason as the
+ * lead store: a module-scoped array would be re-created per route bundle, so the API
+ * route and the admin page would each keep a separate log and decisions would vanish.
+ *
+ * APPEND-ONLY by construction — nothing here deletes or edits an entry. A queue you can
+ * silently rewrite is not defensible when a vendor disputes a rejection, which is exactly
+ * why this log exists rather than just a status column.
+ */
+const globalForModeration = globalThis as unknown as {
+  __moderationLog?: ModerationDecision[];
+  __productDecisions?: Map<string, ProductStatus>;
+};
+const moderationLog: ModerationDecision[] = (globalForModeration.__moderationLog ??= []);
+
+/**
+ * Product decisions, kept separately because `getPendingProducts()` derives its queue from
+ * a deterministic slice rather than from stored status — the seeded catalogue is entirely
+ * APPROVED, so the queue synthesises PENDING for every third row. Without this map a
+ * decision would mutate the underlying product and then appear to do nothing, because the
+ * next render would re-derive the synthetic status. The button must not look broken.
+ */
+const productDecisions: Map<string, ProductStatus> = (globalForModeration.__productDecisions ??=
+  new Map());
+
+const REVIEW_TRANSITIONS: Record<ModerationAction, ReviewStatus> = {
+  APPROVE: "APPROVED",
+  REJECT: "REJECTED",
+  FLAG: "FLAGGED",
+};
+
+const PRODUCT_TRANSITIONS: Record<ModerationAction, ProductStatus> = {
+  APPROVE: "APPROVED",
+  REJECT: "ARCHIVED",
+  FLAG: "PENDING",
+};
+
+let decisionSeq = 0;
+
+function record(entry: Omit<ModerationDecision, "id" | "decidedAt">): ModerationDecision {
+  const decision: ModerationDecision = {
+    ...entry,
+    id: `dec_${Date.now().toString(36)}_${(decisionSeq += 1)}`,
+    decidedAt: new Date().toISOString(),
+  };
+  moderationLog.unshift(decision);
+  return decision;
+}
+
+/**
+ * Apply a decision to a review. Returns null when the id is unknown, so callers can
+ * distinguish "not found" from "already in that state" rather than guessing.
+ */
+export function decideReview(
+  reviewId: string,
+  action: ModerationAction,
+  actor: string,
+  note: string | null = null,
+): ModerationDecision | null {
+  const review = dataset.reviews.find((r) => r.id === reviewId);
+  if (!review) return null;
+
+  const toStatus = REVIEW_TRANSITIONS[action];
+  const fromStatus = review.status;
+  review.status = toStatus;
+
+  return record({
+    targetType: "review",
+    targetId: review.id,
+    targetLabel: review.title,
+    action,
+    note,
+    actor,
+    fromStatus,
+    toStatus,
+  });
+}
+
+/** Apply a decision to a product listing. Returns null when the slug is unknown. */
+export function decideProduct(
+  slug: string,
+  action: ModerationAction,
+  actor: string,
+  note: string | null = null,
+): ModerationDecision | null {
+  const product = dataset.products.find((p) => p.slug === slug);
+  if (!product) return null;
+
+  const toStatus = PRODUCT_TRANSITIONS[action];
+  const fromStatus = productDecisions.get(product.slug) ?? product.status;
+  product.status = toStatus;
+  productDecisions.set(product.slug, toStatus);
+
+  return record({
+    targetType: "product",
+    targetId: product.slug,
+    targetLabel: product.name,
+    action,
+    note,
+    actor,
+    fromStatus,
+    toStatus,
+  });
+}
+
+/** Newest first. The log is append-only, so this is the only read shape offered. */
+export function listModerationLog(limit = 20): ModerationDecision[] {
+  return moderationLog.slice(0, limit);
+}
+
+/** Ids that have already been decided — lets the UI show what is still outstanding. */
+export function moderationLogSize(): number {
+  return moderationLog.length;
+}
 
 /* ==========================================================================
    CATEGORIES
@@ -734,7 +856,13 @@ export function getPendingProducts(limit = 12): Product[] {
     .slice()
     .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
     .slice(0, limit)
-    .map((p, i) => (i % 3 === 0 ? { ...p, status: "PENDING" as const } : p));
+    .map((p, i) => {
+      // A recorded decision wins over the synthesised status, so approving or rejecting a
+      // listing actually moves it in this queue.
+      const status: ProductStatus =
+        productDecisions.get(p.slug) ?? (i % 3 === 0 ? "PENDING" : "APPROVED");
+      return { ...p, status };
+    });
 }
 
 /* ==========================================================================

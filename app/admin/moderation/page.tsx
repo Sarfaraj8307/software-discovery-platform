@@ -2,7 +2,12 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Package, ShieldCheck } from "lucide-react";
 import { formatCount, formatRating, relativeDate } from "@/lib/utils";
-import { getModerationQueue, getPendingProducts } from "@/lib/data/repository";
+import {
+  getModerationQueue,
+  getPendingProducts,
+  listModerationLog,
+} from "@/lib/data/repository";
+import { ModerationActions } from "@/components/admin/ModerationActions";
 import type { Product, Review } from "@/lib/data/types";
 import { DataTable, StatusPill, type Column } from "@/components/ui/table";
 import { EmptyState, SectionHeading } from "@/components/ui/content";
@@ -84,6 +89,19 @@ const REVIEW_COLUMNS: Column<Review>[] = [
     align: "right",
     render: (review) => <StatusPill status={review.status} />,
   },
+  {
+    key: "actions",
+    header: "Decision",
+    width: "w-56",
+    align: "right",
+    render: (review) => (
+      <ModerationActions
+        targetType="review"
+        targetId={review.id}
+        targetLabel={review.title}
+      />
+    ),
+  },
 ];
 
 const PRODUCT_COLUMNS: Column<Product>[] = [
@@ -134,11 +152,25 @@ const PRODUCT_COLUMNS: Column<Product>[] = [
     align: "right",
     render: (product) => <StatusPill status={product.status} />,
   },
+  {
+    key: "actions",
+    header: "Decision",
+    width: "w-56",
+    align: "right",
+    render: (product) => (
+      <ModerationActions
+        targetType="product"
+        targetId={product.slug}
+        targetLabel={product.name}
+      />
+    ),
+  },
 ];
 
 export default function AdminModerationPage() {
   const reviews = getModerationQueue(50);
   const products = getPendingProducts(50);
+  const log = listModerationLog(12);
 
   const pending = reviews.filter((review) => review.status === "PENDING");
   const flagged = reviews.filter((review) => review.status === "FLAGGED");
@@ -193,11 +225,45 @@ export default function AdminModerationPage() {
         </div>
       </section>
 
-      <p className="text-2xs text-muted-foreground">
-        Decisions are not wired up in this build. A production moderation tool needs the authenticated
-        API plus an append-only audit log recording who decided what, and when — a queue without an
-        audit trail is not defensible when a vendor disputes a rejection.
-      </p>
+      <section aria-labelledby="audit-heading">
+        <SectionHeading
+          id="audit-heading"
+          eyebrow="Audit"
+          title="Decision log"
+          description="Append-only. Entries are never edited or removed, so a reversal shows up as a new row rather than an overwrite."
+        />
+
+        {log.length === 0 ? (
+          <p className="mt-4 text-13 text-muted-foreground">
+            No decisions recorded yet. Approve, reject or flag something above and it will appear
+            here with the status it moved from and to.
+          </p>
+        ) : (
+          <ol className="mt-4 divide-y divide-border overflow-hidden rounded-card border border-border bg-card shadow-card">
+            {log.map((entry) => (
+              <li key={entry.id} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 px-4 py-2.5">
+                <span className="text-13 font-medium">{entry.action.toLowerCase()}</span>
+                <span className="min-w-0 flex-1 truncate text-13 text-muted-foreground">
+                  {entry.targetLabel}
+                </span>
+                <span className="text-2xs tnum text-muted-foreground">
+                  {entry.fromStatus} → {entry.toStatus}
+                </span>
+                <span className="text-2xs text-faint">{relativeDate(entry.decidedAt)}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+
+        <p className="mt-3 text-2xs text-muted-foreground">
+          Decisions are live and persisted for the lifetime of this server process, but{" "}
+          <span className="font-medium text-foreground">there is no authentication</span>, so every
+          entry is recorded against a single <span className="font-mono">unauthenticated</span>{" "}
+          actor. The log records that honestly rather than inventing a moderator identity — a
+          trustworthy-looking audit trail that records a fiction is worse than none. Wiring a
+          session principal in is the only change needed once auth lands.
+        </p>
+      </section>
     </div>
   );
 }

@@ -305,9 +305,10 @@ export default function AdminOverviewPage() {
       )}
 
       <p className="text-2xs text-muted-foreground">
-        Queue actions (approve, reject, flag) are not wired up in this build — they require the
-        authenticated moderation API and an audit log. Enquiries are live: submissions through the
-        public forms appear under{" "}
+        Queue actions (approve, reject, flag) are live and every decision is written to an
+        append-only log on the moderation page. They are{" "}
+        <span className="font-medium text-foreground">not authenticated</span> — see the note there.
+        Enquiries are live too: submissions through the public forms appear under{" "}
         <Link href="/admin/leads" className="text-primary underline-offset-2 hover:underline">
           lead routing
         </Link>{" "}

@@ -39,6 +39,22 @@ export const leadSchema = z.object({
 
 export type LeadInput = z.infer<typeof leadSchema>;
 
+export const MODERATION_ACTIONS = ["APPROVE", "REJECT", "FLAG"] as const;
+
+/**
+ * Moderation is a state transition on an existing record, not a free-form write, so the
+ * schema pins both the target and the action to enums. `note` is captured but optional —
+ * a rejection with no stated reason is exactly the case the audit log exists to expose.
+ */
+export const moderationDecisionSchema = z.object({
+  targetType: z.enum(["review", "product"]),
+  targetId: z.string().trim().min(1).max(200),
+  action: z.enum(MODERATION_ACTIONS),
+  note: z.string().trim().max(500, "Please keep the note under 500 characters").optional().or(z.literal("")),
+});
+
+export type ModerationDecisionInput = z.infer<typeof moderationDecisionSchema>;
+
 /** Field-level errors keyed by field name, ready to spread into the form. */
 export type FieldErrors = Partial<Record<keyof LeadInput, string>>;
 

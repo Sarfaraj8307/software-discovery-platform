@@ -427,6 +427,30 @@ export interface VendorMetrics {
   viewsTrend: { label: string; value: number }[];
 }
 
+export type ModerationAction = "APPROVE" | "REJECT" | "FLAG";
+
+/**
+ * An append-only moderation decision.
+ *
+ * `actor` is a string rather than a user id because this build has no authentication
+ * (deferred by decision, see knownIssues.deployment). The surface records the honest
+ * value instead of inventing a fake reviewer identity.
+ */
+export interface ModerationDecision {
+  id: string;
+  targetType: "review" | "product";
+  targetId: string;
+  /** Human-readable label so the log survives the target being renamed. */
+  targetLabel: string;
+  action: ModerationAction;
+  note: string | null;
+  actor: string;
+  decidedAt: string;
+  /** Status the target held before this decision — needed to explain a reversal. */
+  fromStatus: string;
+  toStatus: string;
+}
+
 export interface AdminMetrics {
   pendingReviews: number;
   pendingProducts: number;
