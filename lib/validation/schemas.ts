@@ -45,6 +45,18 @@ export const leadStatusSchema = z.object({
   status: z.enum(LEAD_STATUSES),
 });
 
+/**
+ * A vendor's public reply. Bounded on both ends: a one-word reply is not a response, and
+ * this is a reply shown beside the review rather than a blog post.
+ */
+export const vendorResponseSchema = z.object({
+  body: z
+    .string()
+    .trim()
+    .min(20, "Please write at least a sentence — replies this short read as dismissive")
+    .max(1200, "Replies are capped at 1,200 characters"),
+});
+
 export const MODERATION_ACTIONS = ["APPROVE", "REJECT", "FLAG"] as const;
 
 /**

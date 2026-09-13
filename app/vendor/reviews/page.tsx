@@ -9,6 +9,7 @@ import { KpiCard, SectionHeading, EmptyState } from "@/components/ui/content";
 import { StatusPill } from "@/components/ui/table";
 import { ProductLogo } from "@/components/ui/avatar";
 import { StarRating, VerificationBadge } from "@/components/domain/atoms";
+import { VendorResponseForm } from "@/components/vendor/VendorResponseForm";
 
 export const metadata: Metadata = { title: "Reviews" };
 
@@ -118,10 +119,7 @@ export default function VendorReviewsPage() {
                   </p>
                 </div>
 
-                <p className="mt-3 flex items-center gap-1.5 text-2xs text-muted-foreground">
-                  <MessageSquare className="size-3" aria-hidden="true" />
-                  Replying from the vendor portal is not available in this build.
-                </p>
+                <VendorResponseForm reviewId={review.id} reviewTitle={review.title} />
               </li>
             ))}
           </ul>

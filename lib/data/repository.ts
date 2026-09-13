@@ -580,6 +580,40 @@ export function getReviewSummary(slug: string): ReviewSummary {
   };
 }
 
+export type RespondResult =
+  | { ok: true; review: Review }
+  | { ok: false; reason: "NOT_FOUND" | "WRONG_VENDOR" };
+
+/**
+ * Publish a vendor's public reply to a review.
+ *
+ * Scoped to `companySlug` even though this build has no authentication. Without the check
+ * the endpoint would let anyone write a reply onto any product in the catalogue, and the
+ * eventual real implementation would have to grow the check anyway — better to have the
+ * shape now than to ship an endpoint whose only authorisation is obscurity.
+ *
+ * A reply replaces any previous one rather than being rejected: a vendor correcting their
+ * own response is normal, and refusing it would force them to live with a typo. The earlier
+ * text is not retained, because a "last edited" history is not something this surface claims
+ * to offer.
+ */
+export function respondToReview(
+  reviewId: string,
+  body: string,
+  companySlug: string,
+): RespondResult {
+  const review = dataset.reviews.find((r) => r.id === reviewId);
+  if (!review) return { ok: false, reason: "NOT_FOUND" };
+
+  const product = productBySlug.get(review.productSlug);
+  if (!product || product.companySlug !== companySlug) {
+    return { ok: false, reason: "WRONG_VENDOR" };
+  }
+
+  review.vendorResponse = { body, respondedAt: new Date().toISOString() };
+  return { ok: true, review };
+}
+
 export function getRecentReviews(limit = 12): Review[] {
   return dataset.reviews
     .filter((r) => r.status === "APPROVED")
