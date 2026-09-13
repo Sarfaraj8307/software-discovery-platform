@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Tailwind v4 auto-detects sources across the project. Documentation `.md` files
+   contain class-like strings in examples, which emit phantom utilities we never
+   use. Exclude them so the stylesheet only carries classes that exist in code. */
+@source not "../**/*.md";
+
 /* ============================================================================
    SOFTWARE DISCOVERY PLATFORM — DESIGN TOKENS
    Source of truth: ENTERPRISE-UI-DESIGN-SYSTEM.md §2
