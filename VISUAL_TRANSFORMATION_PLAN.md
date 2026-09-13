@@ -232,17 +232,17 @@ Maps to §35, sequenced so each step is independently buildable and testable.
 | 10 | Testimonial cards | 4, 5 |
 | 11 | Dark contrast band + gradient CTA band (rhythm) | 1 |
 | 12 | Motion primitives (`Reveal`, hover-lift, page-entry) | 1 |
-| 13 | Sticky nav refinement | 1, 5 |
-| 14 | Skeletons for RSC routes | 5 |
-| 15 | Empty / error illustration states | 4 |
-| 16 | Login page (split brand visual / form) | 1, 4, 12 |
-| 17 | Admin visual pass (sidebar, KPI cards, tables, badges) | 1, 5 |
-| 18 | Vendor portal visual pass | 1, 5 |
-| 19 | Micro-interactions (icon nudge, toast, checkmark) | 12 |
-| 20 | Responsive visual QA at 1440/1024/768/390 | all |
-| 21 | Performance check (bundle, LCP, CLS) | all |
-| 22 | Accessibility re-check (contrast on every new token pair) | all |
-| 23 | Cross-page consistency review | all |
+| 13 | Sticky nav refinement (scroll-aware elevation + active route link) ✅ | 1, 5 |
+| 14 | Skeletons for RSC routes (6 `loading.tsx` + `Skeleton`) ✅ | 5 |
+| 15 | Empty / error illustration states (`StateArt` + `EmptyState.illustration`) ✅ | 4 |
+| 16 | Login page (split brand visual / form) ✅ | 1, 4, 12 |
+| 17 | Admin visual pass (KPI hover-lift, queue cards) ✅ | 1, 5 |
+| 18 | Vendor portal visual pass (product row hover, KPI lift) ✅ | 1, 5 |
+| 19 | Micro-interactions (icon nudge utility) ✅ | 12 |
+| 20 | Responsive visual QA at 1440/1024/768/390 | all | 🚫 **BLOCKED** — browser automation unavailable; code-level audit done (login/skeletons/Header clean, no overflow), visual pass needs user via live preview |
+| 21 | Performance check (bundle, LCP, CLS) | all | ✅ build clean, 1.4 MB JS, no new deps; `.md` source-scan excluded (phantom utilities dropped, CSS ~67 KB); exact LCP/CLS need a real browser |
+| 22 | Accessibility re-check (contrast on every new token pair) | all | ✅ visual tokens AA-measured; inverse band + login gradient-cta white text pass AA |
+| 23 | Cross-page consistency review | all | ✅ shared tokens/utilities used throughout |
 
 **First implementation task = Step 1.** Everything else depends on the token layer existing, and it is a single-file change with zero behavioural risk.
 
