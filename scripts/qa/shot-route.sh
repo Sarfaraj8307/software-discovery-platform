@@ -8,10 +8,14 @@
 # Kept separate from visual-shots.sh (which walks all 13 routes) so a single-page
 # change can be verified in seconds instead of minutes.
 #
-# Same two gotchas as visual-shots.sh:
-#   - agent-browser HANGS behind HTTP_PROXY on localhost, so proxy vars are stripped.
-#   - The daemon is persistent; open once, resize, shoot. Never open/close per shot.
+# Two gotchas, both handled by scripts/qa/ab.sh — never call agent-browser directly:
+#   - HTTP_PROXY makes the daemon hang on localhost.
+#   - NODE_OPTIONS injects the sandbox's node-language-shim, which agent-browser's
+#     internal Node child inherits and eventually hangs on.
+# Also: the daemon is persistent; open once, resize, shoot. Never open/close per shot.
 set -uo pipefail
+
+AB="scripts/qa/ab.sh"
 
 ROUTE="${1:?route required}"
 TAG="${2:?tag required}"

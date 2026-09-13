@@ -27,9 +27,6 @@ OUT="${2:-qa-screenshots/$TAG}"
 
 mkdir -p "$OUT"
 
-# Strip proxy so localhost traffic never goes through it.
-unset HTTP_PROXY HTTPS_PROXY http_proxy https_proxy ALL_PROXY all_proxy
-
 ROUTES=(
   "/:home"
   "/categories:categories"
