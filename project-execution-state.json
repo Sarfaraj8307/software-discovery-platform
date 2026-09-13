@@ -5,8 +5,8 @@
   "updatedAt": "2026-09-13",
   "mode": "autonomous",
 
-  "currentPhase": "W5 — Core surfaces (product page)",
-  "currentObjective": "Replace the bare-text composite score with a real visualisation, kill the empty right-hand rail, and replace the grey screenshot placeholders with procedural UI plates.",
+  "currentPhase": "W5 — Core surfaces (product page + compare done; search and graph remain)",
+  "currentObjective": "Give every core surface a visualisation that carries real information. Product page: composite score ring, sticky score rail, procedural screenshot plates. Compare: score bars on a shared scale. Next: /search density and /graph framing.",
 
   "decisionsLocked": {
     "designDirection": "LIGHT ENTERPRISE + RICH VISUAL STORYTELLING. 'Restraint by choice' is SUPERSEDED. Still forbidden: dark/neon/cyberpunk/heavy glassmorphism.",
@@ -89,9 +89,9 @@
 
   "lastValidation": {
     "at": "2026-09-13",
-    "result": "W1/W2/W5 committed as 9c69394 and pushed (remote SHA verified via GitHub API). tsc 0 · eslint 0 · 283 pages · homepage first-load JS 801.6 KB of 1536 KB · CSS 73.7 KB · 14/14 tokens emitted · smoke PASS=25 FAIL=0 · no horizontal overflow at 390/768/1024/1440 · product page screenshotted at 1440 and 390"
+    "result": "W5 compare committed as a477cc4 and pushed (remote SHA verified via GitHub API). tsc 0 · eslint 0 · 283 pages · CSS 73.7 KB · 14/14 tokens emitted · smoke PASS=25 FAIL=0. /categories treemap built, rendered, then reverted in full after the premise was measured false — tree clean."
   },
-  "lastCheckpoint": "9c69394",
+  "lastCheckpoint": "a477cc4",
 
   "nextAutonomousAction": "W5 remaining surfaces: (1) /search result density and empty/zero-result states; (2) /graph framing around the embedded Graphify knowledge graph. Then W3 (plain three.js SoftwareUniverse, dynamic-imported, with a mobile tier) and W6 (vendor + admin recharts dashboards — recharts is installed but NOT yet imported anywhere, so it MUST go behind a dynamic import to protect the 1.5 MB budget). /categories is CLOSED — do not retry a treemap or a pillar quadrant; see knownIssues.visual. Do NOT stop for approval.",
 
