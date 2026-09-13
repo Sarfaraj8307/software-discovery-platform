@@ -123,7 +123,7 @@ export default function AdminOverviewPage() {
               <li key={queue.label}>
                 <Link
                   href={queue.href}
-                  className="flex h-full items-start gap-3 rounded-card border border-border bg-card p-4 shadow-card transition-colors hover:border-border-strong hover:bg-muted"
+                  className="card-lift flex h-full items-start gap-3 rounded-card border border-border bg-card p-4 shadow-card hover:bg-muted"
                 >
                   <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-[7px] border border-border bg-subtle text-muted-foreground">
                     <Icon className="size-4" aria-hidden="true" />
@@ -158,10 +158,10 @@ export default function AdminOverviewPage() {
           action={
             <Link
               href="/admin/moderation"
-              className="inline-flex items-center gap-1 text-13 font-medium text-primary transition-colors hover:text-primary-hover"
+              className="group inline-flex items-center gap-1 text-13 font-medium text-primary transition-colors hover:text-primary-hover"
             >
               Open the queue
-              <ArrowRight className="size-3.5" aria-hidden="true" />
+              <ArrowRight className="size-3.5 nudge group-hover:translate-x-0.5" aria-hidden="true" />
             </Link>
           }
         />

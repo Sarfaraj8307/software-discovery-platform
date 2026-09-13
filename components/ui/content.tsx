@@ -47,10 +47,10 @@ export function SectionLink({ href, children }: { href: string; children: React.
       href={href}
       // -my-1 py-1 keeps the visual position unchanged while lifting the hit area to
       // ~28px tall, which clears the WCAG 2.5.8 24px minimum for a standalone link.
-      className="-my-1 inline-flex shrink-0 items-center gap-1 py-1 text-13 font-medium text-primary transition-colors hover:text-primary-hover"
+      className="-my-1 group inline-flex shrink-0 items-center gap-1 py-1 text-13 font-medium text-primary transition-colors hover:text-primary-hover"
     >
       {children}
-      <ArrowRight className="size-3.5" aria-hidden="true" />
+      <ArrowRight className="size-3.5 nudge group-hover:translate-x-0.5" aria-hidden="true" />
     </Link>
   );
 }
@@ -127,7 +127,7 @@ export function KpiCard({
 }) {
   const positive = delta !== undefined && delta >= 0;
   return (
-    <div className={cn("rounded-card border border-border bg-card p-4 shadow-card", className)}>
+    <div className={cn("card-lift rounded-card border border-border bg-card p-4 shadow-card", className)}>
       <p className="label-caps text-muted-foreground">{label}</p>
       <p className="mt-1.5 text-2xl font-semibold tracking-[-0.02em] tnum">{value}</p>
       <div className="mt-1 flex items-center gap-2">
