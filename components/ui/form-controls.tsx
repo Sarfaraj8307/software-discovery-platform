@@ -143,7 +143,7 @@ export const Switch = React.forwardRef<
     )}
     {...props}
   >
-    <SwitchPrimitive.Thumb className="pointer-events-none block size-4 rounded-full bg-white shadow-sm transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0" />
+    <SwitchPrimitive.Thumb className="pointer-events-none block size-4 rounded-full bg-white shadow-card transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0" />
   </SwitchPrimitive.Root>
 ));
 Switch.displayName = "Switch";
@@ -164,7 +164,7 @@ export const Slider = React.forwardRef<
     <SliderPrimitive.Track className="relative h-1 w-full grow overflow-hidden rounded-pill bg-border">
       <SliderPrimitive.Range className="absolute h-full bg-primary" />
     </SliderPrimitive.Track>
-    <SliderPrimitive.Thumb className="block size-4 rounded-full border-2 border-primary bg-card shadow-sm transition-colors hover:bg-primary-subtle disabled:pointer-events-none disabled:opacity-50" />
+    <SliderPrimitive.Thumb className="block size-4 rounded-full border-2 border-primary bg-card shadow-card transition-colors hover:bg-primary-subtle disabled:pointer-events-none disabled:opacity-50" />
   </SliderPrimitive.Root>
 ));
 Slider.displayName = "Slider";

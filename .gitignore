@@ -16,3 +16,10 @@ next-env.d.ts
 # local build / QA scratch artifacts
 *.log
 qa-screenshots/
+
+# Graphify (codebase knowledge-graph tooling) — venv + generated artifacts
+.venv-graphify/
+graphify-out/
+# graphify output published into the app is generated, not authored
+public/graphify/graph.html
+public/graphify/graph.json

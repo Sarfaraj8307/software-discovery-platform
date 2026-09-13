@@ -21,6 +21,7 @@ const VENDOR_LINKS = [
 const COMPANY_LINKS = [
   { href: "/about", label: "About" },
   { href: "/methodology", label: "Methodology" },
+  { href: "/graph", label: "Codebase graph" },
   { href: "/privacy", label: "Privacy policy" },
   { href: "/terms", label: "Terms of use" },
 ];
