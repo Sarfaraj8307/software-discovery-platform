@@ -60,8 +60,9 @@ Serve with `next start -p 3116 -H 127.0.0.1`. Smoke script: `scripts/qa/smoke.sh
 - Enumerate branches from **constants**: a limit of 4 means your test must reach 4.
 
 ## Open decisions — raised, NOT changed unilaterally
-1. `--color-input` `#e4e4e7` is **1.27:1** against white; as a form-control boundary WCAG
-   **1.4.11** needs 3:1 (≈`#949499`). Conflicts with the confirmed zinc-200 direction.
+1. ~~`--color-input` `#e4e4e7` 1.27:1 vs white (WCAG 1.4.11 needs 3:1)~~ — **RESOLVED
+   2026-09-13**: user approved bump to `#949499` (~3:1). Scoped to `--color-input` only;
+   `--color-border` (still zinc-200 `#e4e4e7`) is a SEPARATE call if borders also need 3:1.
 2. Product hero has **~580px dead space** at 1440px (lead rail stretches the grid).
    Editorial judgement, not a defect.
 
@@ -70,3 +71,18 @@ Verification over assertion; one small task at a time; plan-before-build with a 
 updated with *evidence*; flag judgement calls rather than silently changing them;
 accessibility is a requirement, not a garnish. Delegates to named roles: **Klein** (UI/UX),
 **Kilo Code** (backend), **Hermes** = orchestrator/QA (me).
+
+## Codebase knowledge graph (Graphify)
+- Graphify (`https://github.com/Graphify-Labs/graphify`, PyPI `graphifyy`, `v8` branch) is a
+  **Python CLI**, not an npm/React component — it cannot be imported into the app. Installed
+  in `.venv-graphify/` (gitignored) via `pip install "git+https://github.com/Graphify-Labs/graphify.git@v8"`.
+- Offline path (no API key): `graphify extract . --code-only` → `graphify-out/graph.json`,
+  then `graphify export html --graph graphify-out/graph.json` → `graphify-out/graph.html`.
+  **graph.html is self-contained: vis-network is INLINED by Graphify** (no external CDN, no
+  separate `.js`). Do NOT vendor vis-network as a standalone file in `public/` — `next start`
+  blocks serving bare `.js` from `public/`, so it 404s. Avoid `cluster-only` (tries LLM
+  community-naming, hangs without a key).
+- Published artifact `public/graphify/graph.html` + `graph.json` are gitignored (generated).
+  Embedded via `app/graph/page.tsx` (iframe) and linked in `Footer.tsx` (`/graph`, "Codebase
+  graph"). Regenerate with `scripts/graphify-build.sh`. Graphify honours `.gitignore`
+  (skips `node_modules/`, `.next/`). This project: ~721 nodes, 2071 edges, 29 communities.

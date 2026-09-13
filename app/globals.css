@@ -64,7 +64,7 @@
 
   --color-border: #e4e4e7; /* zinc-200 — 1px everywhere */
   --color-border-strong: #d4d4d8; /* zinc-300 — dividers needing weight */
-  --color-input: #e4e4e7;
+  --color-input: #949499; /* ~3:1 vs white (WCAG 1.4.11) — was zinc-200 #e4e4e7 (1.27:1), failed on form-control boundaries */
   --color-ring: #2563eb;
 
   --color-primary: #2563eb; /* indigo-600 — THE accent */
