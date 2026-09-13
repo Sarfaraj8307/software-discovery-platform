@@ -46,7 +46,7 @@
     "W2_visual_primitives": "DONE — ScoreRing, ScoreBar, AnimatedMetric, NodeField, ScreenshotPlate; PRNG extracted to lib/procedural.ts",
     "W3_3d_foundation": "TODO — plain three.js wrapper (R3F replacement), SoftwareUniverse, lazy + mobile tier",
     "W4_homepage": "PARTIAL — hero rebuilt (aurora, viz-grid, NodeField, animated metric strip)",
-    "W5_core_surfaces": "IN PROGRESS — product page: ScoreRing in hero, sticky score rail replacing dead column, procedural screenshot plates. Remaining: categories, category quadrant grid, compare bars, search, graph framing",
+    "W5_core_surfaces": "IN PROGRESS — product page DONE (ScoreRing in hero, sticky score rail replacing dead column, procedural screenshot plates). Compare DONE (MetricBar on a shared 0-100 scale across the at-a-glance cards). /categories INVESTIGATED AND CLOSED — a treemap was built, rendered, then rejected as premise-false; see knownIssues.visual. Remaining: search, graph framing.",
     "W6_portals": "TODO — vendor + admin charts (recharts)",
     "W7_trust_polish": "TODO"
   },
@@ -69,10 +69,10 @@
   "knownIssues": {
     "visual": [
       "No imagery anywhere — monogram plates + tinted placeholders. (PARTLY ADDRESSED: product screenshots now render procedural UI plates.)",
-      "No data visualisation on any route. (PARTLY ADDRESSED: ScoreRing + ScoreBar on /product/[slug].)",
+      "No data visualisation on any route. (PARTLY ADDRESSED: ScoreRing on /product/[slug]; MetricBar on /compare/[slugs].)",
       "/product/[slug] was an 819-line text scroll with empty grey screenshot boxes and a bare-text score. (ADDRESSED in W5.)",
       "/admin and /vendor are flat KPI boxes with no charts. (OPEN — W6.)",
-      "No spatial composition on /categories — 72 categories read as a flat list. (OPEN — W5.)"
+      "/categories reads as a flat list. INVESTIGATED AND CLOSED AS NOT-A-DEFECT: a squarified treemap of the 18 pillars was built, rendered correctly, and then rejected because the premise was false — pillar counts are 9-16 with eight pillars tied at 13, and subcategory counts cluster at 4-5. The dataset is deliberately uniform at every level, so area-encoding has nothing to encode. The page's flatness reflects a genuinely flat catalogue. Do NOT retry a treemap or a quadrant grid of pillars without first checking whether the spread has changed."
     ],
     "performance": [
       "Baseline 1.3 MB JS. Every new lib must be dynamic-imported to stay <= 1.5 MB.",

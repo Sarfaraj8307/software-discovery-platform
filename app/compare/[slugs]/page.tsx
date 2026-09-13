@@ -9,10 +9,11 @@ import { Button } from "@/components/ui/button";
 import { ProductLogo } from "@/components/ui/avatar";
 import { Breadcrumbs } from "@/components/ui/navigation";
 import { SectionHeading } from "@/components/ui/content";
-import { Chip, DemoDataNotice, ScoreBadge, StarRating } from "@/components/domain/atoms";
+import { Chip, DemoDataNotice, StarRating } from "@/components/domain/atoms";
 import { ComparisonTable } from "@/components/compare/ComparisonTable";
 import { CompareSelection } from "@/components/compare/CompareSelection";
 import { ProductCard } from "@/components/cards/ProductCard";
+import { MetricBar } from "@/components/viz/MetricBar";
 
 type PageProps = { params: Promise<{ slugs: string }> };
 
@@ -193,22 +194,27 @@ export default async function ComparePage({ params }: PageProps) {
                 </span>
               </div>
 
-              <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-border pt-3">
-                <div>
-                  <dt className="label-caps text-muted-foreground">Our score</dt>
-                  <dd className="mt-0.5">
-                    <ScoreBadge score={product.score} />
-                  </dd>
-                </div>
-                <div>
-                  <dt className="label-caps text-muted-foreground">From</dt>
-                  <dd className="mt-0.5 text-13 font-medium tnum">
-                    {formatPrice(product.startingPrice)}
-                    {product.startingPrice !== null && (
-                      <span className="text-2xs font-normal text-muted-foreground">/mo</span>
-                    )}
-                  </dd>
-                </div>
+              {/*
+                The composite score as a bar rather than a badge. All four cards
+                sit on the same 0-100 scale, so the bar lengths are directly
+                comparable across the row — which is the entire job of a
+                comparison page, and the one thing four identical badges cannot
+                do. The number is still printed, so nothing depends on judging
+                the bar by eye.
+              */}
+              <div className="mt-3 border-t border-border pt-3">
+                <span className="label-caps text-muted-foreground">Our score</span>
+                <MetricBar className="mt-1.5" value={product.score} max={100} />
+              </div>
+
+              <dl className="mt-2.5 flex items-baseline justify-between gap-2">
+                <dt className="label-caps text-muted-foreground">From</dt>
+                <dd className="text-13 font-medium tnum">
+                  {formatPrice(product.startingPrice)}
+                  {product.startingPrice !== null && (
+                    <span className="text-2xs font-normal text-muted-foreground">/mo</span>
+                  )}
+                </dd>
               </dl>
 
               {product.leader && (
