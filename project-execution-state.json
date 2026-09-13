@@ -2,9 +2,9 @@
   "$comment": "Persistent execution state for the visual-transformation + productionization program. Read this FIRST at the start of any session, before inspecting anything else. Update after every meaningful milestone. Keep it small and honest.",
   "project": "Software Discovery Platform",
   "repo": "https://github.com/Sarfaraj8307/software-discovery-platform",
-  "updatedAt": "2026-09-13T17:44:04.571Z",
+  "updatedAt": "2026-09-13T17:49:55.101Z",
   "mode": "autonomous",
-  "currentPhase": "W7 IN PROGRESS — trust-signal accuracy pass COMPLETE and the two W6 cleanups closed. Added the /admin composition panel (visual issue [3]). Remaining: browser overflow confirmation on the admin routes, then W7 is done.",
+  "currentPhase": "W7 COMPLETE (commits 7da2897, 10de437) — trust-signal accuracy, both W6 cleanups, and the /admin composition panel. One item is UNVERIFIED rather than verified-and-passing: browser overflow on the admin routes (see knownIssues.qaBlocked). All remaining work is decisions awaiting the user.",
   "currentObjective": "Portals were assessed rather than decorated: /vendor already has labelled dependency-free charts and /admin has no time series to chart, so no charting library was added. Instead the work went into a real defect — a consistency gate that could not fail, hiding a three-way indexation inconsistency for /graph.",
   "decisionsLocked": {
     "designDirection": "LIGHT ENTERPRISE + RICH VISUAL STORYTELLING. 'Restraint by choice' is SUPERSEDED. Still forbidden: dark/neon/cyberpunk/heavy glassmorphism.",
@@ -111,6 +111,11 @@
       "DEFERRED (backend P0, not a UI fix): the copy says Guest reviews 'do not count toward the score at all', but the score's volumeFactor is computed from ratingCount, which includes them. The label was corrected rather than the maths, because ratingCount is generated independently of the review records and changing it would regenerate the dataset. Like the sponsored-exclusion policy, this is copy-only until the backend work lands.",
       "FOLLOW-UP SWEEP 2026-09-13: grepped for any remaining invented number after the W7 fixes. Clean — the only literal numeric prop left in the UI is count={64} on a decorative NodeField, and every remaining *_000 literal is a time constant or a PRNG range inside seed.ts (legitimate data generation, not a claim).",
       "NOT CHANGED — /methodology still states that an unverified (Guest) submission is 'included in the aggregate but excluded from any ranking that claims verified-only sourcing'. The composite score's volumeFactor is computed from ratingCount, so this documents intent rather than current behaviour. Left alone deliberately: /methodology documents policy, whereas the numbers corrected in W7 were checkable claims. Same backend P0 as the sponsored-exclusion policy."
+    ],
+    "qaBlocked": [
+      "2026-09-13 — browser overflow check on /admin and /admin/seo did NOT complete. scripts/qa/overflow.sh ran 12m 33s with no output and had to be killed: `timeout 600` fired against the shell, but an orphaned browser child kept the stdout pipe open, so `tail` never saw EOF and the pipeline hung. This is the known agent-browser wedge (see environmentGotchas).",
+      "NOT resolved because it could not be resolved safely: 15 chrome.exe processes remain. WMIC is on the sandbox program blacklist, so process command lines cannot be read, which means the agent-browser instances cannot be told apart from the user's own Chrome. No process was killed — killing the wrong PID would close the user's real browser. Leave them; they are idle.",
+      "STATUS: the new /admin panel is UNVERIFIED for horizontal overflow, not verified-clean. The structural risk is low — it is `grid gap-5 lg:grid-cols-2` wrapping the same `ProgressBar` list markup already used and breakpoint-tested on /vendor — but that is an argument, not a measurement. Re-run ROUTES='/admin /admin/seo' sh scripts/qa/overflow.sh once the browser processes are cleared."
     ]
   },
   "lastValidation": {
@@ -118,7 +123,7 @@
     "result": "W6 SEO gate committed as 2794c13. tsc 0 · eslint 0 · build 0 · smoke PASS=25 FAIL=0 · overflow PASS=12 FAIL=0 (3 widths x 4 routes incl. /admin/seo and /graph) · all routes under the 1536 KB budget. The gate was deliberately broken and observed going red with two findings, then restored and observed green. Prior: /graph committed as 0b7ed04; W3 committed as 95c5314."
   },
   "lastCheckpoint": "2794c13",
-  "nextAutonomousAction": "W7 close-out: confirm the /admin routes have no horizontal overflow at 390/768/1024/1440 (browser QA; the script routes default to public pages only). After that W7 is complete and the remaining open items are all decisions awaiting the user: soft 404, /graph indexation, stale graph artifact, and pendingProducts/pendingClaims being hardcoded. Do NOT add recharts. Do NOT stop for approval.",
+  "nextAutonomousAction": "W7 is complete. Before starting anything new: re-run the browser overflow check on /admin and /admin/seo (currently UNVERIFIED). Everything else outstanding is a decision awaiting the user — soft 404, /graph indexation, stale graph artifact, and pendingProducts/pendingClaims being hardcoded. Do NOT add recharts. Do NOT stop for approval.",
   "environmentGotchas": [
     "Never chain `rm` before a build — the delete guard blocks it and `&&` short-circuits, leaving a stale log.",
     "Clear NODE_OPTIONS for builds; set CODEBUDDY_SAFE_DELETE_BULK_THRESHOLD=1000000 for npm install.",
@@ -130,6 +135,7 @@
     "Reuse scripts/qa/visual-shots.sh for the per-phase screenshot gate, scripts/qa/shot-route.sh for one route, scripts/qa/overflow.sh for breakpoints.",
     "Tailwind v4 TREE-SHAKES @theme tokens: a declared token is only emitted if some scanned source references it via a class or a literal string. lib/viz.ts holds the literal class strings for exactly this reason.",
     "Tailwind has no --duration-* theme namespace — durations live in a plain :root block.",
-    "`curl -w` can exit 23 on Git Bash even on success, which breaks `&&` chains — check the printed status, not the exit code."
+    "`curl -w` can exit 23 on Git Bash even on success, which breaks `&&` chains — check the printed status, not the exit code.",
+    "`timeout N sh script.sh | tail -n` does NOT bound a wedged agent-browser run: timeout kills the shell, an orphaned browser child keeps the pipe open, and tail never sees EOF. Bound it as `... > out.txt 2>&1` and read the file, or run without a pipe."
   ]
 }
