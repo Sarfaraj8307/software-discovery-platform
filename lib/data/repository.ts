@@ -715,6 +715,25 @@ export function getLead(id: string): Lead | null {
   return leadStore.find((l) => l.id === id) ?? null;
 }
 
+/**
+ * Move an enquiry to a new status.
+ *
+ * Returns null only when the id is unknown. Re-setting the current status is allowed and
+ * returns the lead unchanged — the UI sends whatever the select holds, and treating a
+ * no-op as an error would put a red row on a click that changed nothing.
+ *
+ * `updatedAt` is bumped on every write so the "last touched" column cannot drift from the
+ * status shown next to it.
+ */
+export function updateLeadStatus(id: string, status: LeadStatus): Lead | null {
+  const lead = leadStore.find((l) => l.id === id);
+  if (!lead) return null;
+
+  lead.status = status;
+  lead.updatedAt = new Date().toISOString();
+  return lead;
+}
+
 /* ==========================================================================
    DASHBOARDS
    ========================================================================= */

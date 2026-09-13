@@ -20,6 +20,12 @@ export type LeadType =
 
 export type LeadStatus = "NEW" | "CONTACTED" | "QUALIFIED" | "CLOSED" | "SPAM";
 
+/**
+ * Lives here rather than in `lib/validation/schemas.ts` so the admin table's status control
+ * can import the list without also pulling Zod into that route's client bundle.
+ */
+export const LEAD_STATUSES = ["NEW", "CONTACTED", "QUALIFIED", "CLOSED", "SPAM"] as const;
+
 export type ReviewStatus = "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED";
 
 export type ProductStatus = "DRAFT" | "PENDING" | "APPROVED" | "ARCHIVED";

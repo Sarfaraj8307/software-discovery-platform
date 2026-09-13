@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LEAD_STATUSES } from "@/lib/data/types";
 
 /**
  * Shared validation. Imported by both the client form and the API route, so a field
@@ -38,6 +39,11 @@ export const leadSchema = z.object({
 });
 
 export type LeadInput = z.infer<typeof leadSchema>;
+
+/** PATCH body for an enquiry's status. The status list itself lives in `types.ts`. */
+export const leadStatusSchema = z.object({
+  status: z.enum(LEAD_STATUSES),
+});
 
 export const MODERATION_ACTIONS = ["APPROVE", "REJECT", "FLAG"] as const;
 

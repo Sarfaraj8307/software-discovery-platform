@@ -2,9 +2,9 @@
   "$comment": "Persistent execution state for the visual-transformation + productionization program. Read this FIRST at the start of any session, before inspecting anything else. Update after every meaningful milestone. Keep it small and honest.",
   "project": "Software Discovery Platform",
   "repo": "https://github.com/Sarfaraj8307/software-discovery-platform",
-  "updatedAt": "2026-09-13T18:13:45.485Z",
+  "updatedAt": "2026-09-13T18:24:13.673Z",
   "mode": "autonomous",
-  "currentPhase": "W7 COMPLETE. Backend P0 unblocked by the 'UI first' sequencing and B1 (moderation decisions + audit log) is DONE. Next backend P0 candidates, in order of what the UI currently admits is missing: score/sourcing behaviours that are copy-only (Guest exclusion, sponsored exclusion), then auth.",
+  "currentPhase": "Backend P0 in progress. W7 (visual program) is COMPLETE. B1 moderation decisions and B2 lead status are both DONE and guarded. Next candidates: vendor review responses (the data model already has review.vendorResponse), then the score/sourcing policies — but that one needs a deliberate decision because it may mean touching the generator.",
   "currentObjective": "Portals were assessed rather than decorated: /vendor already has labelled dependency-free charts and /admin has no time series to chart, so no charting library was added. Instead the work went into a real defect — a consistency gate that could not fail, hiding a three-way indexation inconsistency for /graph.",
   "decisionsLocked": {
     "designDirection": "LIGHT ENTERPRISE + RICH VISUAL STORYTELLING. 'Restraint by choice' is SUPERSEDED. Still forbidden: dark/neon/cyberpunk/heavy glassmorphism.",
@@ -71,6 +71,20 @@
       "actorHonesty": "There is no auth in this build, so the route records the literal actor 'unauthenticated' rather than inventing a moderator identity. An audit trail that looks trustworthy while recording a fiction is worse than none. Both the API and the page say so plainly. Wiring a session principal in is the only change needed later.",
       "gotchaFound": "getPendingProducts() derives its queue from a deterministic slice (every third row synthesised as PENDING) rather than from stored status, so decideProduct() would have mutated the underlying product and then appeared to do nothing on the next render. Fixed with a globalThis Map of product decisions that overrides the synthesised status. Without this the buttons would have looked broken — shipped only after catching it.",
       "verified": "scripts/qa/moderation-api.mjs PASS: valid decision 200 (PENDING -> FLAGGED), invalid action 422, invalid targetType 422, unknown id 404, malformed JSON 400. End-to-end confirmed in the rendered page: log row 'flag · <title> · PENDING → FLAGGED', buttons carry per-target aria-labels, stale 'not wired up' copy removed. Smoke 25/25, tsc 0, eslint 0, /admin/moderation first-load 752.4 KB (budget 1536 KB, +1.6 KB over /admin)."
+    },
+    "B2_lead_status": {
+      "status": "DONE",
+      "startedAt": "2026-09-13",
+      "why": "Chosen by grepping the UI for its own admissions of missing functionality (the same reconnaissance move that overturned the W6 audit). Both leads pages openly said status transitions were not implemented. Leads were already runtime-mutable via the globalThis lead store, so this carried none of the dataset-regeneration risk that the scoring backend work does.",
+      "what": [
+        "updateLeadStatus(id, status) in the repository — mutates the lead store and bumps updatedAt on every write so the last-touched column cannot drift from the status.",
+        "PATCH /api/leads/[id] — Zod-validated, only `status` is writable. 200 / 400 / 404 / 422.",
+        "components/admin/LeadStatusSelect.tsx — native <select>, not the Radix Select, because it renders once per row in a 50-row table and a native control needs no per-instance JS.",
+        "Wired into both /admin/leads and /vendor/leads."
+      ],
+      "bundleNote": "LEAD_STATUSES lives in types.ts, NOT in validation/schemas.ts, so the client control does not import Zod. Measured: /admin/leads is 752.1 KB against /admin's 750.8 KB — +1.3 KB. Importing the status list from schemas.ts would have added Zod to that route.",
+      "scopeDecision": "Assignment and vendor hand-off were left unimplemented deliberately: Lead has no owner field, so there is nothing honest to assign it to. The page now says so instead of lumping it in with status.",
+      "verified": "scripts/qa/lead-status.mjs PASS (7/7) — submits the real public enquiry form, then moves the created lead NEW -> CONTACTED -> QUALIFIED, rejects an invented status 422, 404s an unknown id, 400s malformed JSON, and confirms the control renders in the admin table for that exact enquiry. Smoke 25/25, tsc 0, eslint 0."
     }
   },
   "baseline": {
@@ -137,7 +151,7 @@
     "result": "W6 SEO gate committed as 2794c13. tsc 0 · eslint 0 · build 0 · smoke PASS=25 FAIL=0 · overflow PASS=12 FAIL=0 (3 widths x 4 routes incl. /admin/seo and /graph) · all routes under the 1536 KB budget. The gate was deliberately broken and observed going red with two findings, then restored and observed green. Prior: /graph committed as 0b7ed04; W3 committed as 95c5314."
   },
   "lastCheckpoint": "2794c13",
-  "nextAutonomousAction": "Continue backend P0. Remaining known gaps, roughly in order: (1) the composite score ignores the Guest-exclusion and sponsored-exclusion policies the copy promises — note this needs care because ratingCount is generated independently of the review records, so 'fixing' it may mean changing the generator, which regenerates the dataset and invalidates recorded numbers; decide that deliberately. (2) Auth, which gates everything else. Still awaiting the user: soft 404, /graph indexation, stale graph artifact, pendingProducts/pendingClaims hardcoded. Do NOT add recharts. Do NOT stop for approval.",
+  "nextAutonomousAction": "Continue backend P0. Next: vendor responses to reviews (review.vendorResponse already exists in the model and the vendor portal likely discloses it as missing) — same low-risk shape as B1/B2, runtime mutation only. After that, the larger decision: the composite score ignores the Guest-exclusion and sponsored-exclusion policies the copy promises, and fixing it likely means changing the generator, which regenerates the dataset and invalidates every recorded number. Decide that deliberately rather than as a drive-by. Still awaiting the user: soft 404, /graph indexation, stale graph artifact, pendingProducts/pendingClaims. Do NOT add recharts. Do NOT stop for approval.",
   "environmentGotchas": [
     "Never chain `rm` before a build — the delete guard blocks it and `&&` short-circuits, leaving a stale log.",
     "Clear NODE_OPTIONS for builds; set CODEBUDDY_SAFE_DELETE_BULK_THRESHOLD=1000000 for npm install.",

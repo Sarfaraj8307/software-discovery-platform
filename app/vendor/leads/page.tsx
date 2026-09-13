@@ -6,8 +6,9 @@ import { DEMO_VENDOR_SLUG } from "@/lib/portals";
 import { getCompanyProducts, listLeads } from "@/lib/data/repository";
 import type { LeadStatus } from "@/lib/data/types";
 import { cn } from "@/lib/utils";
-import { DataTable, StatusPill, type Column } from "@/components/ui/table";
+import { DataTable, type Column } from "@/components/ui/table";
 import { EmptyState, SectionHeading } from "@/components/ui/content";
+import { LeadStatusSelect } from "@/components/admin/LeadStatusSelect";
 import type { Lead } from "@/lib/data/types";
 
 export const metadata: Metadata = { title: "Enquiries" };
@@ -121,9 +122,11 @@ export default async function VendorLeadsPage({ searchParams }: PageProps) {
     {
       key: "status",
       header: "Status",
-      width: "w-28",
+      width: "w-40",
       align: "right",
-      render: (lead) => <StatusPill status={lead.status} />,
+      render: (lead) => (
+        <LeadStatusSelect leadId={lead.id} contact={lead.name} status={lead.status} />
+      ),
     },
   ];
 

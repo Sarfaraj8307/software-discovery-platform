@@ -5,8 +5,9 @@ import { formatCount, relativeDate } from "@/lib/utils";
 import { listLeads } from "@/lib/data/repository";
 import type { Lead, LeadStatus } from "@/lib/data/types";
 import { cn } from "@/lib/utils";
-import { DataTable, StatusPill, type Column } from "@/components/ui/table";
+import { DataTable, type Column } from "@/components/ui/table";
 import { EmptyState, SectionHeading } from "@/components/ui/content";
+import { LeadStatusSelect } from "@/components/admin/LeadStatusSelect";
 
 export const metadata: Metadata = { title: "Lead routing" };
 
@@ -94,9 +95,11 @@ const COLUMNS: Column<Lead>[] = [
   {
     key: "status",
     header: "Status",
-    width: "w-28",
+    width: "w-40",
     align: "right",
-    render: (lead) => <StatusPill status={lead.status} />,
+    render: (lead) => (
+      <LeadStatusSelect leadId={lead.id} contact={lead.name} status={lead.status} />
+    ),
   },
 ];
 
@@ -177,9 +180,12 @@ export default async function AdminLeadsPage({ searchParams }: PageProps) {
       </div>
 
       <p className="text-2xs text-muted-foreground">
-        Status transitions, assignment and vendor hand-off are not implemented in this build. The
-        table reflects live submissions, so submitting the contact form on any product page will add
-        a row here.
+        Status changes are live and persisted for the lifetime of this server process. Assignment
+        and vendor hand-off are still not implemented — a lead has no owner field yet, so there is
+        nothing honest to assign it to. As with moderation, this surface is{" "}
+        <span className="font-medium text-foreground">unauthenticated</span>: the route records no
+        actor, because inventing one would make the record look more trustworthy than it is. The
+        table reflects live submissions, so the contact form on any product page adds a row here.
       </p>
     </div>
   );
