@@ -16,6 +16,10 @@
 #
 # Usage:  scripts/qa/ab.sh open http://127.0.0.1:3000/
 #         scripts/qa/ab.sh eval "document.title"
+#
+# Every call is bounded by AB_TIMEOUT (default 90s). A wedged daemon — which does
+# happen after a long QA session — otherwise hangs the whole run with no output,
+# and a run that never finishes looks identical to one that is merely slow.
 set -eu
 
 unset HTTP_PROXY HTTPS_PROXY http_proxy https_proxy ALL_PROXY all_proxy
@@ -26,4 +30,6 @@ export NO_PROXY no_proxy
 NODE_OPTIONS=
 export NODE_OPTIONS
 
-exec agent-browser "$@"
+AB_TIMEOUT="${AB_TIMEOUT:-90}"
+
+exec timeout "$AB_TIMEOUT" agent-browser "$@"

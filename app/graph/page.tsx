@@ -14,6 +14,19 @@ export const metadata: Metadata = {
   title: "Codebase graph",
   description:
     "Interactive knowledge graph of this project's source, generated offline by Graphify with tree-sitter.",
+  /**
+   * A viewer for this project's own source, not catalogue content — it should not
+   * compete with the product pages in an index. It stays crawlable (`follow`) so
+   * the footer link still passes through, but it is excluded from the index, the
+   * same treatment /search, /vendor and /admin already get.
+   *
+   * This was previously inherited from the root layout as `index, follow`, which
+   * made /graph indexable while it appeared in neither sitemap.xml nor
+   * robots.txt. /admin/seo reported a clean bill of health regardless, because
+   * its consistency check compared hand-written constants rather than the real
+   * artifacts — see the note on that page.
+   */
+  robots: { index: false, follow: true },
 };
 
 const GRAPH_SRC = "/graphify/graph.html";
