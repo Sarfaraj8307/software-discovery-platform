@@ -2,9 +2,9 @@
   "$comment": "Persistent execution state for the visual-transformation + productionization program. Read this FIRST at the start of any session, before inspecting anything else. Update after every meaningful milestone. Keep it small and honest.",
   "project": "Software Discovery Platform",
   "repo": "https://github.com/Sarfaraj8307/software-discovery-platform",
-  "updatedAt": "2026-09-13T17:49:55.101Z",
+  "updatedAt": "2026-09-13T17:59:55.145Z",
   "mode": "autonomous",
-  "currentPhase": "W7 COMPLETE (commits 7da2897, 10de437) — trust-signal accuracy, both W6 cleanups, and the /admin composition panel. One item is UNVERIFIED rather than verified-and-passing: browser overflow on the admin routes (see knownIssues.qaBlocked). All remaining work is decisions awaiting the user.",
+  "currentPhase": "W7 COMPLETE (commits 7da2897, 10de437, 265cc1d) — trust-signal accuracy, both W6 cleanups, and the /admin composition panel. Overflow re-verified across 7 routes x 4 breakpoints (28/28). All remaining work is decisions awaiting the user.",
   "currentObjective": "Portals were assessed rather than decorated: /vendor already has labelled dependency-free charts and /admin has no time series to chart, so no charting library was added. Instead the work went into a real defect — a consistency gate that could not fail, hiding a three-way indexation inconsistency for /graph.",
   "decisionsLocked": {
     "designDirection": "LIGHT ENTERPRISE + RICH VISUAL STORYTELLING. 'Restraint by choice' is SUPERSEDED. Still forbidden: dark/neon/cyberpunk/heavy glassmorphism.",
@@ -113,9 +113,9 @@
       "NOT CHANGED — /methodology still states that an unverified (Guest) submission is 'included in the aggregate but excluded from any ranking that claims verified-only sourcing'. The composite score's volumeFactor is computed from ratingCount, so this documents intent rather than current behaviour. Left alone deliberately: /methodology documents policy, whereas the numbers corrected in W7 were checkable claims. Same backend P0 as the sponsored-exclusion policy."
     ],
     "qaBlocked": [
-      "2026-09-13 — browser overflow check on /admin and /admin/seo did NOT complete. scripts/qa/overflow.sh ran 12m 33s with no output and had to be killed: `timeout 600` fired against the shell, but an orphaned browser child kept the stdout pipe open, so `tail` never saw EOF and the pipeline hung. This is the known agent-browser wedge (see environmentGotchas).",
-      "NOT resolved because it could not be resolved safely: 15 chrome.exe processes remain. WMIC is on the sandbox program blacklist, so process command lines cannot be read, which means the agent-browser instances cannot be told apart from the user's own Chrome. No process was killed — killing the wrong PID would close the user's real browser. Leave them; they are idle.",
-      "STATUS: the new /admin panel is UNVERIFIED for horizontal overflow, not verified-clean. The structural risk is low — it is `grid gap-5 lg:grid-cols-2` wrapping the same `ProgressBar` list markup already used and breakpoint-tested on /vendor — but that is an argument, not a measurement. Re-run ROUTES='/admin /admin/seo' sh scripts/qa/overflow.sh once the browser processes are cleared."
+      "RESOLVED 2026-09-13 — the /admin overflow check that was left UNVERIFIED now PASSES. The wedge was transient, not permanent: a fresh `open` succeeded once the run was retried. Full matrix re-verified 28/28: /admin and /admin/seo plus the five public routes, each at 1440 / 1024 / 768 / 390.",
+      "HOW IT WAS UNBLOCKED, which matters more than the result: (1) write to a file, never pipe — `timeout N sh s.sh | tail -n` hangs because an orphaned browser child holds stdout open and tail never sees EOF. (2) agent-browser survives roughly 8-11 page checks before wedging, so the matrix was split into small runs (2-3 routes at a time) rather than one 20-check run. (3) partial output is still evidence — the run that got SIGTERM had already written 11 passing checks to its output file.",
+      "STILL OUTSTANDING AND UNFIXABLE FROM HERE: ~18 leaked chrome.exe processes. WMIC is on the sandbox program blacklist so command lines cannot be read, meaning agent-browser's instances cannot be told apart from the user's own Chrome. None were killed deliberately. They are idle but will keep accumulating across QA sessions."
     ]
   },
   "lastValidation": {
@@ -123,7 +123,7 @@
     "result": "W6 SEO gate committed as 2794c13. tsc 0 · eslint 0 · build 0 · smoke PASS=25 FAIL=0 · overflow PASS=12 FAIL=0 (3 widths x 4 routes incl. /admin/seo and /graph) · all routes under the 1536 KB budget. The gate was deliberately broken and observed going red with two findings, then restored and observed green. Prior: /graph committed as 0b7ed04; W3 committed as 95c5314."
   },
   "lastCheckpoint": "2794c13",
-  "nextAutonomousAction": "W7 is complete. Before starting anything new: re-run the browser overflow check on /admin and /admin/seo (currently UNVERIFIED). Everything else outstanding is a decision awaiting the user — soft 404, /graph indexation, stale graph artifact, and pendingProducts/pendingClaims being hardcoded. Do NOT add recharts. Do NOT stop for approval.",
+  "nextAutonomousAction": "W7 is complete and fully verified. Everything outstanding is a decision awaiting the user: soft 404, /graph indexation, stale graph artifact, and pendingProducts/pendingClaims being hardcoded. Do NOT add recharts. Do NOT stop for approval — if continuing, pick up backend P0 work or confirm those decisions first.",
   "environmentGotchas": [
     "Never chain `rm` before a build — the delete guard blocks it and `&&` short-circuits, leaving a stale log.",
     "Clear NODE_OPTIONS for builds; set CODEBUDDY_SAFE_DELETE_BULK_THRESHOLD=1000000 for npm install.",
@@ -136,6 +136,7 @@
     "Tailwind v4 TREE-SHAKES @theme tokens: a declared token is only emitted if some scanned source references it via a class or a literal string. lib/viz.ts holds the literal class strings for exactly this reason.",
     "Tailwind has no --duration-* theme namespace — durations live in a plain :root block.",
     "`curl -w` can exit 23 on Git Bash even on success, which breaks `&&` chains — check the printed status, not the exit code.",
-    "`timeout N sh script.sh | tail -n` does NOT bound a wedged agent-browser run: timeout kills the shell, an orphaned browser child keeps the pipe open, and tail never sees EOF. Bound it as `... > out.txt 2>&1` and read the file, or run without a pipe."
+    "`timeout N sh script.sh | tail -n` does NOT bound a wedged agent-browser run: timeout kills the shell, an orphaned browser child keeps the pipe open, and tail never sees EOF. Bound it as `... > out.txt 2>&1` and read the file, or run without a pipe.",
+    "agent-browser tolerates only ~8-11 page checks before wedging. Split any matrix (routes x breakpoints) into small runs of 2-3 routes and write each to a file; do not pipe to tail. A run killed by SIGTERM may still have written valid partial results — always cat the file."
   ]
 }
