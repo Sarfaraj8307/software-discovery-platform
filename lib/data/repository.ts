@@ -665,9 +665,6 @@ export function getAdminMetrics(): AdminMetrics {
     totalProducts: approvedProducts.length,
     totalReviews: dataset.reviews.length,
     flaggedReviews: dataset.reviews.filter((r) => r.status === "FLAGGED").length,
-    indexedPages: approvedProducts.length * 3 + dataset.comparisons.length + dataset.categories.length,
-    queuedPages: 148,
-    blockedPages: 9,
   };
 }
 
@@ -706,10 +703,47 @@ export function getSocialProof() {
     totalCategories,
     totalCompanies,
     avgRating: Math.round(avgRating * 100) / 100,
-    // Scaled for the "directory scale" strip — labelled as directory totals.
-    reviewScale: totalReviews * 4_180,
-    buyerScale: 2_400_000,
+    // Approved reviews carrying a real verification signal. This is deliberately NOT a
+    // scaled figure: the UI labels it "verified reviews", and an invented multiplier there
+    // contradicted both the synthetic-data disclosure and the unscaled `totalReviews`
+    // shown elsewhere on the same page (the homepage rendered "4.9M" and "1,176" at once).
+    verifiedReviews: dataset.reviews.filter(
+      (r) =>
+        r.status === "APPROVED" &&
+        (r.verification === "VALIDATED" || r.verification === "CURRENT_USER"),
+    ).length,
   };
+}
+
+/**
+ * Verified review count across a set of products.
+ *
+ * Category trust bars used to show `sum(ratingCount) * 12` — an arbitrary multiplier on a
+ * number labelled "verified". This counts what the label says it counts.
+ */
+export function countVerifiedReviews(slugs: readonly string[]): number {
+  const wanted = new Set(slugs);
+  return dataset.reviews.filter(
+    (r) =>
+      wanted.has(r.productSlug) &&
+      r.status === "APPROVED" &&
+      (r.verification === "VALIDATED" || r.verification === "CURRENT_USER"),
+  ).length;
+}
+
+/**
+ * Verified review count for a whole category, not just the current results page.
+ *
+ * The caller must not pass a page slice: the trust bar sits above the filters, so a
+ * number that changes when you paginate would be read as a bug.
+ */
+export function countVerifiedReviewsInCategory(categorySlug: string): number {
+  const slugs = dataset.products
+    .filter(
+      (p) => p.primaryCategorySlug === categorySlug || p.categorySlugs.includes(categorySlug),
+    )
+    .map((p) => p.slug);
+  return countVerifiedReviews(slugs);
 }
 
 export { slugify };

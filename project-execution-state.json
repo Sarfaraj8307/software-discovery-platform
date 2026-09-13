@@ -2,12 +2,10 @@
   "$comment": "Persistent execution state for the visual-transformation + productionization program. Read this FIRST at the start of any session, before inspecting anything else. Update after every meaningful milestone. Keep it small and honest.",
   "project": "Software Discovery Platform",
   "repo": "https://github.com/Sarfaraj8307/software-discovery-platform",
-  "updatedAt": "2026-09-13",
+  "updatedAt": "2026-09-13T17:16:25.222Z",
   "mode": "autonomous",
-
-  "currentPhase": "W6 IN PROGRESS (commit 2794c13) — portal reconnaissance done and the /admin/seo consistency gate made real. W5 complete. Remaining: W7 trust signals + polish.",
+  "currentPhase": "W7 IN PROGRESS — trust-signal accuracy pass done (measured, not assumed): every number labelled 'verified' is now a real verified count, and structured data matches what the page renders. Remaining W7: the two W6 cleanups (AdminMetrics.indexedPages unused; /admin/seo hardcoded 148/9) and final polish.",
   "currentObjective": "Portals were assessed rather than decorated: /vendor already has labelled dependency-free charts and /admin has no time series to chart, so no charting library was added. Instead the work went into a real defect — a consistency gate that could not fail, hiding a three-way indexation inconsistency for /graph.",
-
   "decisionsLocked": {
     "designDirection": "LIGHT ENTERPRISE + RICH VISUAL STORYTELLING. 'Restraint by choice' is SUPERSEDED. Still forbidden: dark/neon/cyberpunk/heavy glassmorphism.",
     "threeD": "Procedural ONLY. No .glb/.gltf/.riv assets — this environment cannot generate 3D models or video. Deterministic geometry from seeded IDs.",
@@ -17,13 +15,17 @@
     "prngBoundary": "lib/data/seed.ts keeps its OWN private mulberry32/FNV-1a and must NOT be refactored onto lib/procedural.ts. Its PRNG defines the dataset; swapping it would regenerate all 230 products and invalidate every recorded number. lib/procedural.ts is the shared implementation for the RENDERING layer only.",
     "tierThresholds": "Rank tiers derive from lib/ranking.ts. Leader = score >= 87, deliberately equal to the data layer's `product.leader`. Do not change one without the other."
   },
-
   "approvedStack": [
-    "three", "motion", "gsap", "@gsap/react", "recharts"
+    "three",
+    "motion",
+    "gsap",
+    "@gsap/react",
+    "recharts"
   ],
-  "approvedStackDev": ["@types/three"],
+  "approvedStackDev": [
+    "@types/three"
+  ],
   "approvedStackNote": "@react-three/fiber, @react-three/drei and @react-three/postprocessing were DROPPED after install failed. Every R3F version (9.7.0 stable and all 10.0.0 canaries) declares peer react \">=19 <19.3\"; this project is on React 19.3.0. Forcing it with --legacy-peer-deps would put an explicitly unsupported reconciler into production. Plain `three` has no React peer dependency, is lighter, and OrbitControls ships in three/examples/jsm/.",
-
   "rejectedStack": {
     "react-spring": "redundant with motion",
     "lenis": "scroll hijacking vs accessibility",
@@ -39,7 +41,6 @@
     "visx": "hand-written SVG likely lighter for ScoreRing",
     "@xyflow/react": "prototype only for a future discovery graph"
   },
-
   "phases": {
     "W0_foundation": "DONE — audit + baseline (commit 9875b80)",
     "W1_design_system": "DONE — 10-hue viz palette, chart chrome, 3D materials, gradients, durations, 8 utilities; contrast-audited",
@@ -48,9 +49,15 @@
     "W4_homepage": "PARTIAL — hero rebuilt (aurora, viz-grid, NodeField, animated metric strip) and now carries the W3 3D layer under the scrims.",
     "W5_core_surfaces": "DONE (commits a477cc4, 0b7ed04) — product page (ScoreRing in hero, sticky score rail replacing a dead column, procedural screenshot plates); compare (MetricBar on a shared 0-100 scale); /graph (framed viewer, build-time stats derived from graph.json, width gate so phones never download the 1.4 MB viewer). /categories INVESTIGATED AND CLOSED — a treemap was built, rendered, then rejected as premise-false; see knownIssues.visual. /search SURVEYED and found already dense (filters, sort, non-product matches, empty states) — nothing obvious to add.",
     "W6_portals": "IN PROGRESS (commit 2794c13) — RECONNAISSANCE FIRST, and it overturned the inherited audit. The audit claimed /vendor and /admin were 'flat KPI boxes with no charts'; that is true of neither. /vendor already has a labelled 8-week bar chart, a lead-source breakdown with ProgressBar, four KPI cards and a recent-leads list, with a code comment explaining why eight labelled points need no charting dependency. /admin has four KPI cards, an SLA-breach callout, four work-queue cards, two queues, and copy disclosing that approve/reject/flag are not wired up. getAdminMetrics() returns ONLY scalars — no time series — so a chart there would have required inventing data. NO CHARTING LIBRARY WAS ADDED; recharts is still installed and imported nowhere. What WAS done: /admin/seo's consistency gate was tautological and is now real (see knownIssues.seo).",
-    "W7_trust_polish": "TODO"
+    "W7_trust_polish": {
+      "status": "IN PROGRESS",
+      "startedAt": "2026-09-13",
+      "hypothesis": "The site makes trust claims about verified reviews while all data is synthetic. The valuable question is not 'add more badges' but 'does any existing trust signal make a claim the data layer cannot back?'",
+      "disclosureCoverage": "CHECKED FIRST and found adequate: DemoDataNotice is in the root Footer (so every page) and as a banner in app/vendor/layout.tsx and app/admin/layout.tsx, so portal sub-routes are covered too. No change needed.",
+      "defectsFound": 3,
+      "defectsFixed": 3
+    }
   },
-
   "baseline": {
     "gitHead": "0b7ed04",
     "jsPayload": "Homepage first-load 877.3 KB, /graph 816.9 KB, /compare 822.6 KB, /product/[slug] 1195.4 KB — all PASS against the 1536 KB budget. NOTE: this is a NEW measurement method (scripts/qa/first-load.mjs sums every /_next/static asset referenced by the served HTML), so it is NOT comparable to the earlier 801.6/808.7 KB figures, which were computed from build manifests. Do not read the difference as a regression: lib/graph-stats.ts has exactly one importer (app/graph/page.tsx), so the homepage module graph is unchanged.",
@@ -67,7 +74,6 @@
     "reducedMotion": "3 captures 2s apart are byte-identical under prefers-reduced-motion: reduce; the motion-enabled control produced 2 differing captures, so the test can actually detect motion and the static result is meaningful",
     "screenshots": "qa-screenshots/baseline/ (17 PNGs) + w5-product/ + w3-hero/ + w3-reduced-motion/ + w5-graph-fold/ + w5-graph-mobile-v2/"
   },
-
   "knownIssues": {
     "visual": [
       "No imagery anywhere — monogram plates + tinted placeholders. (PARTLY ADDRESSED: product screenshots now render procedural UI plates.)",
@@ -94,17 +100,22 @@
     ],
     "artifacts": [
       "The committed knowledge graph is STALE: public/graphify/graph.json records built_at_commit 91a419c, while HEAD is now several commits past it. The /graph page discloses the commit it was built from instead of hiding it, so the staleness is visible rather than silent. Regenerating is a deliberate, separate step (scripts/graphify-build.sh) that rewrites a 1.4 MB generated HTML file, so it was NOT folded into the /graph framing work. Refresh it when the diff is worth paying for."
+    ],
+    "trustSignals": [
+      "FIXED 2026-09-13 — 'verified' labels were attached to numbers that were not verified counts. Measured on rendered HTML, not inferred. (1) getSocialProof() returned reviewScale = totalReviews * 4180, so /categories rendered '4,915,680 verified reviews' for a dataset holding 1,176 reviews; app/categories/[slug] rendered sum(ratingCount) * 12, i.e. 150,972 for CRM whose products actually carry 51 verified reviews. The homepage rendered 'Reviews 4.9M' and 'Reviews 1,176' under the same label on one page. Replaced with a real count (verifiedReviews = APPROVED and VALIDATED|CURRENT_USER = 848) plus countVerifiedReviews / countVerifiedReviewsInCategory. buyerScale (2,400,000) had zero consumers and was deleted.",
+      "(2) The product JSON-LD emitted AggregateRating.reviewCount = product.ratingCount, declaring 1,891 reviews on a page rendering 7 — a mismatch under Google's review-snippet policy. It now emits ratingCount = ratingCount and reviewCount = reviewSummary.total; the audit asserts the declared count equals the count actually rendered across all review pages (12/12 products agree, out-of-range pages clamp so the walk terminates).",
+      "(3) ratingCount is a denormalised figure generated independently of the review records (seed.ts), so calling it 'verified reviews' was wrong twice: it counts all ratings rather than verified-only, and it is not the review count. Relabelled to 'ratings' on the product hero and in the meta description; the Reviews tab now shows reviewSummary.total instead of ratingCount. 'verified review volume' became 'review volume' in the five score explanations (atoms.tsx, app/page.tsx, app/product/[slug], seed.ts x2, ranking.ts x2) because the score's volume input is ratingCount, not a verified subset.",
+      "GUARD: scripts/qa/trust-audit.mjs asserts (a) JSON-LD reviewCount == reviews actually rendered, (b) no product page labels a number 'verified reviews', (c) no page maps one label to two values. Its conflict detector was proven to fire against a fixture before being trusted — see knownIssues.seoAuditLessons for why that matters.",
+      "CONSEQUENCE TO REMEMBER: this is a visible copy change on marketing surfaces. The site now says 'ratings' where it said 'verified reviews', and the verified count is two orders of magnitude smaller than the invented one. That is the honest number; do not 'restore impact' by reintroducing a multiplier.",
+      "DEFERRED (backend P0, not a UI fix): the copy says Guest reviews 'do not count toward the score at all', but the score's volumeFactor is computed from ratingCount, which includes them. The label was corrected rather than the maths, because ratingCount is generated independently of the review records and changing it would regenerate the dataset. Like the sponsored-exclusion policy, this is copy-only until the backend work lands."
     ]
   },
-
   "lastValidation": {
     "at": "2026-09-13",
     "result": "W6 SEO gate committed as 2794c13. tsc 0 · eslint 0 · build 0 · smoke PASS=25 FAIL=0 · overflow PASS=12 FAIL=0 (3 widths x 4 routes incl. /admin/seo and /graph) · all routes under the 1536 KB budget. The gate was deliberately broken and observed going red with two findings, then restored and observed green. Prior: /graph committed as 0b7ed04; W3 committed as 95c5314."
   },
   "lastCheckpoint": "2794c13",
-
-  "nextAutonomousAction": "W7: trust signals + polish. Before that, two small honest cleanups surfaced by the W6 reconnaissance: (1) AdminMetrics.indexedPages is computed and consumed nowhere — either surface it on /admin or delete it; (2) /admin/seo's 'Queue / blocked' card shows hardcoded 148 and 9, which are the only invented numbers on that page and should either be derived or labelled as illustrative. ALSO STILL OPEN AND NEEDING A DECISION: the soft-404 (see knownIssues.seo). Do NOT add recharts to /vendor or /admin — /vendor already has labelled dependency-free charts and getAdminMetrics() has no time series, so there is nothing honest to chart. Do NOT stop for approval.",
-
+  "nextAutonomousAction": "W7 remaining, in this order: (1) AdminMetrics.indexedPages — computed in getAdminMetrics() and consumed nowhere; either surface it on /admin or delete it. (2) /admin/seo's 'Queue / blocked' card hardcodes 148 and 9, the only invented numbers on a page whose whole job is consistency — derive them or label them illustrative. Then final polish. Do NOT reintroduce scaled review numbers. STILL OPEN AND NEEDING A DECISION: the soft 404 (knownIssues.seo) and the /graph indexation change. Do NOT stop for approval.",
   "environmentGotchas": [
     "Never chain `rm` before a build — the delete guard blocks it and `&&` short-circuits, leaving a stale log.",
     "Clear NODE_OPTIONS for builds; set CODEBUDDY_SAFE_DELETE_BULK_THRESHOLD=1000000 for npm install.",

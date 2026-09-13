@@ -74,7 +74,7 @@ for (const route of routes) {
       const bytes = await sizeOf(`${BASE}${asset}`);
       if (asset.endsWith(".css")) css += bytes;
       else js += bytes;
-    } catch (err) {
+    } catch {
       missing.push(asset);
     }
   }

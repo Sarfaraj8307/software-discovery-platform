@@ -608,7 +608,7 @@ function buildCategoryEditorial(group: RawGroup, products: Product[]): string[] 
 
   return [
     `There are ${products.length} ${group.name.toLowerCase()} products in this directory, carrying ${products.reduce((s, p) => s + p.ratingCount, 0).toLocaleString("en-US")} reviews between them. The category average rating is ${avg.toFixed(1)} out of 5, and ${freeCount} of the ${products.length} offer a free trial or a free tier.`,
-    `${top[0]} leads on our composite score, followed by ${top[1]} and ${top[2]}. That ordering reflects verified review volume, satisfaction scores and functional coverage — it is not influenced by vendor payment, and no vendor can buy a position in this list.`,
+    `${top[0]} leads on our composite score, followed by ${top[1]} and ${top[2]}. That ordering reflects review volume, satisfaction scores and functional coverage — it is not influenced by vendor payment, and no vendor can buy a position in this list.`,
     `When shortlisting ${group.name.toLowerCase()}, decide first whether you are buying depth or speed. Depth-oriented platforms carry steeper implementation costs but hold up as a team scales; speed-oriented platforms deliver value in days but tend to be replaced within two to three years.`,
     `Filter by pricing model and deployment before you compare features — those two constraints eliminate most of the shortlist, and they are the hardest to change after purchase.`,
   ];
@@ -634,7 +634,7 @@ function buildCategoryFaqs(group: RawGroup, products: Product[]): FaqItem[] {
     {
       question: `How are these ${group.name.toLowerCase()} products ranked?`,
       answer:
-        "Ranking combines verified review volume, satisfaction scores across four dimensions, and functional coverage measured against the category feature taxonomy. Vendors cannot pay for placement. Sponsored listings, where they appear, are labelled and excluded from the ranking.",
+        "Ranking combines review volume, satisfaction scores across four dimensions, and functional coverage measured against the category feature taxonomy. Vendors cannot pay for placement. Sponsored listings, where they appear, are labelled and excluded from the ranking.",
     },
   ];
 }

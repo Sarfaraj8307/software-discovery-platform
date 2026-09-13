@@ -208,7 +208,7 @@ export function summariseDifferences(sections: ComparisonSection[], products: Pr
 
   const byRating = [...products].sort((a, b) => b.ratingAvg - a.ratingAvg);
   bullets.push(
-    `${byRating[0]!.name} holds the highest verified rating at ${byRating[0]!.ratingAvg.toFixed(1)} out of 5 across ${byRating[0]!.ratingCount.toLocaleString("en-US")} reviews.`,
+    `${byRating[0]!.name} holds the highest average rating at ${byRating[0]!.ratingAvg.toFixed(1)} out of 5 across ${byRating[0]!.ratingCount.toLocaleString("en-US")} ratings.`,
   );
 
   const priced = products.filter((p) => p.startingPrice !== null && p.startingPrice > 0);

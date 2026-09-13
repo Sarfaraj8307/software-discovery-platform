@@ -79,7 +79,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { product } = data;
   return {
     title: `${product.name} Reviews & Pricing`,
-    description: `${product.name} — ${product.tagline} Rated ${formatRating(product.ratingAvg)}/5 from ${formatCount(product.ratingCount)} reviews. Compare pricing, features and alternatives.`,
+    description: `${product.name} — ${product.tagline} Rated ${formatRating(product.ratingAvg)}/5 from ${formatCount(product.ratingCount)} ratings. Compare pricing, features and alternatives.`,
     alternates: { canonical: `/product/${product.slug}` },
     openGraph: {
       title: `${product.name} — reviews, pricing and alternatives`,
@@ -116,7 +116,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
 
   const tabs: TabItem[] = [
     { id: "overview", label: "Overview" },
-    { id: "reviews", label: "Reviews", count: product.ratingCount },
+    { id: "reviews", label: "Reviews", count: reviewSummary.total },
     { id: "pricing", label: "Pricing" },
     { id: "integrations", label: "Integrations", count: integrations.length },
     { id: "alternatives", label: "Alternatives" },
@@ -158,7 +158,12 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
         aggregateRating: {
           "@type": "AggregateRating",
           ratingValue: product.ratingAvg,
-          reviewCount: product.ratingCount,
+          // schema.org separates the two: `ratingCount` is the sample behind the average,
+          // `reviewCount` is the reviews actually published on this page. Emitting
+          // `reviewCount: ratingCount` claimed 1,891 reviews next to 6 rendered cards,
+          // which is a mismatch under Google's review-snippet policy.
+          ratingCount: product.ratingCount,
+          reviewCount: reviewSummary.total,
           bestRating: 5,
           worstRating: 1,
         },
@@ -342,7 +347,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
                         <span className="text-2xs text-muted-foreground">composite score</span>
                       </div>
                       <p className="mt-1 text-2xs leading-snug text-muted-foreground">
-                        Weighted on verified review volume, satisfaction and feature coverage.
+                        Weighted on review volume, satisfaction and feature coverage.
                       </p>
                     </div>
                   </div>
@@ -567,7 +572,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
                       label={`Rated ${formatRating(product.ratingAvg)} out of 5`}
                     />
                     <p className="mt-1.5 text-13 text-muted-foreground tnum">
-                      {formatCount(product.ratingCount)} verified reviews
+                      {formatCount(product.ratingCount)} ratings
                     </p>
 
                     <RatingDistribution

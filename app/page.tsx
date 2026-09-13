@@ -279,7 +279,7 @@ export default function HomePage() {
           <SectionHeading
             eyebrow="Ranked by composite score"
             title="Top ranked by category"
-            description="Each block shows the leading products in a category, ordered by verified review volume, satisfaction and functional coverage."
+            description="Each block shows the leading products in a category, ordered by review volume, satisfaction and functional coverage."
             action={<SectionLink href="/categories">All categories</SectionLink>}
           />
 
@@ -393,7 +393,10 @@ export default function HomePage() {
                 {/* ------------------------------------------ social proof */}
                 <dl className="mt-6 grid grid-cols-2 gap-4 rounded-card border border-border bg-card p-4 sm:grid-cols-4">
                   {[
-                    { label: "Reviews", value: formatCompact(data.socialProof.reviewScale) },
+                    {
+                      label: "Verified reviews",
+                      value: formatCompact(data.socialProof.verifiedReviews),
+                    },
                     { label: "Products", value: formatCount(data.socialProof.totalProducts) },
                     { label: "Categories", value: formatCount(data.socialProof.totalCategories) },
                     { label: "Vendors", value: formatCount(data.socialProof.totalCompanies) },

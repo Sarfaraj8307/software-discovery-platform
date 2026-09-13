@@ -4,7 +4,10 @@ import { notFound } from "next/navigation";
 import { ChevronRight, SearchX } from "lucide-react";
 import { formatCount, monthYear } from "@/lib/utils";
 import { getCategoryPageData } from "@/lib/data/queries";
-import { listPillarCategories } from "@/lib/data/repository";
+import {
+  countVerifiedReviewsInCategory,
+  listPillarCategories,
+} from "@/lib/data/repository";
 import type { SearchParams } from "@/lib/data/queries";
 import { ProductCard } from "@/components/cards/ProductCard";
 import { CategoryChip } from "@/components/cards/CategoryCard";
@@ -153,7 +156,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
           <TrustBar
             className="mt-4"
-            reviewCount={products.items.reduce((sum, p) => sum + p.ratingCount, 0) * 12}
+            reviewCount={countVerifiedReviewsInCategory(category.slug)}
             productCount={category.productCount}
             updatedLabel={updated}
           />

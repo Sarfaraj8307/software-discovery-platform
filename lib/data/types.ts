@@ -435,7 +435,4 @@ export interface AdminMetrics {
   totalProducts: number;
   totalReviews: number;
   flaggedReviews: number;
-  indexedPages: number;
-  queuedPages: number;
-  blockedPages: number;
 }

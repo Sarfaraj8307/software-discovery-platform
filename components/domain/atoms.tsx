@@ -120,7 +120,7 @@ export function ScoreBadge({
         </span>
       </TooltipTrigger>
       <TooltipContent>
-        Composite score out of 100. Weighted: verified review volume, satisfaction across four
+        Composite score out of 100. Weighted: review volume, satisfaction across four
         dimensions, and functional coverage against the category taxonomy. Vendors cannot
         influence it. See our methodology.
       </TooltipContent>

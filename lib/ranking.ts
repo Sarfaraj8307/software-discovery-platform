@@ -58,7 +58,7 @@ const TIERS: Record<RankTierKey, RankTier> = {
   leader: {
     key: "leader",
     label: "Leader",
-    blurb: "Top-scoring products in the catalogue on verified reviews, satisfaction and coverage.",
+    blurb: "Top-scoring products in the catalogue on reviews, satisfaction and coverage.",
     accent: vizAt(0).solid,
     ink: vizAt(0).ink,
     tintClass: vizAt(0).tintClass,
@@ -74,7 +74,7 @@ const TIERS: Record<RankTierKey, RankTier> = {
   contender: {
     key: "contender",
     label: "Contender",
-    blurb: "Competitive on the fundamentals, with narrower coverage or fewer verified reviews.",
+    blurb: "Competitive on the fundamentals, with narrower coverage or fewer reviews.",
     accent: vizAt(4).solid,
     ink: vizAt(4).ink,
     tintClass: vizAt(4).tintClass,

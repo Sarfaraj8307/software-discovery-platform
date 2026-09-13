@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { AlertTriangle, Check, ExternalLink, Minus } from "lucide-react";
 import { formatCount } from "@/lib/utils";
-import { getAdminMetrics, getDataset } from "@/lib/data/repository";
+import { getDataset } from "@/lib/data/repository";
 import { KpiCard, SectionHeading } from "@/components/ui/content";
 import { Badge } from "@/components/ui/badge";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
@@ -65,7 +65,6 @@ function toArray(value: string | string[] | undefined): string[] {
 
 export default function AdminSeoPage() {
   const dataset = getDataset();
-  const metrics = getAdminMetrics();
 
   const pillars = dataset.categories.filter((c) => c.depth === 0).length;
   const subcategories = dataset.categories.filter((c) => c.depth > 0).length;
@@ -279,9 +278,9 @@ export default function AdminSeoPage() {
           hint="Search, graph, portals and API endpoints"
         />
         <KpiCard
-          label="Queue / blocked"
-          value={`${formatCount(metrics.queuedPages)} / ${formatCount(metrics.blockedPages)}`}
-          hint="Pages awaiting crawl budget or blocked by policy"
+          label="Disallow rules"
+          value={formatCount(disallowed.length)}
+          hint="Prefixes robots.txt currently blocks"
         />
       </div>
 

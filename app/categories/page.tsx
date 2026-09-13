@@ -37,7 +37,7 @@ export default function CategoriesPage() {
         </p>
         <TrustBar
           className="mt-4"
-          reviewCount={proof.reviewScale}
+          reviewCount={proof.verifiedReviews}
           productCount={proof.totalProducts}
           updatedLabel={updated}
         />

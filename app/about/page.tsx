@@ -40,7 +40,7 @@ export default function AboutPage() {
         </h2>
         <div className="grid gap-3 sm:grid-cols-3">
           <KpiCard label="Products" value={formatCount(proof.totalProducts)} />
-          <KpiCard label="Reviews" value={formatCount(proof.reviewScale)} />
+          <KpiCard label="Reviews" value={formatCount(proof.totalReviews)} />
           <KpiCard label="Categories" value={formatCount(proof.totalCategories)} />
         </div>
       </section>
