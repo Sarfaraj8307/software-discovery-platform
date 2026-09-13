@@ -1,17 +1,74 @@
 import Link from "next/link";
 import { ArrowRight, Clock, Flag, Inbox, Package, ShieldCheck } from "lucide-react";
-import { formatCount } from "@/lib/utils";
+import { cn, formatCount } from "@/lib/utils";
 import {
   getAdminMetrics,
   getModerationQueue,
   getPendingProducts,
+  getReviewBreakdowns,
 } from "@/lib/data/repository";
-import { KpiCard, SectionHeading, EmptyState } from "@/components/ui/content";
+import { KpiCard, ProgressBar, SectionHeading, EmptyState } from "@/components/ui/content";
 import { StatusPill } from "@/components/ui/table";
 import { EmptyArt } from "@/components/brand/StateArt";
 
 /** Queues older than this are surfaced as breaching the review SLA. */
 const SLA_DAYS = 7;
+
+/**
+ * Bar colours are literal Tailwind class strings, not templated — Tailwind v4 scans
+ * source text, so a constructed class name never makes it into the stylesheet and every
+ * bar renders unfilled. See lib/viz.ts for the same constraint.
+ */
+const STATUS_BAR: Record<string, string> = {
+  APPROVED: "bg-success",
+  PENDING: "bg-warning",
+  FLAGGED: "bg-destructive",
+  REJECTED: "bg-muted-foreground",
+};
+
+const VERIFICATION_BAR: Record<string, string> = {
+  VALIDATED: "bg-success",
+  CURRENT_USER: "bg-primary",
+  INCENTIVIZED: "bg-warning",
+  GUEST: "bg-muted-foreground",
+};
+
+function BreakdownList({
+  rows,
+  total,
+  bars,
+  className,
+}: {
+  rows: { key: string; label: string; count: number }[];
+  total: number;
+  bars: Record<string, string>;
+  className?: string;
+}) {
+  return (
+    <ul className={cn("space-y-3 rounded-card border border-border bg-card p-5 shadow-card", className)}>
+      {rows.map((row) => (
+        <li key={row.key}>
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-13 font-medium">{row.label}</span>
+            <span className="text-13 text-muted-foreground tnum">
+              {formatCount(row.count)}
+              <span className="ml-1.5 text-2xs">
+                ({total > 0 ? Math.round((row.count / total) * 100) : 0}%)
+              </span>
+            </span>
+          </div>
+          <ProgressBar
+            className="mt-1.5"
+            value={row.count}
+            max={total}
+            barClassName={bars[row.key]}
+            label={`${row.label}: ${row.count} of ${total} reviews`}
+          />
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 function daysWaiting(iso: string): number {
   return Math.floor((Date.parse("2026-09-12T00:00:00.000Z") - Date.parse(iso)) / 86_400_000);
@@ -21,6 +78,7 @@ export default function AdminOverviewPage() {
   const metrics = getAdminMetrics();
   const reviewQueue = getModerationQueue(50);
   const productQueue = getPendingProducts(50);
+  const mix = getReviewBreakdowns();
 
   const breaching = reviewQueue.filter((review) => daysWaiting(review.createdAt) > SLA_DAYS);
   const oldest = reviewQueue[0];
@@ -88,6 +146,37 @@ export default function AdminOverviewPage() {
             value={formatCount(metrics.totalProducts)}
             hint={`${formatCount(metrics.totalReviews)} reviews on record`}
           />
+        </div>
+      </section>
+
+      {/* --------------------------------------------------------- review mix */}
+      <section aria-labelledby="mix-heading">
+        <SectionHeading
+          id="mix-heading"
+          eyebrow="Composition"
+          title="What the catalogue is made of"
+          description={`Every count below is taken from the ${formatCount(mix.total)} reviews on record. Incentivized and guest submissions stay visible here rather than being folded into a single "verified" figure.`}
+        />
+
+        <div className="mt-4 grid gap-5 lg:grid-cols-2">
+          <div>
+            <h3 className="label-caps text-muted-foreground">By moderation status</h3>
+            <BreakdownList
+              className="mt-3"
+              rows={mix.status}
+              total={mix.total}
+              bars={STATUS_BAR}
+            />
+          </div>
+          <div>
+            <h3 className="label-caps text-muted-foreground">By verification</h3>
+            <BreakdownList
+              className="mt-3"
+              rows={mix.verification}
+              total={mix.total}
+              bars={VERIFICATION_BAR}
+            />
+          </div>
         </div>
       </section>
 

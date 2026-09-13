@@ -29,9 +29,11 @@ import type {
   ProductQuery,
   Resource,
   Review,
+  ReviewStatus,
   SearchResults,
   SortKey,
   VendorMetrics,
+  VerificationLabel,
 } from "./types";
 import { slugify } from "./seed";
 
@@ -665,6 +667,56 @@ export function getAdminMetrics(): AdminMetrics {
     totalProducts: approvedProducts.length,
     totalReviews: dataset.reviews.length,
     flaggedReviews: dataset.reviews.filter((r) => r.status === "FLAGGED").length,
+  };
+}
+
+/**
+ * Review breakdowns for the admin overview.
+ *
+ * Both axes are counts of records that actually exist — the same discipline as the trust
+ * signals: a breakdown is only worth charting if the numbers are real. Rows with a zero
+ * count are kept so the shape of the panel does not change when a queue empties.
+ */
+export function getReviewBreakdowns(): {
+  total: number;
+  status: { key: ReviewStatus; label: string; count: number }[];
+  verification: { key: VerificationLabel; label: string; count: number }[];
+} {
+  const STATUS_LABELS: Record<ReviewStatus, string> = {
+    PENDING: "Pending",
+    APPROVED: "Approved",
+    REJECTED: "Rejected",
+    FLAGGED: "Flagged",
+  };
+  const VERIFICATION_LABELS: Record<VerificationLabel, string> = {
+    VALIDATED: "Validated reviewer",
+    CURRENT_USER: "Current user",
+    INCENTIVIZED: "Incentivized",
+    GUEST: "Guest",
+  };
+
+  const tally = <K extends string>(keys: readonly K[], pick: (r: Review) => K) => {
+    const counts = new Map<K, number>(keys.map((k) => [k, 0]));
+    for (const review of dataset.reviews) {
+      const key = pick(review);
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return counts;
+  };
+
+  const statusKeys = Object.keys(STATUS_LABELS) as ReviewStatus[];
+  const verificationKeys = Object.keys(VERIFICATION_LABELS) as VerificationLabel[];
+  const byStatus = tally(statusKeys, (r) => r.status);
+  const byVerification = tally(verificationKeys, (r) => r.verification);
+
+  return {
+    total: dataset.reviews.length,
+    status: statusKeys.map((key) => ({ key, label: STATUS_LABELS[key], count: byStatus.get(key) ?? 0 })),
+    verification: verificationKeys.map((key) => ({
+      key,
+      label: VERIFICATION_LABELS[key],
+      count: byVerification.get(key) ?? 0,
+    })),
   };
 }
 

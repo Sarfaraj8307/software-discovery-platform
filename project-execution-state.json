@@ -2,9 +2,9 @@
   "$comment": "Persistent execution state for the visual-transformation + productionization program. Read this FIRST at the start of any session, before inspecting anything else. Update after every meaningful milestone. Keep it small and honest.",
   "project": "Software Discovery Platform",
   "repo": "https://github.com/Sarfaraj8307/software-discovery-platform",
-  "updatedAt": "2026-09-13T17:16:25.222Z",
+  "updatedAt": "2026-09-13T17:44:04.571Z",
   "mode": "autonomous",
-  "currentPhase": "W7 IN PROGRESS — trust-signal accuracy pass done (measured, not assumed): every number labelled 'verified' is now a real verified count, and structured data matches what the page renders. Remaining W7: the two W6 cleanups (AdminMetrics.indexedPages unused; /admin/seo hardcoded 148/9) and final polish.",
+  "currentPhase": "W7 IN PROGRESS — trust-signal accuracy pass COMPLETE and the two W6 cleanups closed. Added the /admin composition panel (visual issue [3]). Remaining: browser overflow confirmation on the admin routes, then W7 is done.",
   "currentObjective": "Portals were assessed rather than decorated: /vendor already has labelled dependency-free charts and /admin has no time series to chart, so no charting library was added. Instead the work went into a real defect — a consistency gate that could not fail, hiding a three-way indexation inconsistency for /graph.",
   "decisionsLocked": {
     "designDirection": "LIGHT ENTERPRISE + RICH VISUAL STORYTELLING. 'Restraint by choice' is SUPERSEDED. Still forbidden: dark/neon/cyberpunk/heavy glassmorphism.",
@@ -50,12 +50,13 @@
     "W5_core_surfaces": "DONE (commits a477cc4, 0b7ed04) — product page (ScoreRing in hero, sticky score rail replacing a dead column, procedural screenshot plates); compare (MetricBar on a shared 0-100 scale); /graph (framed viewer, build-time stats derived from graph.json, width gate so phones never download the 1.4 MB viewer). /categories INVESTIGATED AND CLOSED — a treemap was built, rendered, then rejected as premise-false; see knownIssues.visual. /search SURVEYED and found already dense (filters, sort, non-product matches, empty states) — nothing obvious to add.",
     "W6_portals": "IN PROGRESS (commit 2794c13) — RECONNAISSANCE FIRST, and it overturned the inherited audit. The audit claimed /vendor and /admin were 'flat KPI boxes with no charts'; that is true of neither. /vendor already has a labelled 8-week bar chart, a lead-source breakdown with ProgressBar, four KPI cards and a recent-leads list, with a code comment explaining why eight labelled points need no charting dependency. /admin has four KPI cards, an SLA-breach callout, four work-queue cards, two queues, and copy disclosing that approve/reject/flag are not wired up. getAdminMetrics() returns ONLY scalars — no time series — so a chart there would have required inventing data. NO CHARTING LIBRARY WAS ADDED; recharts is still installed and imported nowhere. What WAS done: /admin/seo's consistency gate was tautological and is now real (see knownIssues.seo).",
     "W7_trust_polish": {
-      "status": "IN PROGRESS",
+      "status": "NEARLY COMPLETE",
       "startedAt": "2026-09-13",
       "hypothesis": "The site makes trust claims about verified reviews while all data is synthetic. The valuable question is not 'add more badges' but 'does any existing trust signal make a claim the data layer cannot back?'",
       "disclosureCoverage": "CHECKED FIRST and found adequate: DemoDataNotice is in the root Footer (so every page) and as a banner in app/vendor/layout.tsx and app/admin/layout.tsx, so portal sub-routes are covered too. No change needed.",
       "defectsFound": 3,
-      "defectsFixed": 3
+      "defectsFixed": 3,
+      "adminCharts": "getAdminMetrics() returns only scalars, and getVendorMetrics() (which owns viewsTrend and leadsBySource) is already charted on /vendor. So /admin gained a panel over data it actually has: getReviewBreakdowns() tallies review status (pending/approved/rejected/flagged) and verification (validated/current user/incentivized/guest) over the real 1,176 records. Rendered with the same dependency-free ProgressBar list /vendor uses — no recharts, no new dependency, aria-label per bar. Verified rendered: Approved 1,093 (93%), Pending 53 (5%), Validated reviewer 604 (51%), Current user 303 (26%)."
     }
   },
   "baseline": {
@@ -79,7 +80,7 @@
       "No imagery anywhere — monogram plates + tinted placeholders. (PARTLY ADDRESSED: product screenshots now render procedural UI plates.)",
       "No data visualisation on any route. (PARTLY ADDRESSED: ScoreRing on /product/[slug]; MetricBar on /compare/[slugs].)",
       "/product/[slug] was an 819-line text scroll with empty grey screenshot boxes and a bare-text score. (ADDRESSED in W5.)",
-      "/admin and /vendor are flat KPI boxes with no charts. (OPEN — W6.)",
+      "/admin and /vendor were flat KPI boxes with no charts. /vendor was already charted in W6 (leadsBySource + viewsTrend, hand-rolled ProgressBar list). /admin ADDRESSED 2026-09-13: getReviewBreakdowns() powers a status + verification composition panel. No charting library was added — recharts remains installed and imported nowhere, and should stay that way unless something genuinely needs axes or tooltips.",
       "/categories reads as a flat list. INVESTIGATED AND CLOSED AS NOT-A-DEFECT: a squarified treemap of the 18 pillars was built, rendered correctly, and then rejected because the premise was false — pillar counts are 9-16 with eight pillars tied at 13, and subcategory counts cluster at 4-5. The dataset is deliberately uniform at every level, so area-encoding has nothing to encode. The page's flatness reflects a genuinely flat catalogue. Do NOT retry a treemap or a quadrant grid of pillars without first checking whether the spread has changed."
     ],
     "performance": [
@@ -107,7 +108,9 @@
       "(3) ratingCount is a denormalised figure generated independently of the review records (seed.ts), so calling it 'verified reviews' was wrong twice: it counts all ratings rather than verified-only, and it is not the review count. Relabelled to 'ratings' on the product hero and in the meta description; the Reviews tab now shows reviewSummary.total instead of ratingCount. 'verified review volume' became 'review volume' in the five score explanations (atoms.tsx, app/page.tsx, app/product/[slug], seed.ts x2, ranking.ts x2) because the score's volume input is ratingCount, not a verified subset.",
       "GUARD: scripts/qa/trust-audit.mjs asserts (a) JSON-LD reviewCount == reviews actually rendered, (b) no product page labels a number 'verified reviews', (c) no page maps one label to two values. Its conflict detector was proven to fire against a fixture before being trusted — see knownIssues.seoAuditLessons for why that matters.",
       "CONSEQUENCE TO REMEMBER: this is a visible copy change on marketing surfaces. The site now says 'ratings' where it said 'verified reviews', and the verified count is two orders of magnitude smaller than the invented one. That is the honest number; do not 'restore impact' by reintroducing a multiplier.",
-      "DEFERRED (backend P0, not a UI fix): the copy says Guest reviews 'do not count toward the score at all', but the score's volumeFactor is computed from ratingCount, which includes them. The label was corrected rather than the maths, because ratingCount is generated independently of the review records and changing it would regenerate the dataset. Like the sponsored-exclusion policy, this is copy-only until the backend work lands."
+      "DEFERRED (backend P0, not a UI fix): the copy says Guest reviews 'do not count toward the score at all', but the score's volumeFactor is computed from ratingCount, which includes them. The label was corrected rather than the maths, because ratingCount is generated independently of the review records and changing it would regenerate the dataset. Like the sponsored-exclusion policy, this is copy-only until the backend work lands.",
+      "FOLLOW-UP SWEEP 2026-09-13: grepped for any remaining invented number after the W7 fixes. Clean — the only literal numeric prop left in the UI is count={64} on a decorative NodeField, and every remaining *_000 literal is a time constant or a PRNG range inside seed.ts (legitimate data generation, not a claim).",
+      "NOT CHANGED — /methodology still states that an unverified (Guest) submission is 'included in the aggregate but excluded from any ranking that claims verified-only sourcing'. The composite score's volumeFactor is computed from ratingCount, so this documents intent rather than current behaviour. Left alone deliberately: /methodology documents policy, whereas the numbers corrected in W7 were checkable claims. Same backend P0 as the sponsored-exclusion policy."
     ]
   },
   "lastValidation": {
@@ -115,7 +118,7 @@
     "result": "W6 SEO gate committed as 2794c13. tsc 0 · eslint 0 · build 0 · smoke PASS=25 FAIL=0 · overflow PASS=12 FAIL=0 (3 widths x 4 routes incl. /admin/seo and /graph) · all routes under the 1536 KB budget. The gate was deliberately broken and observed going red with two findings, then restored and observed green. Prior: /graph committed as 0b7ed04; W3 committed as 95c5314."
   },
   "lastCheckpoint": "2794c13",
-  "nextAutonomousAction": "W7 remaining, in this order: (1) AdminMetrics.indexedPages — computed in getAdminMetrics() and consumed nowhere; either surface it on /admin or delete it. (2) /admin/seo's 'Queue / blocked' card hardcodes 148 and 9, the only invented numbers on a page whose whole job is consistency — derive them or label them illustrative. Then final polish. Do NOT reintroduce scaled review numbers. STILL OPEN AND NEEDING A DECISION: the soft 404 (knownIssues.seo) and the /graph indexation change. Do NOT stop for approval.",
+  "nextAutonomousAction": "W7 close-out: confirm the /admin routes have no horizontal overflow at 390/768/1024/1440 (browser QA; the script routes default to public pages only). After that W7 is complete and the remaining open items are all decisions awaiting the user: soft 404, /graph indexation, stale graph artifact, and pendingProducts/pendingClaims being hardcoded. Do NOT add recharts. Do NOT stop for approval.",
   "environmentGotchas": [
     "Never chain `rm` before a build — the delete guard blocks it and `&&` short-circuits, leaving a stale log.",
     "Clear NODE_OPTIONS for builds; set CODEBUDDY_SAFE_DELETE_BULK_THRESHOLD=1000000 for npm install.",
