@@ -21,6 +21,10 @@ const SIZE_LABELS: Record<string, string> = {
 export function ReviewCard({ review, className }: { review: Review; className?: string }) {
   return (
     <article
+      // Stable per-review anchor. A review is a linkable entity — a vendor quoting one in
+      // a dispute, or a buyer sharing one, needs a URL that lands on it rather than on the
+      // top of a five-per-page list whose ordering changes as new reviews arrive.
+      id={`review-${review.id}`}
       className={
         className ??
         "rounded-card border border-border bg-card p-4 shadow-card"

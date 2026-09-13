@@ -1,9 +1,10 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ExternalLink, Package } from "lucide-react";
-import { formatCount, formatRating, relativeDate } from "@/lib/utils";
+import { cn, formatCount, formatRating, relativeDate } from "@/lib/utils";
 import { DEMO_VENDOR_SLUG } from "@/lib/portals";
-import { getCompanyProducts } from "@/lib/data/repository";
+import { getCompanyProducts, listListingEdits } from "@/lib/data/repository";
+import { ListingEditForm } from "@/components/vendor/ListingEditForm";
 import type { Product } from "@/lib/data/types";
 import { DataTable, StatusPill, type Column } from "@/components/ui/table";
 import { EmptyState, ProgressBar, SectionHeading } from "@/components/ui/content";
@@ -140,6 +141,20 @@ export default function VendorProductsPage() {
       ),
     },
     {
+      key: "edit",
+      header: "Copy",
+      width: "w-40",
+      align: "right",
+      render: (product) => (
+        <ListingEditForm
+          slug={product.slug}
+          productName={product.name}
+          tagline={product.tagline}
+          shortDescription={product.shortDescription}
+        />
+      ),
+    },
+    {
       key: "open",
       header: "",
       width: "w-12",
@@ -157,6 +172,9 @@ export default function VendorProductsPage() {
   ];
 
   const pending = products.filter((p) => p.status === "PENDING").length;
+  // Proposals this vendor has already made, so a submitted edit does not look like it
+  // vanished. Decided ones are shown too — silence after submitting reads as a bug.
+  const proposed = listListingEdits(20);
 
   return (
     <div className="space-y-6">
@@ -193,9 +211,42 @@ export default function VendorProductsPage() {
         />
       </div>
 
+      {proposed.length > 0 && (
+        <section aria-labelledby="proposed-heading" className="space-y-2">
+          <h2 id="proposed-heading" className="label-caps text-muted-foreground">
+            Your proposals
+          </h2>
+          <ul className="divide-y divide-border overflow-hidden rounded-card border border-border bg-card">
+            {proposed.map((edit) => (
+              <li key={edit.id} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 px-4 py-2.5">
+                <span className="text-13 font-medium">{edit.productName}</span>
+                <span className="min-w-0 flex-1 truncate text-2xs text-muted-foreground">
+                  {edit.fields.tagline}
+                </span>
+                <span
+                  className={cn(
+                    "text-2xs font-medium",
+                    edit.status === "PENDING" && "text-warning",
+                    edit.status === "APPLIED" && "text-success",
+                    edit.status === "DISCARDED" && "text-muted-foreground",
+                  )}
+                >
+                  {edit.status.toLowerCase()}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <p className="text-2xs text-muted-foreground">
-        Completeness reflects the fields buyers look for. Editing is not available in this
-        demonstration build — it requires the authenticated vendor API.
+        Completeness reflects the fields buyers look for. You can propose new tagline and
+        description copy, which moderation reviews before it goes live.{" "}
+        <span className="font-medium text-foreground">
+          Ratings, review counts and feature coverage are not editable
+        </span>{" "}
+        — they feed the composite score, and letting a vendor edit them would be letting a
+        vendor edit their own ranking.
       </p>
     </div>
   );

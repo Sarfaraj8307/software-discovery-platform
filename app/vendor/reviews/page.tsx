@@ -22,7 +22,17 @@ export default function VendorReviewsPage() {
     .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 
   const unanswered = reviews.filter((review) => !review.vendorResponse);
-  const answered = reviews.filter((review) => review.vendorResponse);
+
+  // "Your public replies, most recent first" — so this must be ordered by when the reply
+  // was published, not by when the review was written. Sorting by `createdAt` (as the
+  // aggregate above is) buries a reply that was just published behind ten older ones, and
+  // the section is capped at ten: you would post a response and see nothing change.
+  const answered = reviews
+    .filter((review) => review.vendorResponse)
+    .sort(
+      (a, b) =>
+        Date.parse(b.vendorResponse!.respondedAt) - Date.parse(a.vendorResponse!.respondedAt),
+    );
 
   const avgRating =
     reviews.length > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;

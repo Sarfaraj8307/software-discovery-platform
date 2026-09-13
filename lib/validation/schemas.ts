@@ -60,6 +60,31 @@ export const vendorResponseSchema = z.object({
 export const MODERATION_ACTIONS = ["APPROVE", "REJECT", "FLAG"] as const;
 
 /**
+ * Vendor-proposed listing copy. Deliberately excludes every score input — see `ListingEdit`
+ * in types.ts. Both fields are bounded; a tagline is not a description and a description is
+ * not a documentation page.
+ */
+export const listingEditSchema = z.object({
+  tagline: z
+    .string()
+    .trim()
+    .min(10, "Give the tagline at least a few words")
+    .max(120, "Taglines are capped at 120 characters"),
+  shortDescription: z
+    .string()
+    .trim()
+    .min(40, "Please describe the product in a sentence or two")
+    .max(400, "Descriptions are capped at 400 characters"),
+});
+
+export const LISTING_EDIT_DECISIONS = ["APPLY", "DISCARD"] as const;
+
+export const listingEditDecisionSchema = z.object({
+  id: z.string().trim().min(1).max(120),
+  decision: z.enum(LISTING_EDIT_DECISIONS),
+});
+
+/**
  * Moderation is a state transition on an existing record, not a free-form write, so the
  * schema pins both the target and the action to enums. `note` is captured but optional —
  * a rejection with no stated reason is exactly the case the audit log exists to expose.

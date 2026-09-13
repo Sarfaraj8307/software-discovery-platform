@@ -7,7 +7,7 @@
  * and no page or component needs to move.
  */
 
-import { dataset } from "./seed";
+import { dataset as seeded } from "./seed";
 import type {
   AdminMetrics,
   Category,
@@ -23,6 +23,7 @@ import type {
   Lead,
   LeadStatus,
   LeadType,
+  ListingEdit,
   ModerationAction,
   ModerationDecision,
   ProductStatus,
@@ -39,6 +40,21 @@ import type {
   VerificationLabel,
 } from "./types";
 import { slugify } from "./seed";
+
+/**
+ * `dataset` is MUTABLE at runtime — route handlers write to it (vendor replies,
+ * moderation decisions, listing-edit applications) and pages must then read that
+ * same memory. A plain module-scoped binding is instantiated once *per route
+ * bundle* in a production build, so `app/api/reviews/[id]/response/route.ts` and
+ * `app/product/[slug]/page.tsx` each end up with their own `dataset`: the write
+ * returns 201 and the published reply never appears anywhere.
+ *
+ * Parking the object on `globalThis` makes it process-wide, which is the same
+ * trick `leadStore` uses below for the same reason. The seeding itself is
+ * deterministic, so the first bundle to touch it creates the one true copy.
+ */
+const globalForDataset = globalThis as unknown as { __dataset?: typeof seeded };
+const dataset: Dataset = (globalForDataset.__dataset ??= seeded);
 
 /* ==========================================================================
    INDEXES — built once per process
@@ -578,6 +594,72 @@ export function getReviewSummary(slug: string): ReviewSummary {
     incentivizedCount: approved.filter((r) => r.verification === "INCENTIVIZED").length,
     withResponses: approved.filter((r) => r.vendorResponse).length,
   };
+}
+
+/* ------------------------------------------------------ proposed listing edits */
+
+const globalForListingEdits = globalThis as unknown as {
+  __listingEdits?: ListingEdit[];
+};
+const listingEdits: ListingEdit[] = (globalForListingEdits.__listingEdits ??= []);
+
+let listingEditSeq = 0;
+
+/**
+ * A vendor proposes a change; it is queued rather than applied.
+ *
+ * The vendor page states that edits are reviewed before they go live, so writing straight
+ * to the listing would make the UI's own copy false. Queuing also means the moderator sees
+ * a diffable proposal instead of trying to notice that a live listing changed.
+ */
+export function proposeListingEdit(
+  slug: string,
+  fields: ListingEdit["fields"],
+  companySlug: string,
+): ListingEdit | "NOT_FOUND" | "WRONG_VENDOR" {
+  const product = productBySlug.get(slug);
+  if (!product) return "NOT_FOUND";
+  if (product.companySlug !== companySlug) return "WRONG_VENDOR";
+
+  const edit: ListingEdit = {
+    id: `edit_${Date.now().toString(36)}_${(listingEditSeq += 1)}`,
+    slug,
+    productName: product.name,
+    fields,
+    status: "PENDING",
+    proposedAt: new Date().toISOString(),
+    decidedAt: null,
+  };
+  listingEdits.unshift(edit);
+  return edit;
+}
+
+export function listPendingListingEdits(): ListingEdit[] {
+  return listingEdits.filter((e) => e.status === "PENDING");
+}
+
+/** Most recent first, any status — used by the vendor to see what happened to a proposal. */
+export function listListingEdits(limit = 10): ListingEdit[] {
+  return listingEdits.slice(0, limit);
+}
+
+export function decideListingEdit(id: string, apply: boolean): ListingEdit | null {
+  const edit = listingEdits.find((e) => e.id === id);
+  if (!edit || edit.status !== "PENDING") return null;
+
+  edit.status = apply ? "APPLIED" : "DISCARDED";
+  edit.decidedAt = new Date().toISOString();
+
+  if (apply) {
+    const product = productBySlug.get(edit.slug);
+    if (product) {
+      product.tagline = edit.fields.tagline;
+      product.shortDescription = edit.fields.shortDescription;
+      product.updatedAt = edit.decidedAt;
+    }
+  }
+
+  return edit;
 }
 
 export type RespondResult =

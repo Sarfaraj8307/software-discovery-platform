@@ -6,7 +6,9 @@ import {
   getModerationQueue,
   getPendingProducts,
   listModerationLog,
+  listPendingListingEdits,
 } from "@/lib/data/repository";
+import { ListingEditDecider } from "@/components/admin/ListingEditDecider";
 import { ModerationActions } from "@/components/admin/ModerationActions";
 import type { Product, Review } from "@/lib/data/types";
 import { DataTable, StatusPill, type Column } from "@/components/ui/table";
@@ -171,6 +173,7 @@ export default function AdminModerationPage() {
   const reviews = getModerationQueue(50);
   const products = getPendingProducts(50);
   const log = listModerationLog(12);
+  const proposedEdits = listPendingListingEdits();
 
   const pending = reviews.filter((review) => review.status === "PENDING");
   const flagged = reviews.filter((review) => review.status === "FLAGGED");
@@ -225,6 +228,37 @@ export default function AdminModerationPage() {
         </div>
       </section>
 
+      <section aria-labelledby="proposed-heading">
+        <SectionHeading
+          id="proposed-heading"
+          eyebrow="Queue"
+          title="Proposed listing changes"
+          description="Vendor-submitted copy, awaiting a decision. Nothing here touches a rating, a review count or feature coverage — those feed the score and are not vendor-editable."
+        />
+
+        {proposedEdits.length === 0 ? (
+          <p className="mt-4 text-13 text-muted-foreground">
+            No pending proposals. Copy a vendor submits from the vendor portal appears here.
+          </p>
+        ) : (
+          <ul className="mt-4 divide-y divide-border overflow-hidden rounded-card border border-border bg-card shadow-card">
+            {proposedEdits.map((edit) => (
+              <li key={edit.id} className="space-y-2 px-4 py-3">
+                <div className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="text-13 font-medium">{edit.productName}</span>
+                  <span className="text-2xs text-faint">{relativeDate(edit.proposedAt)}</span>
+                </div>
+                <p className="text-13 text-foreground">{edit.fields.tagline}</p>
+                <p className="text-2xs leading-relaxed text-muted-foreground">
+                  {edit.fields.shortDescription}
+                </p>
+                <ListingEditDecider editId={edit.id} productName={edit.productName} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
       <section aria-labelledby="audit-heading">
         <SectionHeading
           id="audit-heading"
@@ -241,15 +275,25 @@ export default function AdminModerationPage() {
         ) : (
           <ol className="mt-4 divide-y divide-border overflow-hidden rounded-card border border-border bg-card shadow-card">
             {log.map((entry) => (
-              <li key={entry.id} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 px-4 py-2.5">
-                <span className="text-13 font-medium">{entry.action.toLowerCase()}</span>
-                <span className="min-w-0 flex-1 truncate text-13 text-muted-foreground">
-                  {entry.targetLabel}
-                </span>
-                <span className="text-2xs tnum text-muted-foreground">
-                  {entry.fromStatus} → {entry.toStatus}
-                </span>
-                <span className="text-2xs text-faint">{relativeDate(entry.decidedAt)}</span>
+              <li key={entry.id} className="px-4 py-2.5">
+                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                  <span className="text-13 font-medium">{entry.action.toLowerCase()}</span>
+                  <span className="min-w-0 flex-1 truncate text-13 text-muted-foreground">
+                    {entry.targetLabel}
+                  </span>
+                  <span className="text-2xs tnum text-muted-foreground">
+                    {entry.fromStatus} → {entry.toStatus}
+                  </span>
+                  <span className="text-2xs text-faint">{relativeDate(entry.decidedAt)}</span>
+                </div>
+                {/* The reason is the entire point of an audit log — a row that records only
+                    PENDING → REJECTED cannot answer the question a vendor will actually ask.
+                    It was being captured and then never shown. */}
+                {entry.note && (
+                  <p className="mt-1 text-2xs leading-relaxed text-muted-foreground">
+                    <span className="font-medium text-foreground">Reason:</span> {entry.note}
+                  </p>
+                )}
               </li>
             ))}
           </ol>

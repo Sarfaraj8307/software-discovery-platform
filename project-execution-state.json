@@ -4,8 +4,8 @@
   "repo": "https://github.com/Sarfaraj8307/software-discovery-platform",
   "updatedAt": "2026-09-13T18:33:07.390Z",
   "mode": "autonomous",
-  "currentPhase": "Backend P0 in progress. W7 (visual program) COMPLETE; B1 moderation, B2 lead status and B3 vendor replies all DONE and guarded. The vendor portal's core loop is now closed: enquiries arrive, are worked through statuses, and reviews can be answered.",
-  "currentObjective": "Portals were assessed rather than decorated: /vendor already has labelled dependency-free charts and /admin has no time series to chart, so no charting library was added. Instead the work went into a real defect — a consistency gate that could not fail, hiding a three-way indexation inconsistency for /graph.",
+  "currentPhase": "Backend P0 in progress. W7 (visual program) COMPLETE; B1 moderation, B2 lead status, B3 vendor replies, B4 listing edits all DONE and guarded. Two defensive fixes shipped: the dataset singleton (route handlers and pages now share one in-memory copy, proven by a 36→28 approved-reviews aggregate probe), and a review anchor (id=\"review-<id>\") that gives every review a stable deep link.",
+  "currentObjective": "The dataset bug was the load-bearing one this session. Route handlers and pages were getting separate copies of the dataset because module scope in a production Next build is per route bundle, so an API write returned 201 and the public page never showed it — exactly what the codebase's own globalThis comment on leadStore warned about, but dataset itself was missed. After parking dataset on globalThis, an aggregate probe (rejecting 9 reviews on the demo vendor's products dropped the \"approved reviews\" KPI on /vendor/reviews from 36 to 28) proved route and page now share state. The vendor-reply guard was rewritten to post a unique marker and grep for THAT — the previous version asserted on \"Your response\", which also appears in the form label, so it stayed green on a false premise. The guard now genuinely proves the write reaches both /vendor/reviews and the product page. /vendor/reviews now also sorts Responded by respondedAt desc — the section heading promises most recent first and a slice of 10 was burying just-published replies.",
   "decisionsLocked": {
     "designDirection": "LIGHT ENTERPRISE + RICH VISUAL STORYTELLING. 'Restraint by choice' is SUPERSEDED. Still forbidden: dark/neon/cyberpunk/heavy glassmorphism.",
     "threeD": "Procedural ONLY. No .glb/.gltf/.riv assets — this environment cannot generate 3D models or video. Deterministic geometry from seeded IDs.",
@@ -70,7 +70,7 @@
       ],
       "actorHonesty": "There is no auth in this build, so the route records the literal actor 'unauthenticated' rather than inventing a moderator identity. An audit trail that looks trustworthy while recording a fiction is worse than none. Both the API and the page say so plainly. Wiring a session principal in is the only change needed later.",
       "gotchaFound": "getPendingProducts() derives its queue from a deterministic slice (every third row synthesised as PENDING) rather than from stored status, so decideProduct() would have mutated the underlying product and then appeared to do nothing on the next render. Fixed with a globalThis Map of product decisions that overrides the synthesised status. Without this the buttons would have looked broken — shipped only after catching it.",
-      "verified": "scripts/qa/moderation-api.mjs PASS: valid decision 200 (PENDING -> FLAGGED), invalid action 422, invalid targetType 422, unknown id 404, malformed JSON 400. End-to-end confirmed in the rendered page: log row 'flag · <title> · PENDING → FLAGGED', buttons carry per-target aria-labels, stale 'not wired up' copy removed. Smoke 25/25, tsc 0, eslint 0, /admin/moderation first-load 752.4 KB (budget 1536 KB, +1.6 KB over /admin)."
+      "verified": "scripts/qa/moderation-api.mjs PASS (7/7). The audit-note visibility check posts a note the page must render and grepps for it on /admin/moderation. The note was being CAPTURED in the log but never RENDERED — a real defect the guard found on first run: a row that records only PENDING → REJECTED cannot answer the question a vendor will actually ask. Now rendered as a \"Reason:\" line under each entry. tsc 0 · eslint 0 · build 0."
     },
     "B2_lead_status": {
       "status": "DONE",
@@ -96,8 +96,23 @@
         "components/vendor/VendorResponseForm.tsx — collapsed behind a Reply button until asked for, with a live character count against the 1,200 cap."
       ],
       "scopeDecision": "Scope is enforced server-side even though there is no session: a vendor may only reply to reviews on its own products (DEMO_VENDOR_SLUG). It returns 403 rather than 404 for another vendor's review so the status code cannot be used to probe which ids exist. Without this the endpoint would let anyone write a reply onto any product in the catalogue, and the real implementation would have to grow the check anyway.",
-      "boundaryKept": "Only vendorResponse is written. The review itself is never edited or deleted — disputes go to moderation. That boundary is stated on the page.",
-      "verified": "scripts/qa/vendor-response.mjs PASS (6/6) — reply to own product 201, the reply actually renders in the portal, another vendor's product 403, too-short reply 422, unknown id 404, malformed JSON 400. The 403 is the load-bearing assertion: without the scope check it would be a 201, so the test discriminates rather than passing by accident. Smoke 25/25, tsc 0, eslint 0, /vendor/reviews 753.3 KB."
+      "boundaryKept": "Only vendorResponse is written. The review itself is never edited or deleted — disputes go to moderation. That boundary is stated on the page. AND: ReviewCard now carries id=\"review-<id>\" so a single review is linkable (the visibility check depends on it; the anchor is also useful on its own — a vendor quoting a review in a dispute needs the deep link).",
+      "verified": "scripts/qa/vendor-response.mjs PASS (8/8) after the dataset singleton fix and the ReviewCard anchor. Visibility checks now post a unique marker and grep for THAT, not for static strings like \"Your response\" which also match the reply form label. The marker is confirmed present on /vendor/reviews (in the Responded list, now sorted by respondedAt desc — was sorted by review createdAt and capped at 10, so a just-published reply could be invisible behind the slice) and on the public product page. /vendor/reviews 753.2 KB · tsc 0 · eslint 0 · build 0."
+    },
+    "B4_listing_edits": {
+      "status": "DONE",
+      "startedAt": "2026-09-13",
+      "why": "Fourth item found by grepping the UI for its own admissions. /vendor/products said \"Edit listing\" and routed nowhere. The product model already had tagline and shortDescription fields, and the admin portal already had a moderation queue, so no schema work was needed — a queue of vendor proposals, decided by admin, was the shape the UI was already promising.",
+      "what": [
+        "proposeListingEdit(slug, fields) / listPendingListingEdits() / listListingEdits() / decideListingEdit(id, apply) — the proposal queue lives on globalThis for the same reason as the moderation log.",
+        "POST /api/vendor/listings/[slug] — 201 / 400 / 403 / 404 / 422; 403 enforces the cross-vendor scope server-side.",
+        "POST /api/moderation/listing-edit — applies or discards; idempotent (re-deciding an APPLIED proposal returns 409).",
+        "components/vendor/ListingEditForm.tsx — only tagline and shortDescription (the score-driving fields are deliberately not editable from the vendor side).",
+        "components/admin/ListingEditDecider.tsx — Apply / Discard buttons, calls the moderation endpoint."
+      ],
+      "scopeDecision": "Scope is enforced server-side: a vendor may only propose edits to its own products (DEMO_VENDOR_SLUG). Returns 403, not 404, so the status code cannot be used to probe which slugs exist.",
+      "boundaryKept": "Proposals are queued, never written straight to the live listing — the vendor page explicitly promises review before go-live. On the admin side, the Apply step is the only path to the live product.",
+      "verified": "scripts/qa/listing-edit.mjs PASS (9/9). The load-bearing assertion posts a unique token and asserts the token appears on the product page after Apply — not the static tagline string, which could be anywhere. tsc 0 · eslint 0 · build 0."
     }
   },
   "baseline": {
@@ -151,20 +166,32 @@
       "CONSEQUENCE TO REMEMBER: this is a visible copy change on marketing surfaces. The site now says 'ratings' where it said 'verified reviews', and the verified count is two orders of magnitude smaller than the invented one. That is the honest number; do not 'restore impact' by reintroducing a multiplier.",
       "DEFERRED (backend P0, not a UI fix): the copy says Guest reviews 'do not count toward the score at all', but the score's volumeFactor is computed from ratingCount, which includes them. The label was corrected rather than the maths, because ratingCount is generated independently of the review records and changing it would regenerate the dataset. Like the sponsored-exclusion policy, this is copy-only until the backend work lands.",
       "FOLLOW-UP SWEEP 2026-09-13: grepped for any remaining invented number after the W7 fixes. Clean — the only literal numeric prop left in the UI is count={64} on a decorative NodeField, and every remaining *_000 literal is a time constant or a PRNG range inside seed.ts (legitimate data generation, not a claim).",
-      "NOT CHANGED — /methodology still states that an unverified (Guest) submission is 'included in the aggregate but excluded from any ranking that claims verified-only sourcing'. The composite score's volumeFactor is computed from ratingCount, so this documents intent rather than current behaviour. Left alone deliberately: /methodology documents policy, whereas the numbers corrected in W7 were checkable claims. Same backend P0 as the sponsored-exclusion policy."
+      "NOT CHANGED — /methodology still states that an unverified (Guest) submission is 'included in the aggregate but excluded from any ranking that claims verified-only sourcing'. The composite score's volumeFactor is computed from ratingCount, so this documents intent rather than current behaviour. Left alone deliberately: /methodology documents policy, whereas the numbers corrected in W7 were checkable claims. Same backend P0 as the sponsored-exclusion policy.",
+      {
+        "id": "W7_TS_009",
+        "surface": "repository.dataset singleton",
+        "status": "fixed",
+        "found": "2026-09-13",
+        "notes": "Module-scoped `dataset` in lib/data/repository.ts was being instantiated per route bundle in the production build. API routes (vendor reply, moderation, listing-edit apply) wrote to one copy and pages read another; a POST returned 201 and the public page never reflected it. The repository already parked leadStore / moderationLog / productDecisions / listingEdits on globalThis with a comment explaining exactly why, but `dataset` itself was missed. Fixed by adding the same globalThis wrapper. Proved correct by an aggregate probe: rejecting 9 reviews on the demo vendor's products dropped the approved-reviews KPI on /vendor/reviews from 36 to 28."
+      }
     ],
     "qaBlocked": [
       "RESOLVED 2026-09-13 — the /admin overflow check that was left UNVERIFIED now PASSES. The wedge was transient, not permanent: a fresh `open` succeeded once the run was retried. Full matrix re-verified 28/28: /admin and /admin/seo plus the five public routes, each at 1440 / 1024 / 768 / 390.",
       "HOW IT WAS UNBLOCKED, which matters more than the result: (1) write to a file, never pipe — `timeout N sh s.sh | tail -n` hangs because an orphaned browser child holds stdout open and tail never sees EOF. (2) agent-browser survives roughly 8-11 page checks before wedging, so the matrix was split into small runs (2-3 routes at a time) rather than one 20-check run. (3) partial output is still evidence — the run that got SIGTERM had already written 11 passing checks to its output file.",
       "STILL OUTSTANDING AND UNFIXABLE FROM HERE: ~18 leaked chrome.exe processes. WMIC is on the sandbox program blacklist so command lines cannot be read, meaning agent-browser's instances cannot be told apart from the user's own Chrome. None were killed deliberately. They are idle but will keep accumulating across QA sessions."
+    ],
+    "qaGatesFixed": [
+      "scripts/qa/vendor-response.mjs: visibility checks now post a unique marker and grep for THAT (the previous version asserted on the static string \"Your response\", which also appears in the reply form label, so it stayed green on a false premise).",
+      "scripts/qa/listing-edit.mjs: same fix — assertions are on a unique token in the rendered body, not on the static tagline.",
+      "scripts/qa/moderation-api.mjs: now asserts that an accepted decision actually surfaces in the /admin/moderation decision log. The audit-note visibility check failed on first run, exposing a real defect (the note was captured but never rendered)."
     ]
   },
   "lastValidation": {
     "at": "2026-09-13",
-    "result": "W6 SEO gate committed as 2794c13. tsc 0 · eslint 0 · build 0 · smoke PASS=25 FAIL=0 · overflow PASS=12 FAIL=0 (3 widths x 4 routes incl. /admin/seo and /graph) · all routes under the 1536 KB budget. The gate was deliberately broken and observed going red with two findings, then restored and observed green. Prior: /graph committed as 0b7ed04; W3 committed as 95c5314."
+    "result": "B4 listing edits COMPLETE. Dataset singleton fix proven correct by aggregate probe (9 rejections dropped the approved-reviews KPI on /vendor/reviews from 36 to 28). The vendor-reply guard, which previously asserted on a static string that also appears in the reply form label, now posts a unique marker and grepps for THAT — it now genuinely proves the write reaches both the portal and the public product page. /vendor/reviews Responded list now sorts by respondedAt desc, matching its heading. /admin/moderation decision log now renders the captured audit note (was recorded but never shown). tsc 0 · eslint 0 · build 0 · smoke PASS=25 FAIL=0 · trust-audit PASS · first-load PASS (all routes under 1536 KB; /vendor/reviews 753.2 KB, /admin/moderation 753.7 KB). All four backend guards pass (30 assertions total): moderation-api 7/7, lead-status 7/7, vendor-response 8/8, listing-edit 9/9."
   },
   "lastCheckpoint": "2794c13",
-  "nextAutonomousAction": "Backend P0 continues. Remaining known gap worth doing safely: /vendor/products disclosed that listing edits require the authenticated vendor API — worth a look, but check whether it can be done without touching the generator (product edits are runtime mutation, so probably yes). Then the big deliberate decision: the composite score ignores the Guest-exclusion and sponsored-exclusion policies the copy promises, and fixing it likely means changing the generator, which regenerates the dataset and invalidates every recorded number. Still awaiting the user: soft 404, /graph indexation, stale graph artifact, pendingProducts/pendingClaims. Do NOT add recharts. Do NOT stop for approval.",
+  "nextAutonomousAction": "Backend P0 visible items done. Remaining known gaps: soft 404 (loading.tsx flushed before notFound() — fix is a decision, not a silent change), /graph indexation change (now noindex + robots disallow — awaiting confirmation), stale graph artifact (built_at_commit 91a419c), pendingProducts:7 / pendingClaims:4 hardcoded (deriving gives 0, empties the demo narrative). The composite score still ignores the Guest-exclusion and sponsored-exclusion policies the copy promises — fixing it likely means changing the generator, which regenerates the dataset and invalidates every recorded number, so that one is a deliberate user decision. Do NOT add recharts. Do NOT stop for approval.",
   "environmentGotchas": [
     "Never chain `rm` before a build — the delete guard blocks it and `&&` short-circuits, leaving a stale log.",
     "Clear NODE_OPTIONS for builds; set CODEBUDDY_SAFE_DELETE_BULK_THRESHOLD=1000000 for npm install.",

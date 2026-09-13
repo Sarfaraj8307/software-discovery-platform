@@ -457,6 +457,25 @@ export interface ModerationDecision {
   toStatus: string;
 }
 
+/**
+ * A vendor's proposed change to their own listing, awaiting moderation.
+ *
+ * Only fields that do NOT feed the composite score are editable. The score is
+ * (rating/5 x 68) + (volume x 17) + (coverage x 15), so ratingAvg, ratingCount and
+ * featureSlugs are deliberately absent from `fields` — letting a vendor edit any of them
+ * would let them edit their own ranking, which the vendor page explicitly promises
+ * moderation never does.
+ */
+export interface ListingEdit {
+  id: string;
+  slug: string;
+  productName: string;
+  fields: { tagline: string; shortDescription: string };
+  status: "PENDING" | "APPLIED" | "DISCARDED";
+  proposedAt: string;
+  decidedAt: string | null;
+}
+
 export interface AdminMetrics {
   pendingReviews: number;
   pendingProducts: number;

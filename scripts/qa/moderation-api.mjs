@@ -102,5 +102,21 @@ const malformed = await fetch(`${base}/api/moderation`, {
 });
 check("malformed body returns 400", malformed.status === 400, `status ${malformed.status}`);
 
+/* 6. The audit log is the whole point of this route, so a decision that is accepted but
+ * never surfaces in the admin UI is worthless. Post one carrying a note no seeded record
+ * could contain and assert on THAT — asserting on a static string would pass even if the
+ * log were written somewhere no page reads. */
+const note = `audit-note-${Date.now()}`;
+await post({ targetType: "review", targetId: target, action: "APPROVE", note });
+
+const admin = await (await fetch(`${base}/admin/moderation`)).text();
+check(
+  "decision appears in the admin decision log",
+  admin.includes(note),
+  admin.includes(note)
+    ? "note rendered in the moderation log"
+    : "200 returned but the note is NOT in /admin/moderation",
+);
+
 console.log(`\n${failures === 0 ? "PASS" : `FAIL (${failures})`} — moderation API`);
 process.exit(failures === 0 ? 0 : 1);
