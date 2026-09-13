@@ -82,7 +82,8 @@ accessibility is a requirement, not a garnish. Delegates to named roles: **Klein
   separate `.js`). Do NOT vendor vis-network as a standalone file in `public/` — `next start`
   blocks serving bare `.js` from `public/`, so it 404s. Avoid `cluster-only` (tries LLM
   community-naming, hangs without a key).
-- Published artifact `public/graphify/graph.html` + `graph.json` are gitignored (generated).
-  Embedded via `app/graph/page.tsx` (iframe) and linked in `Footer.tsx` (`/graph`, "Codebase
-  graph"). Regenerate with `scripts/graphify-build.sh`. Graphify honours `.gitignore`
+- Published artifact `public/graphify/graph.html` + `graph.json` are **committed** (so a fresh
+  clone ships with the knowledge graph; regenerate via `scripts/graphify-build.sh` — it will
+  then show them modified). Embedded via `app/graph/page.tsx` (iframe) and linked in
+  `Footer.tsx` (`/graph`, "Codebase graph"). Graphify honours `.gitignore`
   (skips `node_modules/`, `.next/`). This project: ~721 nodes, 2071 edges, 29 communities.

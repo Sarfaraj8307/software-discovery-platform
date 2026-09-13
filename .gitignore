@@ -20,6 +20,9 @@ qa-screenshots/
 # Graphify (codebase knowledge-graph tooling) — venv + generated artifacts
 .venv-graphify/
 graphify-out/
-# graphify output published into the app is generated, not authored
-public/graphify/graph.html
-public/graphify/graph.json
+# Graphify published artifacts ARE committed so a fresh clone ships with the knowledge
+# graph. They are generated output — re-run scripts/graphify-build.sh to refresh (it will
+# then show these as modified; commit or not, per preference). The venv + raw graphify-out/
+# below stay ignored.
+# public/graphify/graph.html
+# public/graphify/graph.json
