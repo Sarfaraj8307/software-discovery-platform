@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Software Discovery Platform — Functionality &amp; UI Report</title>
+<style>
+  :root{
+    --bg:#0b1020; --panel:#121a33; --panel-2:#0f1730; --line:#243156;
+    --ink:#f4f4f7; --ink-2:#a9b1c7; --ink-3:#7b86a6;
+    --accent:#93c5fd; --accent-solid:#2563eb; --accent-deep:#1d4ed8;
+    --ok:#34d399; --warn:#fbbf24; --bad:#f87171; --violet:#a78bfa;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+       font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 96px}
+
+  /* ---------- hero ---------- */
+  header.hero{border-bottom:1px solid var(--line);background:
+      radial-gradient(900px 320px at 12% -40%,rgba(37,99,235,.28),transparent 62%),
+      radial-gradient(700px 300px at 88% -30%,rgba(167,139,250,.16),transparent 60%);
+      padding:56px 0 40px;margin-bottom:40px}
+  .eyebrow{font:600 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;
+      color:var(--accent);margin:0 0 16px}
+  h1{margin:0 0 12px;font-size:clamp(28px,4vw,40px);line-height:1.1;letter-spacing:-.03em;font-weight:800}
+  .sub{margin:0;color:var(--ink-2);max-width:74ch;font-size:16px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+  .chip{font:500 12px/1 var(--mono);color:var(--ink-2);border:1px solid var(--line);
+      background:rgba(255,255,255,.03);padding:7px 11px;border-radius:999px;white-space:nowrap}
+
+  /* ---------- kpi ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:0 0 48px}
+  .kpi{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);
+      border-radius:10px;padding:16px 16px 14px}
+  .kpi b{display:block;font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.05}
+  .kpi span{display:block;margin-top:6px;font:600 10.5px/1.35 var(--mono);letter-spacing:.08em;
+      text-transform:uppercase;color:var(--ink-3)}
+
+  /* ---------- sections ---------- */
+  section{margin:0 0 52px;scroll-margin-top:20px}
+  h2{font-size:22px;letter-spacing:-.02em;margin:0 0 6px;padding-bottom:12px;
+      border-bottom:1px solid var(--line);font-weight:750}
+  h2 .n{font:700 12px/1 var(--mono);color:var(--accent);margin-right:10px;vertical-align:2px}
+  h3{font-size:15px;margin:26px 0 10px;color:var(--accent);font-weight:700;
+      letter-spacing:.01em}
+  p{margin:12px 0;color:var(--ink-2)}
+  p strong,li strong{color:var(--ink);font-weight:650}
+  a{color:var(--accent)}
+  ul{margin:10px 0;padding-left:20px;color:var(--ink-2)}
+  li{margin:6px 0}
+  code{font-family:var(--mono);font-size:.87em;background:rgba(147,197,253,.10);
+      border:1px solid var(--line);border-radius:5px;padding:1.5px 6px;color:var(--accent)}
+
+  /* ---------- tables ---------- */
+  .tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;margin:16px 0;background:var(--panel-2)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font:700 10.5px/1.3 var(--mono);letter-spacing:.09em;text-transform:uppercase;
+      color:var(--ink-3);background:rgba(255,255,255,.028);white-space:nowrap}
+  tr:last-child td{border-bottom:0}
+  td:first-child{color:var(--ink);font-weight:600;white-space:nowrap}
+  td code{white-space:nowrap}
+  tbody tr:hover{background:rgba(147,197,253,.045)}
+
+  /* ---------- badges ---------- */
+  .b{display:inline-block;font:700 10px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;
+      padding:4px 7px;border-radius:5px;white-space:nowrap}
+  .b.ok{background:rgba(52,211,153,.14);color:var(--ok);border:1px solid rgba(52,211,153,.32)}
+  .b.p0{background:rgba(248,113,113,.14);color:var(--bad);border:1px solid rgba(248,113,113,.34)}
+  .b.p1{background:rgba(251,191,36,.13);color:var(--warn);border:1px solid rgba(251,191,36,.32)}
+  .b.p2{background:rgba(147,197,253,.13);color:var(--accent);border:1px solid rgba(147,197,253,.30)}
+  .b.p3{background:rgba(167,139,250,.13);color:var(--violet);border:1px solid rgba(167,139,250,.30)}
+  .b.mut{background:rgba(255,255,255,.05);color:var(--ink-3);border:1px solid var(--line)}
+
+  /* ---------- callouts ---------- */
+  .call{border:1px solid var(--line);border-left:3px solid var(--accent-solid);border-radius:8px;
+      background:var(--panel);padding:14px 18px;margin:18px 0}
+  .call.warn{border-left-color:var(--warn)}
+  .call.good{border-left-color:var(--ok)}
+  .call p{margin:6px 0}
+  .call .t{font:700 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;
+      color:var(--accent);margin:0 0 8px}
+  .call.warn .t{color:var(--warn)} .call.good .t{color:var(--ok)}
+
+  /* ---------- swatches ---------- */
+  .sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin:16px 0}
+  .sw div{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel-2)}
+  .sw .c{height:38px} .sw .l{padding:8px 10px;font:500 11px/1.4 var(--mono);color:var(--ink-2)}
+  .sw .l b{display:block;color:var(--ink);font-weight:700}
+
+  /* ---------- prompt block ---------- */
+  pre{background:#080d1c;border:1px solid var(--line);border-radius:10px;padding:18px;
+      overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.65;color:#cfe0ff;margin:16px 0}
+  pre .k{color:var(--accent)} pre .c{color:var(--ink-3)}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}}
+  footer{border-top:1px solid var(--line);margin-top:64px;padding-top:24px;color:var(--ink-3);font-size:12.5px}
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 44px}
+  .toc a{font:500 12px/1 var(--mono);color:var(--ink-2);text-decoration:none;
+      border:1px solid var(--line);padding:7px 11px;border-radius:999px}
+  .toc a:hover{color:var(--accent);border-color:var(--accent-solid)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Functionality &amp; UI Report · Internal</p>
+    <h1>Software Discovery Platform</h1>
+    <p class="sub">A B2B software discovery &amp; comparison marketplace — a G2/Capterra-class
+      catalogue built from scratch on Next.js 16 App Router. This report inventories what the
+      application actually does, documents the UI system it does it with, and lays out the
+      verified gap list that becomes the future-enhancement roadmap.</p>
+    <div class="meta">
+      <span class="chip">Generated 13 Sep 2026</span>
+      <span class="chip">Build <code style="border:0;background:none;padding:0">ACgijwZ7KqBAxzr3Haxgf</code></span>
+      <span class="chip">Next.js 16.3.5 · React 19.3 · Tailwind v4</span>
+      <span class="chip">tsc 0 · eslint 0 · smoke 25/25</span>
+      <span class="chip">Data: synthetic, disclosed</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <nav class="toc">
+    <a href="#s1">1 · Summary</a>
+    <a href="#s2">2 · Functionality</a>
+    <a href="#s3">3 · Routes</a>
+    <a href="#s4">4 · Components</a>
+    <a href="#s5">5 · Data model</a>
+    <a href="#s6">6 · UI report</a>
+    <a href="#s7">7 · Verification</a>
+    <a href="#s8">8 · Gaps</a>
+    <a href="#s9">9 · Roadmap</a>
+    <a href="#s10">10 · Master-prompt seed</a>
+  </nav>
+
+  <div class="kpis">
+    <div class="kpi"><b>230</b><span>Products</span></div>
+    <div class="kpi"><b>1,176</b><span>Reviews</span></div>
+    <div class="kpi"><b>72</b><span>Categories</span></div>
+    <div class="kpi"><b>188</b><span>Vendors</span></div>
+    <div class="kpi"><b>138</b><span>Integrations</span></div>
+    <div class="kpi"><b>98</b><span>Features / 8 groups</span></div>
+    <div class="kpi"><b>180</b><span>Comparison pages</span></div>
+    <div class="kpi"><b>16,185</b><span>LOC (app+comp+lib)</span></div>
+  </div>
+
+  <!-- ============================================================ 1 -->
+  <section id="s1">
+    <h2><span class="n">01</span>Executive summary</h2>
+    <p>This is a <strong>read-heavy, server-rendered discovery catalogue</strong> with three working
+      portals bolted onto one data core. It is not a CMS, not a transactional marketplace, and not
+      a community — it is a comparison engine whose product is <em>buyer intent</em>.</p>
+    <p>What is genuinely built and verified:</p>
+    <ul>
+      <li><strong>Public catalogue</strong> — home, category directory (18 pillars → 54 subcategories),
+        category rankings, 230 product profiles, faceted search, and 180 programmatic
+        <code>/compare/&lt;a&gt;-vs-&lt;b&gt;</code> pages.</li>
+      <li><strong>Comparison engine</strong> — up to 4 products side-by-side, with a
+        <em>"differs"</em> row-highlight, persisted in a localStorage bucket across tabs.</li>
+      <li><strong>Lead capture</strong> — a real write path: form → Zod validation →
+        <code>POST /api/leads</code> → in-process store → visible in the vendor inbox.</li>
+      <li><strong>Vendor &amp; admin shells</strong> — 4 + 4 pages, reading real (synthetic) metrics
+        through the same repository.</li>
+      <li><strong>Programmatic SEO</strong> — per-route metadata, <code>sitemap.xml</code>,
+        <code>robots.txt</code>, canonical comparison slugs.</li>
+      <li><strong>Knowledge graph</strong> — a Graphify-generated, self-contained codebase map served
+        at <code>/graph</code> (721 nodes / 2,071 edges / 29 communities).</li>
+    </ul>
+    <div class="call warn">
+      <p class="t">What it is not — stated plainly</p>
+      <p><strong>Zero authentication, zero database, no persistence beyond process memory, no
+        imagery.</strong> Vendor and admin portals are <em>shells over synthetic data</em> — they render
+        correctly and read through the real query layer, but nothing is gated and nothing is written
+        to durable storage except leads, which live in a <code>globalThis</code> array and vanish on
+        restart. All 230 products, 1,176 reviews and 188 vendors are <strong>deterministically
+        generated</strong> (seeded PRNG, no <code>Math.random</code>) and disclosed as such in the UI.</p>
+    </div>
+    <p>The architecture was shaped for exactly this gap: <code>lib/data/repository.ts</code> is the
+      <strong>single data entry point</strong> — 43 accessors, and nothing imports the seed directly.
+      Swapping the generated dataset for Postgres is a one-module change with the compiler checking
+      the seam.</p>
+  </section>
+
+  <!-- ============================================================ 2 -->
+  <section id="s2">
+    <h2><span class="n">02</span>Functionality inventory</h2>
+    <p>Every capability below was confirmed by reading the implementation and probing the running
+      build — not inferred from the plan documents.</p>
+
+    <h3>2.1 Discovery &amp; browse</h3>
+    <div class="tw"><table>
+      <thead><tr><th>Capability</th><th>What it does</th><th>State</th></tr></thead>
+      <tbody>
+        <tr><td>Homepage</td><td>Hero search, category hub, leaderboards (top-rated / most-reviewed / trending), featured &amp; sponsored slots, most-compared, verified testimonials, directory-scale strip</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Category directory</td><td>18 pillars × 54 subcategories with product counts, icon + tint per pillar, editorial intro copy</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Category page</td><td>Ranked product list (composite score), facet rail, editorial body, FAQs, adjacent-category nudge</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Product profile</td><td>Header (logo plate, rating, review count, score /100, badges), tabbed body — Overview / Pricing / Reviews / Alternatives / Features / Screenshots / Integrations, pros &amp; cons pills, AI summary, FAQs, lead rail</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Vendor (company) data</td><td>188 companies with HQ, founded year, headcount band, verified-publisher flag, mean rating</td><td><span class="b ok">Live</span></td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>2.2 Search &amp; filtering</h3>
+    <div class="tw"><table>
+      <thead><tr><th>Capability</th><th>What it does</th><th>State</th></tr></thead>
+      <tbody>
+        <tr><td>Autocomplete</td><td>Debounced (180 ms) live suggest across products, categories and comparisons, keyboard-navigable, empty-state suggestions</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Faceted filter rail</td><td>7 dimensions — pricing, deployment, company size, features, integrations, min rating, min score</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Honest facet counts</td><td>Counts computed against the set filtered by every <em>other</em> active dimension, so no filter ever advertises an option that returns nothing</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Sort</td><td>5 keys — composite score, popularity, satisfaction, review count, name</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>URL state</td><td>Filters and sort round-trip through the query string (shareable, back-button correct)</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Pagination</td><td>Server-side paging over the filtered set, page clamped to range</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td><code>/api/search</code></td><td>JSON search endpoint returning typed product / category / comparison hits</td><td><span class="b ok">Live</span></td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>2.3 Comparison</h3>
+    <div class="tw"><table>
+      <thead><tr><th>Capability</th><th>What it does</th><th>State</th></tr></thead>
+      <tbody>
+        <tr><td>Comparison bucket</td><td>Add up to 4 products; persists to localStorage and syncs across browser tabs</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Picker</td><td>Search-and-add product picker with slot limits and full-bucket handling</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Comparison matrix</td><td>Grouped rows (score / text / boolean / price), sample sizes shown as muted metadata, <em>"differs"</em> flag highlights rows where products genuinely diverge</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Programmatic pages</td><td>180 canonical <code>/compare/&lt;a&gt;-vs-&lt;b&gt;</code> pages, alphabetically ordered slugs, 80 prerendered at build</td><td><span class="b ok">Live</span></td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>2.4 Reviews</h3>
+    <div class="tw"><table>
+      <thead><tr><th>Capability</th><th>What it does</th><th>State</th></tr></thead>
+      <tbody>
+        <tr><td>Review list</td><td>Filter by star rating, verified-only, current-user-only; sort by recent / helpful / rating; paginated</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Rating distribution</td><td>5★→1★ histogram with per-band counts, driven by <code>getReviewSummary</code></td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Trust labels</td><td><code>VALIDATED</code> / <code>CURRENT_USER</code> / <code>INCENTIVIZED</code> / <code>GUEST</code> rendered as badges; incentivised reviews are labelled, never hidden (FTC 16 CFR 255)</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Vendor response</td><td>Vendor reply rendered under the review when present (read path only)</td><td><span class="b mut">Read-only</span></td></tr>
+        <tr><td>Helpful voting</td><td>Client-side helpful counter with optimistic state</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Submission flow</td><td>—</td><td><span class="b p0">Absent</span></td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>2.5 Lead generation (the one real write path)</h3>
+    <div class="tw"><table>
+      <thead><tr><th>Capability</th><th>What it does</th><th>State</th></tr></thead>
+      <tbody>
+        <tr><td>Lead form</td><td>Validated (Zod) capture with 5 intent types — Get pricing, Request demo, Expert recommendation, Visit website, Comparison email</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Attribution</td><td>Every lead records <code>sourceLocation</code> (e.g. <code>product#hero</code>, <code>compare#gate</code>, <code>category#rail</code>)</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td><code>POST /api/leads</code></td><td>Server route → <code>createLead()</code> → shared <code>globalThis</code> store</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Vendor inbox</td><td>New enquiries appear immediately in <code>/vendor/leads</code>, filtered by the vendor's own products</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Durability</td><td>In-process only — no DB, lost on restart, not shared across instances</td><td><span class="b p0">Gap</span></td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>2.6 Vendor portal <span class="b mut" style="margin-left:6px">shell</span></h3>
+    <p>Four pages — dashboard, products, reviews, leads — reading real metrics through
+      <code>getVendorMetrics()</code>: profile views (7d/30d), comparison hits, lead counts and deltas,
+      review velocity, average rating, response rate, lead-source breakdown, 8-week views trend.</p>
+
+    <h3>2.7 Admin panel <span class="b mut" style="margin-left:6px">shell</span></h3>
+    <p>Four pages — dashboard, leads, moderation, SEO. Reads <code>getAdminMetrics()</code>
+      (pending reviews 53 · flagged 30 · new leads 18 · pending listings 7 · vendor claims 4 ·
+      catalogue 230 · reviews 1,176 · categories 72 · vendors 188) plus moderation queue,
+      pending products, and an SEO index/queue/blocked breakdown.</p>
+
+    <h3>2.8 SEO &amp; platform</h3>
+    <div class="tw"><table>
+      <thead><tr><th>Capability</th><th>What it does</th><th>State</th></tr></thead>
+      <tbody>
+        <tr><td>Per-route metadata</td><td>Title, description, OpenGraph, canonical per page — generated from the data</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td><code>sitemap.xml</code></td><td>Generated from products, categories and comparisons</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td><code>robots.txt</code></td><td>Served as a route</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Structured editorial</td><td>Category and product FAQs + long-form editorial rendered server-side</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Knowledge graph</td><td><code>/graph</code> embeds a self-contained Graphify graph (vis-network inlined — no CDN)</td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Deterministic data</td><td>mulberry32 + FNV-1a seeded PRNG — identical dataset every build, no <code>Math.random</code></td><td><span class="b ok">Live</span></td></tr>
+        <tr><td>Auth / session</td><td>—</td><td><span class="b p0">Absent</span></td></tr>
+        <tr><td>Database</td><td>—</td><td><span class="b p0">Absent</span></td></tr>
+        <tr><td>Real imagery</td><td>Deterministic monogram plates and tinted placeholders</td><td><span class="b p0">Absent</span></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- ============================================================ 3 -->
+  <section id="s3">
+    <h2><span class="n">03</span>Route inventory</h2>
+    <p>26 static routes + 3 dynamic route patterns, confirmed from the build's route manifest.
+      Last build generated <strong>283 pages</strong>; 94 entries are prerendered (80 of them
+      comparison pages).</p>
+    <div class="tw"><table>
+      <thead><tr><th>Route</th><th>Type</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>/</code></td><td>Static</td><td>Homepage — search, hub, leaderboards, social proof</td></tr>
+        <tr><td><code>/categories</code></td><td>Static</td><td>Category directory (72 categories)</td></tr>
+        <tr><td><code>/categories/[slug]</code></td><td>Dynamic</td><td>Pillar or subcategory ranking page</td></tr>
+        <tr><td><code>/product/[slug]</code></td><td>Dynamic</td><td>Product profile (230 products)</td></tr>
+        <tr><td><code>/search</code></td><td>Static</td><td>Faceted search &amp; results</td></tr>
+        <tr><td><code>/compare</code></td><td>Static</td><td>Comparison hub — picker + bucket</td></tr>
+        <tr><td><code>/compare/[slugs]</code></td><td>Dynamic</td><td>Side-by-side matrix (180 canonical slugs)</td></tr>
+        <tr><td><code>/graph</code></td><td>Static</td><td>Codebase knowledge graph (iframe)</td></tr>
+        <tr><td><code>/login</code></td><td>Static</td><td>Split brand-visual / form layout — <em>UI only, no auth</em></td></tr>
+        <tr><td><code>/methodology</code></td><td>Static</td><td>Published scoring formula</td></tr>
+        <tr><td><code>/about</code> · <code>/privacy</code> · <code>/terms</code></td><td>Static</td><td>Trust &amp; legal</td></tr>
+        <tr><td><code>/vendor</code> + <code>/vendor/{products,reviews,leads}</code></td><td>Static</td><td>Vendor portal shell (4 pages)</td></tr>
+        <tr><td><code>/admin</code> + <code>/admin/{leads,moderation,seo}</code></td><td>Static</td><td>Admin panel shell (4 pages)</td></tr>
+        <tr><td><code>/api/search</code></td><td>Route</td><td>JSON search API</td></tr>
+        <tr><td><code>/api/leads</code></td><td>Route</td><td>Lead capture write endpoint</td></tr>
+        <tr><td><code>/sitemap.xml</code> · <code>/robots.txt</code> · <code>/icon.svg</code></td><td>Route</td><td>SEO &amp; platform assets</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- ============================================================ 4 -->
+  <section id="s4">
+    <h2><span class="n">04</span>Component inventory — 44 files</h2>
+    <div class="tw"><table>
+      <thead><tr><th>Group</th><th>Components</th></tr></thead>
+      <tbody>
+        <tr><td>ui/ (14)</td><td><code>button</code>, <code>input</code>, <code>card</code>, <code>badge</code>, <code>avatar</code>, <code>table</code>, <code>navigation</code>, <code>overlay</code>, <code>feedback</code>, <code>form-controls</code>, <code>content</code>, <code>skeleton</code>, <code>responsive-image</code></td></tr>
+        <tr><td>layout/ (6)</td><td><code>Header</code> (sticky, scroll-aware shadow + active link), <code>MegaMenu</code>, <code>MobileNav</code>, <code>Footer</code>, <code>TrustBar</code>, <code>PortalNav</code></td></tr>
+        <tr><td>compare/ (5)</td><td><code>CompareProvider</code> (useSyncExternalStore over localStorage), <code>ComparePicker</code>, <code>ComparisonBucket</code>, <code>CompareSelection</code>, <code>ComparisonTable</code></td></tr>
+        <tr><td>product/ (5)</td><td><code>ProductTabs</code>, <code>PricingTable</code>, <code>MediaGallery</code>, <code>IntegrationGrid</code>, plus profile sections</td></tr>
+        <tr><td>reviews/ (4)</td><td><code>ReviewCard</code>, <code>RatingDistribution</code>, <code>HelpfulButton</code>, <code>TestimonialCard</code></td></tr>
+        <tr><td>filters/ (3)</td><td><code>FilterRail</code>, <code>ResultToolbar</code>, <code>useFilters</code> (URL-state hook)</td></tr>
+        <tr><td>cards/ (2)</td><td><code>ProductCard</code>, <code>CategoryCard</code></td></tr>
+        <tr><td>search/ (1)</td><td><code>SearchAutocomplete</code></td></tr>
+        <tr><td>forms/ (1)</td><td><code>LeadForm</code></td></tr>
+        <tr><td>brand/ (3)</td><td><code>BrandMark</code>, <code>CategoryArt</code>, <code>StateArt</code> (illustrated empty/error states)</td></tr>
+        <tr><td>motion/ (1)</td><td><code>Reveal</code> — scroll-reveal with <code>&lt;noscript&gt;</code> fallback</td></tr>
+        <tr><td>domain/ (2)</td><td><code>atoms</code> (score chip, rating, badges, logo plate), <code>icon</code></td></tr>
+      </tbody>
+    </table></div>
+    <p><strong>26 of the 44 are client components</strong> (<code>"use client"</code>); the rest render on
+      the server. Only interactive surfaces are hydrated — the catalogue itself ships as static HTML.</p>
+  </section>
+
+  <!-- ============================================================ 5 -->
+  <section id="s5">
+    <h2><span class="n">05</span>Data model &amp; dataset</h2>
+    <p>The domain model in <code>lib/data/types.ts</code> deliberately mirrors the 20-model Postgres
+      schema — the shapes are already the shapes a database would return, so the migration is
+      mechanical rather than exploratory.</p>
+    <div class="tw"><table>
+      <thead><tr><th>Entity</th><th>Count</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Product</td><td>230</td><td>Full profile: ratings across 5 sub-scores, pricing plans, deployment, sizes, features, integrations, pros/cons, AI summary, FAQs</td></tr>
+        <tr><td>Review</td><td>1,176</td><td>Trust label, sub-ratings, pros/cons text, helpful count, optional vendor response</td></tr>
+        <tr><td>Category</td><td>72</td><td>18 pillars (depth 0, hold no products) + 54 subcategories (depth 1) — G2's taxonomic rule</td></tr>
+        <tr><td>Company</td><td>188</td><td>HQ, founded year, headcount band, verified-publisher flag, mean rating</td></tr>
+        <tr><td>Integration</td><td>138</td><td>Across 17 categories (CRM, Cloud, Data, Identity, Finance, HR, …)</td></tr>
+        <tr><td>Feature</td><td>98</td><td>In 8 groups — Platform &amp; Admin, Reporting, Automation, Integrations, Security, Collaboration, Mobile, AI</td></tr>
+        <tr><td>Comparison</td><td>180</td><td>Top-5-by-score pairwise within each pillar — a bounded crawl by design</td></tr>
+        <tr><td>Lead</td><td>seeded + runtime</td><td>5 intent types, 5 statuses, source attribution</td></tr>
+        <tr><td>Resource</td><td>—</td><td>Modelled, no route yet</td></tr>
+      </tbody>
+    </table></div>
+    <div class="call">
+      <p class="t">Architecture commitments worth preserving</p>
+      <p><strong>One data entry point.</strong> <code>repository.ts</code> exposes 43 accessors; no page or
+        component imports the seed. <strong>Shared mutable state on <code>globalThis</code></strong> — a
+        module-level array would be re-created per route bundle in a production build, so the API route
+        and the vendor inbox would hold separate copies. <strong>Deterministic generation</strong> — a
+        seeded PRNG means the dataset is byte-identical across builds.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ 6 -->
+  <section id="s6">
+    <h2><span class="n">06</span>UI report</h2>
+
+    <h3>6.1 Direction</h3>
+    <p><strong>Light enterprise, single accent, restraint by choice.</strong> The dark / neon /
+      glassmorphism direction was explicitly rejected. One interactive accent
+      (<code>#2563EB</code>); every clickable or brand-reading element is that blue. Two narrow
+      non-interactive exceptions exist and are documented in the token file: <code>brand-2</code>
+      exists only as a gradient far-stop, and category hues are data-visualisation tints with no
+      affordance.</p>
+
+    <h3>6.2 Palette</h3>
+    <div class="sw">
+      <div><div class="c" style="background:#2563eb"></div><div class="l"><b>primary</b>#2563EB · the accent</div></div>
+      <div><div class="c" style="background:#1e3a8a"></div><div class="l"><b>brand-ink</b>#1E3A8A · 10.36:1</div></div>
+      <div><div class="c" style="background:#ffffff;border-bottom:1px solid #333"></div><div class="l"><b>background</b>#FFFFFF</div></div>
+      <div><div class="c" style="background:#fafafa"></div><div class="l"><b>subtle</b>#FAFAFA · surface-2</div></div>
+      <div><div class="c" style="background:#f4f4f5"></div><div class="l"><b>muted</b>#F4F4F5 · surface-3</div></div>
+      <div><div class="c" style="background:#e4e4e7"></div><div class="l"><b>border</b>#E4E4E7 · zinc-200</div></div>
+      <div><div class="c" style="background:#949499"></div><div class="l"><b>input</b>#949499 · ~3:1</div></div>
+      <div><div class="c" style="background:#6f6f78"></div><div class="l"><b>muted-fg</b>#6F6F78 · 4.98:1</div></div>
+      <div><div class="c" style="background:#047857"></div><div class="l"><b>success</b>#047857 · verified</div></div>
+      <div><div class="c" style="background:#b45309"></div><div class="l"><b>warning</b>#B45309 · sponsored</div></div>
+      <div><div class="c" style="background:#d42020"></div><div class="l"><b>destructive</b>#D42020</div></div>
+      <div><div class="c" style="background:#0b1020"></div><div class="l"><b>surface-inverse</b>#0B1020</div></div>
+    </div>
+
+    <h3>6.3 Typography &amp; scale</h3>
+    <p>Two families: <strong>Inter</strong> (sans) and <strong>JetBrains Mono</strong> (numeric tables,
+      inline code). A fluid display size is reserved for hero copy.</p>
+    <div class="tw"><table>
+      <thead><tr><th>Token</th><th>Size</th><th>Line-height</th><th>Use</th></tr></thead>
+      <tbody>
+        <tr><td>display</td><td>clamp(2.5rem → 3.5rem)</td><td>1.05</td><td>Hero, −0.035em tracking</td></tr>
+        <tr><td>4xl / 3xl</td><td>2.5rem / 1.875rem</td><td>1.1 / 1.2</td><td>Section headings</td></tr>
+        <tr><td>2xl / xl</td><td>1.5rem / 1.25rem</td><td>1.3 / 1.4</td><td>Card &amp; panel titles</td></tr>
+        <tr><td>base / body</td><td>1rem / 0.9375rem</td><td>1.6</td><td>Body copy</td></tr>
+        <tr><td>sm / 13</td><td>0.875 / 0.8125rem</td><td>1.55 / 1.5</td><td>Dense UI text</td></tr>
+        <tr><td>xs / 2xs</td><td>0.75 / 0.625rem</td><td>1.45 / 1.4</td><td>Metadata, uppercase labels</td></tr>
+      </tbody>
+    </table></div>
+    <div class="call">
+      <p class="t">A deliberate hierarchy compromise</p>
+      <p><strong>No gray lighter than <code>muted-foreground</code> can reach 4.5:1 on white.</strong>
+        The intended 3-step gray tier <em>collapsed to two for text</em> — hierarchy is now carried by
+        size and weight instead of by tone. The former zinc-400 carried real 10px content text in ~35
+        places and failed AA everywhere it did.</p>
+    </div>
+
+    <h3>6.4 Surfaces, radius, elevation, motion</h3>
+    <div class="grid2">
+      <div class="tw" style="margin-top:0"><table style="min-width:0">
+        <thead><tr><th>Scale</th><th>Values</th></tr></thead>
+        <tbody>
+          <tr><td>Radius</td><td>control 6px · card 8px · dialog 12px · pill 999px</td></tr>
+          <tr><td>Elevation</td><td>card · lift · sticky · overlay — four steps, used sparingly</td></tr>
+          <tr><td>Surfaces</td><td>surface-1 #fff · surface-2 #fafafa · surface-3 #f4f4f5 · inverse #0b1020</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tw" style="margin-top:0"><table style="min-width:0">
+        <thead><tr><th>Motion</th><th>Behaviour</th></tr></thead>
+        <tbody>
+          <tr><td>Easing</td><td><code>--ease-out-quiet</code> cubic-bezier(.22,1,.36,1)</td></tr>
+          <tr><td>Scroll reveal</td><td><code>Reveal</code> + <code>.reveal</code>, <code>&lt;noscript&gt;</code> fallback</td></tr>
+          <tr><td>Sticky nav</td><td>Scroll-aware shadow + active-link tracking</td></tr>
+          <tr><td>Reduced motion</td><td><code>prefers-reduced-motion</code> and <code>scripting:none</code> guards on every motion utility</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <h3>6.5 State vocabulary</h3>
+    <p>Every data surface defines all five states — rest, loading, empty, error, full. Six
+      <code>loading.tsx</code> routes ship skeleton layouts; <code>StateArt</code> provides
+      illustrated empty and error states so no surface is a dead end.</p>
+
+    <h3>6.6 Accessibility</h3>
+    <div class="tw"><table>
+      <thead><tr><th>Check</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>Contrast (WCAG 2.2 AA)</td><td><span class="b ok">16/16 pairs pass</span> — computed from relative luminance, not eyeballed</td></tr>
+        <tr><td>Form-control boundaries (1.4.11)</td><td><span class="b ok">Fixed</span> — <code>--color-input</code> 1.27:1 → <code>#949499</code> (~3:1)</td></tr>
+        <tr><td>Horizontal overflow</td><td><span class="b ok">Clean</span> at 1440 / 1024 / 768 / 390 px</td></tr>
+        <tr><td>Keyboard &amp; focus</td><td>Focus ring token (<code>--color-ring</code>), Radix primitives for menus, dialogs, tabs, selects</td></tr>
+        <tr><td>Motion sensitivity</td><td><span class="b ok">Respected</span> — reduced-motion + scripting:none guards</td></tr>
+        <tr><td>Semantics</td><td>Landmarks, heading order, table headers, ARIA on icon-only controls</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>6.7 UI verdict</h3>
+    <p>The design system is <strong>structurally competent</strong> — typography, contrast, hierarchy and
+      state coverage are all real and verified. Two things hold it back from looking like a
+      category-leading marketplace, and both are content problems rather than design problems:
+      <strong>there is no imagery</strong> (logos are deterministic monogram plates, screenshots are
+      tinted placeholders), and <strong>there is no login</strong>. Everything else in the visual layer
+      is already close to parity with the benchmark.</p>
+  </section>
+
+  <!-- ============================================================ 7 -->
+  <section id="s7">
+    <h2><span class="n">07</span>Verification evidence</h2>
+    <p>Claims in this report are backed by the commands below. Nothing here is inferred from the
+      plan documents.</p>
+    <div class="tw"><table>
+      <thead><tr><th>Gate</th><th>Command</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>Types</td><td><code>tsc --noEmit</code></td><td><span class="b ok">0 errors</span></td></tr>
+        <tr><td>Lint</td><td><code>eslint .</code></td><td><span class="b ok">0 errors</span></td></tr>
+        <tr><td>Build</td><td><code>next build</code></td><td><span class="b ok">283 pages</span></td></tr>
+        <tr><td>Route smoke</td><td><code>bash scripts/qa/smoke.sh</code></td><td><span class="b ok">25/25</span></td></tr>
+        <tr><td>Contrast</td><td>relative-luminance audit</td><td><span class="b ok">16/16 AA</span></td></tr>
+        <tr><td>Overflow</td><td>4 viewports, 1440→390</td><td><span class="b ok">none</span></td></tr>
+        <tr><td>Live server</td><td><code>GET /</code> · <code>GET /graph</code></td><td><span class="b ok">200 · 200</span></td></tr>
+      </tbody>
+    </table></div>
+    <p>Runtime environment: production build served with <code>next start</code>; route manifest
+      confirms 26 static + 3 dynamic patterns; 94 prerendered route entries.</p>
+  </section>
+
+  <!-- ============================================================ 8 -->
+  <section id="s8">
+    <h2><span class="n">08</span>Gap analysis — verified distance to production</h2>
+    <p>Measured against a G2-class benchmark. Priorities are the project's own P0–P3 scale.</p>
+    <div class="tw"><table>
+      <thead><tr><th>Area</th><th>Current state</th><th>Gap</th><th>P</th></tr></thead>
+      <tbody>
+        <tr><td>Database</td><td>None — generated dataset</td><td>Total</td><td><span class="b p0">P0</span></td></tr>
+        <tr><td>Authentication</td><td>None — <code>/login</code> is UI only</td><td>Total</td><td><span class="b p0">P0</span></td></tr>
+        <tr><td>Authorization / RLS</td><td>None</td><td>Total</td><td><span class="b p0">P0</span></td></tr>
+        <tr><td>Vendor isolation</td><td>None — one demo vendor slug</td><td>Critical</td><td><span class="b p0">P0</span></td></tr>
+        <tr><td>Product CRUD (vendor)</td><td>Read-only portal</td><td>Total</td><td><span class="b p0">P0</span></td></tr>
+        <tr><td>Moderation actions</td><td>Queue renders; no approve/reject</td><td>Total</td><td><span class="b p0">P0</span></td></tr>
+        <tr><td>Imagery</td><td>Monogram plates, tinted placeholders</td><td>Total</td><td><span class="b p0">P0</span></td></tr>
+        <tr><td>Audit logs</td><td>None</td><td>Total</td><td><span class="b p0">P0</span></td></tr>
+        <tr><td>Review submission</td><td>Read-only</td><td>High</td><td><span class="b p0">P0</span></td></tr>
+        <tr><td>Vendor profile pages</td><td>No public <code>/vendor/&lt;slug&gt;</code></td><td>Medium</td><td><span class="b p1">P1</span></td></tr>
+        <tr><td>Product sub-tabs</td><td>Single long page</td><td>Medium</td><td><span class="b p1">P1</span></td></tr>
+        <tr><td>Test framework</td><td>One curl smoke script</td><td>High</td><td><span class="b p1">P1</span></td></tr>
+        <tr><td>Security headers</td><td>None</td><td>Medium</td><td><span class="b p1">P1</span></td></tr>
+        <tr><td>Search at scale</td><td>In-process scan</td><td>Won't scale past ~1k products</td><td><span class="b p2">P2</span></td></tr>
+        <tr><td>Saved items</td><td>localStorage compare bucket only</td><td>Medium</td><td><span class="b p2">P2</span></td></tr>
+        <tr><td>CI/CD</td><td>None</td><td>Medium</td><td><span class="b p2">P2</span></td></tr>
+        <tr><td>Rate limiting</td><td>None on <code>/api/leads</code></td><td>Medium</td><td><span class="b p2">P2</span></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- ============================================================ 9 -->
+  <section id="s9">
+    <h2><span class="n">09</span>Future enhancements — roadmap</h2>
+
+    <h3>P0 — blocking; the product cannot be called production-ready without these</h3>
+    <div class="tw"><table>
+      <thead><tr><th>#</th><th>Enhancement</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Supabase Postgres + migrations</td><td>Nothing persists; leads die on restart</td></tr>
+        <tr><td>2</td><td>Supabase Auth — email, reset, verify, session</td><td>Three portals are ungated</td></tr>
+        <tr><td>3</td><td>Middleware + server-side role checks (4-tier RBAC)</td><td>Frontend-only gating is not gating</td></tr>
+        <tr><td>4</td><td>RLS policies + vendor isolation, verified by cross-vendor access tests</td><td>Vendor A must never see Vendor B's leads</td></tr>
+        <tr><td>5</td><td>Product workflow state machine — DRAFT → SUBMITTED → UNDER_REVIEW → APPROVED → PUBLISHED, plus REJECTED → resubmit</td><td>Current enum lacks REJECTED / UNDER_REVIEW</td></tr>
+        <tr><td>6</td><td>Vendor product CRUD + submit/resubmit</td><td>Portal is read-only today</td></tr>
+        <tr><td>7</td><td>Admin moderation actions (approve / reject / publish / archive)</td><td>Queue renders but cannot act</td></tr>
+        <tr><td>8</td><td>Supabase Storage + <code>next/image</code> — logos, covers, screenshots</td><td>Imagery is the single largest visual gap</td></tr>
+        <tr><td>9</td><td>Audit logs on every mutation</td><td>Moderation depends on it</td></tr>
+        <tr><td>10</td><td>Review submission + collection flow</td><td>Reviews are read-only and all synthetic</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>P1 — high value</h3>
+    <div class="tw"><table>
+      <thead><tr><th>#</th><th>Enhancement</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>11</td><td>Public vendor profile pages <code>/vendor/&lt;slug&gt;</code> (distinct from the portal)</td><td>Companies have data but no public page</td></tr>
+        <tr><td>12</td><td>Product sub-tabs — <code>/product/&lt;slug&gt;/{reviews,pricing,alternatives}</code></td><td>Matches the canonical URL shape; shortens the 819-line profile</td></tr>
+        <tr><td>13</td><td>Category Grid visualisation (Leader / High Performer / Contender / Niche)</td><td>Largest missing discovery surface vs benchmark</td></tr>
+        <tr><td>14</td><td>Featured-companies module (vendor customers, logo + name, max 15)</td><td>Paid social-proof slot</td></tr>
+        <tr><td>15</td><td>Trust-signal row — headline score, badge set, AI trust tier</td><td>Targets the 39% security-review delay</td></tr>
+        <tr><td>16</td><td>Vendor response write path (field already exists)</td><td>Read path is built; write path is missing</td></tr>
+        <tr><td>17</td><td>Test framework — functional + security suites</td><td>One curl script is not a suite</td></tr>
+        <tr><td>18</td><td>Security headers — CSP, HSTS, frame-options, referrer-policy</td><td>Baseline hardening</td></tr>
+        <tr><td>19</td><td>Best-of editorial lists + scaffold</td><td>SEO + editorial differentiation</td></tr>
+        <tr><td>20</td><td>Dedicated pricing tab + admin/vendor editor</td><td>Plans are embedded today</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>P2 — medium</h3>
+    <div class="tw"><table>
+      <thead><tr><th>#</th><th>Enhancement</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>21</td><td>Search upgrade — Postgres FTS now, Meilisearch later</td><td>In-process scan won't scale</td></tr>
+        <tr><td>22</td><td>Favourites / saved lists (table once auth lands)</td><td>Retention</td></tr>
+        <tr><td>23</td><td>Rate limiting on <code>/api/leads</code> (Redis-backed)</td><td>Public write endpoint</td></tr>
+        <tr><td>24</td><td>Admin analytics wired from the database</td><td>Counters are static today</td></tr>
+        <tr><td>25</td><td>Dynamic category attributes (JSONB, B2B/B2C etc.)</td><td>Category-level filters</td></tr>
+        <tr><td>26</td><td>Normalise embedded plans / features / integrations into child tables</td><td>Enables the editors above</td></tr>
+        <tr><td>27</td><td>Search recents + trending in suggest</td><td>Autocomplete has no memory</td></tr>
+        <tr><td>28</td><td>Skeletons for RSC navigation</td><td>Client-side transitions still block</td></tr>
+        <tr><td>29</td><td>All-in-One / Best-of-Breed classification</td><td>Discovery filter</td></tr>
+        <tr><td>30</td><td>CI/CD pipeline</td><td>No automated gate on merge</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>P3 — deferred</h3>
+    <p>2FA · SSO/SAML for enterprise buyers · Deals module · personalised homepage · Learn / resources
+      hub (the <code>Resource</code> entity is modelled but has no route).</p>
+
+    <div class="call good">
+      <p class="t">Differentiators to encode deliberately</p>
+      <p><strong>Published scoring</strong> — every product's composite score links to
+        <code>/methodology</code>; the formula is visible, not buried. <strong>No paid placement</strong>
+        — homepage and category ordering use the same score; there is no "boost" slot.
+        <strong>Every review carries a date and a trust label</strong>, never folded into an opaque
+        average.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ 10 -->
+  <section id="s10">
+    <h2><span class="n">10</span>Master-prompt seed</h2>
+    <p>A self-contained brief you can paste into the master-prompt generator. It carries the project
+      identity, the confirmed decisions, the hard constraints, and the P0 scope — so a downstream
+      agent does not have to re-derive them.</p>
+<pre><span class="c"># PROJECT</span>
+Software Discovery Platform — B2B software discovery &amp; comparison marketplace
+(G2/Capterra class). Built from scratch in this workspace. Not a migration.
+
+<span class="c"># STACK (fixed)</span>
+Next.js 16.3.5 App Router · React 19.3 · TypeScript 5.6 · Tailwind CSS v4 ·
+Radix primitives · Zod 4. No second UI framework.
+
+<span class="c"># CONFIRMED DECISIONS — do not re-litigate</span>
+1. <span class="k">Light enterprise only.</span> Light-first, zinc-200 borders, ONE interactive
+   accent #2563EB. Dark/neon/glassmorphism was explicitly rejected.
+2. <span class="k">Data is synthetic and disclosed as such.</span> Deterministic seeded PRNG
+   (mulberry32 + FNV-1a). Never introduce Math.random.
+3. <span class="k">Accessibility is a requirement, not a garnish.</span> WCAG 2.2 AA, contrast
+   computed from relative luminance, real target sizes.
+
+<span class="c"># ARCHITECTURE — preserve these</span>
+- lib/data/repository.ts is the ONLY data entry point (43 accessors). No page or
+  component may import the seed directly. Swapping to Postgres must touch one module.
+- Mutable server state lives on a globalThis singleton. A module-level array is
+  re-created per route bundle in production, so state silently diverges.
+- Comparison bucket: useSyncExternalStore over localStorage; getSnapshot must be
+  referentially stable or React loops.
+- Derive state during render rather than setState in an effect.
+
+<span class="c"># CURRENT VERIFIED STATE</span>
+tsc 0 · eslint 0 · next build 283 pages · route smoke 25/25 · contrast 16/16 AA ·
+no horizontal overflow at 1440/1024/768/390. 230 products · 1,176 reviews ·
+72 categories (18 pillars + 54 subs) · 188 vendors · 138 integrations ·
+98 features · 180 comparison pages · 44 components · 16,185 LOC.
+
+<span class="c"># WHAT EXISTS</span>
+Public catalogue (home, /categories, /categories/[slug], /product/[slug], /search),
+comparison engine (/compare, /compare/[slugs]), reviews with trust labels,
+lead capture (form → Zod → POST /api/leads → in-process store → vendor inbox),
+vendor portal shell (4 pages), admin panel shell (4 pages),
+programmatic SEO (sitemap, robots, per-route metadata), Graphify knowledge graph at /graph.
+
+<span class="c"># WHAT DOES NOT EXIST — the work</span>
+No database. No authentication. No authorization / RLS. No vendor isolation.
+No vendor product CRUD. No moderation actions. No real imagery.
+No audit logs. No review submission. No CI/CD.
+
+<span class="c"># P0 SCOPE — the first block of work</span>
+1.  Supabase Postgres + migrations (20-model schema already designed in lib/data/types.ts)
+2.  Supabase Auth — email + password, reset, verify, session persistence
+3.  middleware.ts route protection + SERVER-SIDE role checks (never frontend-only)
+4.  RLS policies; vendor isolation verified by cross-vendor access tests
+5.  Product workflow: DRAFT → SUBMITTED → UNDER_REVIEW → APPROVED → PUBLISHED,
+    plus REJECTED → EDIT → RESUBMIT
+6.  Vendor product CRUD + submit / resubmit
+7.  Admin moderation actions (approve / reject / publish / archive), audit-logged
+8.  Supabase Storage + next/image — logos, covers, screenshots
+9.  Audit logs on every mutation
+10. Review submission + collection flow
+
+<span class="c"># WORKING STYLE — the user's own requirements</span>
+- Verification over assertion. After every implementation, INSPECT the actual
+  result — curl the route, render the page, read the screenshot. Never report a
+  verification you did not run.
+- One small task at a time, with a verified gate between each.
+- Plan before building; update the tracker with EVIDENCE, not intentions.
+- Flag judgement calls for a decision rather than silently changing them.
+- Named collaborators: Klein (UI/UX), Kilo Code (backend/architecture).
+
+<span class="c"># ENVIRONMENT GOTCHAS — these cost real time</span>
+- NEVER chain rm before a build. The sandbox delete guard blocks the rm and the
+  &amp;&amp; short-circuits, so you read a STALE LOG and conclude success.
+- Clear NODE_OPTIONS for builds. The shim patches fs.unlinkSync with a
+  turn-scoped counter (threshold 50); a large npm install saturates it.
+- Confirm which PID owns the port before trusting a 200. A stale server serves
+  old code.
+- Call local bins directly, not npx.
+- eslint-config-next@16 is already flat config — FlatCompat throws.
+- React inserts &lt;!-- --&gt; between interpolated text nodes — grep with context.
+- documentElement.scrollWidth lies with position:sticky; test
+  window.scrollTo(9999,0) then check window.scrollX === 0.
+</pre>
+    <p style="color:var(--ink-3);font-size:13px">Tip: the P0 block above maps one-to-one onto the
+      roadmap in §09, so the two can be kept in sync without re-reading the codebase.</p>
+  </section>
+
+  <footer>
+    <p><strong>Software Discovery Platform</strong> — Functionality &amp; UI Report ·
+      generated 13 September 2026 · build <code>ACgijwZ7KqBAxzr3Haxgf</code></p>
+    <p>All figures in this report were read from the source and the running build, not from the
+      project's plan documents. Dataset is synthetic and disclosed in the UI as such.
+      Companion documents: <code>AUDIT_PHASE1.md</code>, <code>G2_BENCHMARK_AND_GAP.md</code>,
+      <code>WEBSITE_REBUILD_PLAN.md</code>.</p>
+  </footer>
+</div>
+</body>
+</html>

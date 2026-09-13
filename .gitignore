@@ -17,6 +17,10 @@ next-env.d.ts
 *.log
 qa-screenshots/
 
+# Agent workspace state — local memory notes about the user and this project.
+# Deliberately NOT published. Kept on disk; untracked from the index.
+.workbuddy-ai/
+
 # Graphify (codebase knowledge-graph tooling) — venv + generated artifacts
 .venv-graphify/
 graphify-out/
