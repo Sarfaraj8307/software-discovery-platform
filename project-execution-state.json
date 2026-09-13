@@ -93,7 +93,7 @@
   },
   "lastCheckpoint": "9c69394",
 
-  "nextAutonomousAction": "W5 continues. Next surfaces, in priority order: (1) /categories — 72 categories currently render as a flat list with no spatial composition; (2) the category detail quadrant grid (Leader / High Performer / Contender / Niche) using lib/ranking.ts, which is the intended consumer of the tier colours; (3) /compare score bars via ScoreBar; (4) /graph framing; (5) /search result density. Then W3 (plain three.js SoftwareUniverse) and W6 (vendor/admin recharts). Do NOT stop for approval.",
+  "nextAutonomousAction": "W5 remaining surfaces: (1) /search result density and empty/zero-result states; (2) /graph framing around the embedded Graphify knowledge graph. Then W3 (plain three.js SoftwareUniverse, dynamic-imported, with a mobile tier) and W6 (vendor + admin recharts dashboards — recharts is installed but NOT yet imported anywhere, so it MUST go behind a dynamic import to protect the 1.5 MB budget). /categories is CLOSED — do not retry a treemap or a pillar quadrant; see knownIssues.visual. Do NOT stop for approval.",
 
   "environmentGotchas": [
     "Never chain `rm` before a build — the delete guard blocks it and `&&` short-circuits, leaving a stale log.",
