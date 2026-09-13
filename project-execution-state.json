@@ -52,9 +52,9 @@
   },
 
   "baseline": {
-    "gitHead": "9875b80",
+    "gitHead": "9c69394",
     "jsPayload": "1.3 MB total; homepage first-load 801.6 KB / 1536 KB budget (PASS)",
-    "cssPayload": "68 KB baseline -> 71.8 KB after W1",
+    "cssPayload": "68 KB baseline -> 71.8 KB after W1 -> 73.7 KB after W5",
     "pages": 283,
     "sitemapUrls": 489,
     "tsc": 0,
@@ -62,7 +62,8 @@
     "smoke": "25/25",
     "contrast": "16/16 AA; all 10 viz hues pass 3:1 graphical and 4.5:1 text",
     "tokensEmitted": "14/14 in-use tokens present in built CSS",
-    "screenshots": "qa-screenshots/baseline/ (17 PNGs)"
+    "overflow": "scrollX === 0 at 390 / 768 / 1024 / 1440 on /product/[slug]",
+    "screenshots": "qa-screenshots/baseline/ (17 PNGs) + qa-screenshots/w5-product/"
   },
 
   "knownIssues": {
@@ -88,11 +89,11 @@
 
   "lastValidation": {
     "at": "2026-09-13",
-    "result": "W1/W2: tsc 0 · eslint 0 · 283 pages · homepage first-load 801.6 KB (budget 1536 KB) · 14/14 tokens emitted · smoke PASS=25 FAIL=0 · hero screenshotted at 1440 and 390"
+    "result": "W1/W2/W5 committed as 9c69394 and pushed (remote SHA verified via GitHub API). tsc 0 · eslint 0 · 283 pages · homepage first-load JS 801.6 KB of 1536 KB · CSS 73.7 KB · 14/14 tokens emitted · smoke PASS=25 FAIL=0 · no horizontal overflow at 390/768/1024/1440 · product page screenshotted at 1440 and 390"
   },
-  "lastCheckpoint": "9875b80",
+  "lastCheckpoint": "9c69394",
 
-  "nextAutonomousAction": "Finish W5: wire the product page (done), verify visually at 1440/390, then move to the /categories spatial composition and the category quadrant grid (Leader / High Performer / Contender / Niche) using lib/ranking.ts. Do NOT stop for approval.",
+  "nextAutonomousAction": "W5 continues. Next surfaces, in priority order: (1) /categories — 72 categories currently render as a flat list with no spatial composition; (2) the category detail quadrant grid (Leader / High Performer / Contender / Niche) using lib/ranking.ts, which is the intended consumer of the tier colours; (3) /compare score bars via ScoreBar; (4) /graph framing; (5) /search result density. Then W3 (plain three.js SoftwareUniverse) and W6 (vendor/admin recharts). Do NOT stop for approval.",
 
   "environmentGotchas": [
     "Never chain `rm` before a build — the delete guard blocks it and `&&` short-circuits, leaving a stale log.",
