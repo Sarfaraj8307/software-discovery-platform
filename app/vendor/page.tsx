@@ -209,7 +209,7 @@ export default function VendorOverviewPage() {
           {products.slice(0, 4).map((product) => (
             <li
               key={product.slug}
-              className="flex items-center gap-3 rounded-card border border-border bg-card p-4 shadow-card"
+              className="flex items-center gap-3 rounded-card border border-border bg-card p-4 shadow-card transition-colors hover:bg-muted"
             >
               <ProductLogo name={product.name} domain={product.logoDomain} size="md" />
               <div className="min-w-0 flex-1">
