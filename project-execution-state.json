@@ -5,8 +5,8 @@
   "updatedAt": "2026-09-13",
   "mode": "autonomous",
 
-  "currentPhase": "W3 COMPLETE — 3D hero shipped (commit 95c5314). W5 core surfaces: product page, compare and categories are done; /graph framing remains.",
-  "currentObjective": "Give every core surface a visualisation that carries real information. Product page: composite score ring, sticky score rail, procedural screenshot plates. Compare: score bars on a shared scale. Homepage hero: layered SVG NodeField plus a lazy 3D field behind a gate. Next: /graph framing, then W6 portals.",
+  "currentPhase": "W5 COMPLETE (commits 95c5314, 0b7ed04). Product page, compare, categories, search and graph are all done. Next: W6 portals.",
+  "currentObjective": "Every core surface now carries a visualisation with real information behind it. Homepage hero: layered SVG field plus a gated lazy 3D field. Product: composite score ring, sticky rail, procedural screenshot plates. Compare: score bars on a shared scale. Graph: framed viewer with build-time stats. Next: W6 vendor + admin dashboards.",
 
   "decisionsLocked": {
     "designDirection": "LIGHT ENTERPRISE + RICH VISUAL STORYTELLING. 'Restraint by choice' is SUPERSEDED. Still forbidden: dark/neon/cyberpunk/heavy glassmorphism.",
@@ -46,15 +46,15 @@
     "W2_visual_primitives": "DONE — ScoreRing, ScoreBar, AnimatedMetric, NodeField, ScreenshotPlate; PRNG extracted to lib/procedural.ts",
     "W3_3d_foundation": "DONE (commit 95c5314) — plain three.js, NOT R3F. SoftwareUniverse (Fibonacci-sphere InstancedMesh nodes + LineSegments edges, seeded, paused on hidden/off-screen, fully disposed on unmount) + HeroScene (the gate: WebGL, >=1024px, unmetered connection, no reduced-motion/reduced-data; all checks in an effect so SSR and first client render agree). Reduced motion renders ONE STATIC FRAME rather than removing the scene. three stays in its own 529 KB lazy chunk; homepage first-load 801.6 -> 808.7 KB.",
     "W4_homepage": "PARTIAL — hero rebuilt (aurora, viz-grid, NodeField, animated metric strip) and now carries the W3 3D layer under the scrims.",
-    "W5_core_surfaces": "IN PROGRESS — product page DONE (ScoreRing in hero, sticky score rail replacing dead column, procedural screenshot plates). Compare DONE (MetricBar on a shared 0-100 scale across the at-a-glance cards). /categories INVESTIGATED AND CLOSED — a treemap was built, rendered, then rejected as premise-false; see knownIssues.visual. /search SURVEYED and found already dense (filters, sort, non-product matches, empty states) — nothing obvious to add. Remaining: /graph framing.",
+    "W5_core_surfaces": "DONE (commits a477cc4, 0b7ed04) — product page (ScoreRing in hero, sticky score rail replacing a dead column, procedural screenshot plates); compare (MetricBar on a shared 0-100 scale); /graph (framed viewer, build-time stats derived from graph.json, width gate so phones never download the 1.4 MB viewer). /categories INVESTIGATED AND CLOSED — a treemap was built, rendered, then rejected as premise-false; see knownIssues.visual. /search SURVEYED and found already dense (filters, sort, non-product matches, empty states) — nothing obvious to add.",
     "W6_portals": "TODO — vendor + admin charts (recharts)",
     "W7_trust_polish": "TODO"
   },
 
   "baseline": {
-    "gitHead": "95c5314",
-    "jsPayload": "1.3 MB total; homepage first-load 801.6 KB -> 808.7 KB after W3, against a 1536 KB budget (PASS). three lives in its own 529 KB lazy chunk and is NOT in initial JS.",
-    "cssPayload": "68 KB baseline -> 71.8 KB after W1 -> 73.7 KB after W5",
+    "gitHead": "0b7ed04",
+    "jsPayload": "Homepage first-load 877.3 KB, /graph 816.9 KB, /compare 822.6 KB, /product/[slug] 1195.4 KB — all PASS against the 1536 KB budget. NOTE: this is a NEW measurement method (scripts/qa/first-load.mjs sums every /_next/static asset referenced by the served HTML), so it is NOT comparable to the earlier 801.6/808.7 KB figures, which were computed from build manifests. Do not read the difference as a regression: lib/graph-stats.ts has exactly one importer (app/graph/page.tsx), so the homepage module graph is unchanged.",
+    "cssPayload": "68 KB baseline -> 71.8 KB after W1 -> 73.7 KB after W5 -> 74.4 KB after /graph",
     "pages": 283,
     "sitemapUrls": 489,
     "tsc": 0,
@@ -62,10 +62,10 @@
     "smoke": "25/25",
     "contrast": "16/16 AA; all 10 viz hues pass 3:1 graphical and 4.5:1 text",
     "tokensEmitted": "14/14 in-use tokens present in built CSS",
-    "overflow": "scrollX === 0 — 20/20 across 4 breakpoints (1440/1024/768/390) x 5 routes (/, /categories, /compare, /product/[slug], /search?q=pricing)",
-    "widthGate": "hero canvas absent at 390 and 768, present at 1024 and 1440",
+    "overflow": "scrollX === 0 — 20/20 across 4 breakpoints (1440/1024/768/390) x 5 routes (/, /graph, /categories, /product/[slug], /search?q=pricing)",
+    "widthGate": "hero canvas absent at 390 and 768, present at 1024 and 1440; /graph iframe absent at 390 (0 frames, so the 1.4 MB viewer is never downloaded) and present at 1440 (1 frame, 612px, entirely above the fold)",
     "reducedMotion": "3 captures 2s apart are byte-identical under prefers-reduced-motion: reduce; the motion-enabled control produced 2 differing captures, so the test can actually detect motion and the static result is meaningful",
-    "screenshots": "qa-screenshots/baseline/ (17 PNGs) + qa-screenshots/w5-product/ + qa-screenshots/w3-hero/ + qa-screenshots/w3-reduced-motion/"
+    "screenshots": "qa-screenshots/baseline/ (17 PNGs) + w5-product/ + w3-hero/ + w3-reduced-motion/ + w5-graph-fold/ + w5-graph-mobile-v2/"
   },
 
   "knownIssues": {
@@ -86,16 +86,19 @@
     ],
     "deployment": [
       "No database, no auth, no RLS. Portals are ungated shells (deferred by decision, not a bug)."
+    ],
+    "artifacts": [
+      "The committed knowledge graph is STALE: public/graphify/graph.json records built_at_commit 91a419c, while HEAD is now several commits past it. The /graph page discloses the commit it was built from instead of hiding it, so the staleness is visible rather than silent. Regenerating is a deliberate, separate step (scripts/graphify-build.sh) that rewrites a 1.4 MB generated HTML file, so it was NOT folded into the /graph framing work. Refresh it when the diff is worth paying for."
     ]
   },
 
   "lastValidation": {
     "at": "2026-09-13",
-    "result": "W3 committed as 95c5314. tsc 0 · eslint 0 · smoke PASS=25 FAIL=0 · overflow PASS=20 FAIL=0 (4 breakpoints x 5 routes) · homepage first-load 808.7 KB / 1536 KB · three confirmed in a separate 529 KB lazy chunk · reduced-motion static frame proven against a motion-enabled control. Prior: W5 compare committed as a477cc4. /categories treemap built, rendered, then reverted in full after the premise was measured false — tree clean."
+    "result": "/graph committed as 0b7ed04 and pushed (remote ref verified with git ls-remote). tsc 0 · eslint 0 · smoke PASS=25 FAIL=0 · overflow PASS=20 FAIL=0 (4 breakpoints x 5 routes incl. /graph) · all routes under the 1536 KB budget · /graph embeds 1 frame at 1440 and 0 at 390 · stats module confirmed absent from every client chunk. Prior: W3 committed as 95c5314 (reduced-motion static frame proven against a motion-enabled control; three confined to a 529 KB lazy chunk)."
   },
-  "lastCheckpoint": "95c5314",
+  "lastCheckpoint": "0b7ed04",
 
-  "nextAutonomousAction": "W5 last surface: /graph framing around the embedded Graphify knowledge graph (it is currently a bare iframe with no chrome, no explanation of what the viewer is looking at, and no route into it from anywhere except the footer). Then W6: vendor + admin dashboards. recharts is installed but imported NOWHERE — it MUST go behind a dynamic import to protect the 1.5 MB budget. Note getAdminMetrics() has only current counts and no time series, so an /admin chart would require inventing data — do not do that; getVendorMetrics() DOES have chart-ready data (viewsTrend 8 weeks, leadsBySource). /categories is CLOSED — do not retry a treemap or a pillar quadrant; see knownIssues.visual. Do NOT stop for approval.",
+  "nextAutonomousAction": "W6: vendor + admin dashboards. recharts is installed but imported NOWHERE — it MUST go behind a dynamic import to protect the 1.5 MB budget (see the W3 precedent: three was kept out of initial JS the same way). IMPORTANT PRE-CHECK BEFORE BUILDING: getAdminMetrics() returns only current counts with no time series, so a chart on /admin would require inventing data — do NOT do that. getVendorMetrics() DOES have chart-ready data (viewsTrend, 8 weeks; leadsBySource, categorical). Also note /vendor already has hand-rolled, dependency-free, accessible charts with a code comment explaining the deliberate choice — so W6 should ask whether recharts genuinely improves on them before adding a dependency to the bundle. /categories is CLOSED — do not retry a treemap or a pillar quadrant; see knownIssues.visual. Do NOT stop for approval.",
 
   "environmentGotchas": [
     "Never chain `rm` before a build — the delete guard blocks it and `&&` short-circuits, leaving a stale log.",
