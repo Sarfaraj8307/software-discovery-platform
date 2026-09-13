@@ -198,9 +198,21 @@ export function tierFromWidth(width: number): VizTier {
   return "high";
 }
 
-/** Particle / node budget per tier. Deterministic counts, not random ones. */
+/**
+ * Node / edge / DPR budget per tier, for the 3D hero scene.
+ *
+ * `low` is a *ceiling*, not a target: the hero gate treats a low tier as
+ * "SVG only" and never builds a WebGL context on a phone. A scaled-down desktop
+ * scene on a 390px screen is worse than a purpose-built SVG — it costs battery,
+ * runs at a worse frame rate, and reads as clutter. The simplification is the
+ * design, not a compromise.
+ *
+ * DPR is capped below 2 even on `high`. The scene is a soft background behind
+ * text; the difference between 1.75x and 2x is invisible there and costs ~23%
+ * more pixels every frame.
+ */
 export const TIER_BUDGET: Record<VizTier, { nodes: number; edges: number; dpr: number }> = {
-  low: { nodes: 14, edges: 18, dpr: 1 },
-  medium: { nodes: 26, edges: 40, dpr: 1.5 },
-  high: { nodes: 42, edges: 72, dpr: 2 },
+  low: { nodes: 60, edges: 90, dpr: 1 },
+  medium: { nodes: 120, edges: 210, dpr: 1.5 },
+  high: { nodes: 190, edges: 340, dpr: 1.75 },
 };

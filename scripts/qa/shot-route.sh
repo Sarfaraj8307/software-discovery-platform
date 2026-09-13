@@ -23,20 +23,23 @@ BASE="${BASE:-http://127.0.0.1:3000}"
 OUT="qa-screenshots/$TAG"
 mkdir -p "$OUT"
 
-unset HTTP_PROXY HTTPS_PROXY http_proxy https_proxy ALL_PROXY all_proxy
-
-SLUG="$(printf '%s' "$ROUTE" | sed 's|^/||; s|/|_|g; s|^$|home|')"
+SLUG="$(printf '%s' "$ROUTE" \
+  | sed 's|^/||' \
+  | sed 's|[?&]|-|g' \
+  | sed 's|/|_|g' \
+  | sed 's|[^A-Za-z0-9._-]|_|g' \
+  | sed 's|^$|home|')"
 FILE="$OUT/${W}-${SLUG}.png"
 
 FLAGS="--full"
 [ "$MODE" = "viewport" ] && FLAGS=""
 
-agent-browser open "$BASE$ROUTE" >/dev/null 2>&1
-agent-browser set viewport "$W" "$H" >/dev/null 2>&1
-agent-browser wait 1500 >/dev/null 2>&1
+sh "$AB" open "$BASE$ROUTE" >/dev/null 2>&1
+sh "$AB" set viewport "$W" "$H" >/dev/null 2>&1
+sh "$AB" wait 1500 >/dev/null 2>&1
 # shellcheck disable=SC2086
-agent-browser screenshot $FLAGS "$FILE" >/dev/null 2>&1
-agent-browser close >/dev/null 2>&1
+sh "$AB" screenshot $FLAGS "$FILE" >/dev/null 2>&1
+sh "$AB" close >/dev/null 2>&1
 
 if [ -f "$FILE" ]; then
   echo "ok   $ROUTE -> $FILE ($(wc -c < "$FILE") bytes)"

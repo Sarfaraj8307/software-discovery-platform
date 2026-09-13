@@ -16,6 +16,7 @@ import { SectionHeading, SectionLink } from "@/components/ui/content";
 import { DemoDataNotice } from "@/components/domain/atoms";
 import { Reveal } from "@/components/motion/Reveal";
 import { NodeField } from "@/components/viz/NodeField";
+import { HeroScene } from "@/components/viz/HeroScene";
 import { AnimatedMetric } from "@/components/viz/AnimatedMetric";
 
 export const metadata: Metadata = {
@@ -70,6 +71,22 @@ export default function HomePage() {
               <NodeField seed="hero-ecosystem" count={64} />
             </div>
 
+            {/*
+              The 3D layer, layered *under* the scrims below so they fade it
+              exactly as they fade the SVG field.
+
+              This is strictly additive. `HeroScene` renders nothing unless the
+              client has WebGL, a wide viewport, an unmetered connection and no
+              reduced-motion or reduced-data preference — and `three` only ever
+              arrives through a dynamic import, so it is not in initial JS. The
+              SVG NodeField above is the complete hero on its own; this raises
+              the ceiling for clients that can afford it and is invisible to
+              those that cannot.
+            */}
+            <div className="absolute inset-0 hidden lg:block">
+              <HeroScene seed="hero-universe" />
+            </div>
+
             {/* Narrow screens: fade the field out vertically, above the copy. */}
             <div
               className="absolute inset-0 lg:hidden"
@@ -79,12 +96,19 @@ export default function HomePage() {
               }}
             />
             {/* Desktop: the field sits clear of the text column, so only a
-                light left-to-right wash is needed. */}
+                light left-to-right wash is needed.
+
+                The wash is stronger than the SVG-only version was, because the
+                3D scene is full-bleed rather than confined to the corner — it
+                runs behind the content cards on the right, and at the original
+                opacity they sat on a visibly busy background. It still reaches
+                the right edge at 0.18 rather than 0, so the field has depth
+                instead of being cut off. */}
             <div
               className="absolute inset-0 hidden lg:block"
               style={{
                 backgroundImage:
-                  "linear-gradient(90deg, rgb(250 250 250 / 0.92) 0%, rgb(250 250 250 / 0.55) 34%, transparent 58%)",
+                  "linear-gradient(90deg, rgb(250 250 250 / 0.94) 0%, rgb(250 250 250 / 0.78) 34%, rgb(250 250 250 / 0.45) 58%, rgb(250 250 250 / 0.18) 100%)",
               }}
             />
 
