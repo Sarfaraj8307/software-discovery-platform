@@ -860,9 +860,9 @@ node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/mo
       <tr>
         <td>P1.4</td>
         <td><strong>Lead export (CSV)</strong></td>
-        <td>A route handler streaming <code>text/csv</code> scoped to the vendor's own enquiries. Roughly 4 KB of server code, no client JS.</td>
+        <td><strong>DONE 2026-09-14.</strong> New <code>GET /api/leads/export</code> streams a real RFC 4180 CSV of all leads, scoped to the demo vendor via the existing <code>DEMO_VENDOR_SLUG</code> contract (a mismatched <code>?companySlug</code> returns 403, not 404). ~2.3 KB of server code, no client JS, no new dependency. Verified end-to-end by <code>scripts/qa/lead-export.mjs</code> (6/6 — posts a lead, confirms its id lands in the CSV).</td>
         <td class="num">1</td>
-        <td>P0.2 for real scoping</td>
+        <td>None — ships against the in-memory store; real scoping lands with P0.2.</td>
       </tr>
       <tr>
         <td>P1.5</td>
@@ -954,8 +954,8 @@ NODE_OPTIONS= npm start         # serve the production build</code></pre>
 </section>
 
 <footer>
-  <p>Generated from the live workspace at commit e44b3a6. All figures measured against a served production build, not inferred.</p>
-  <p><strong>Post-script:</strong> P0.3 (soft 404) is now FIXED at commit 55d38d9 — the three <code>loading.tsx</code> streaming shells were removed so invalid slugs on <code>/product/[slug]</code>, <code>/categories/[slug]</code> and <code>/compare/[slugs]</code> return a real 404 (verified by <code>scripts/qa/soft-404.mjs</code>, 6/6). P0.4 (score/methodology contradiction) remains a deferred user decision — changing the maths would regenerate the dataset.</p>
+  <p>Generated from the live workspace; last updated 2026-09-14. All figures measured against a served production build, not inferred.</p>
+  <p><strong>Post-script:</strong> P0.3 (soft 404) is now FIXED at commit 55d38d9 — the three <code>loading.tsx</code> streaming shells were removed so invalid slugs on <code>/product/[slug]</code>, <code>/categories/[slug]</code> and <code>/compare/[slugs]</code> return a real 404 (verified by <code>scripts/qa/soft-404.mjs</code>, 6/6). P1.4 (lead export CSV) is now DONE — <code>GET /api/leads/export</code> streams a real RFC 4180 CSV scoped to the demo vendor and is verified end-to-end by <code>scripts/qa/lead-export.mjs</code> (6/6). P0.4 (score/methodology contradiction) remains a deferred user decision — changing the maths would regenerate the dataset.</p>
 </footer>
 
 </div>
