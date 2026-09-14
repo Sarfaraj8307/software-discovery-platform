@@ -21,6 +21,7 @@ import type {
   FilterFacets,
   Integration,
   Lead,
+  LeadOwner,
   LeadStatus,
   LeadType,
   ListingEdit,
@@ -803,6 +804,7 @@ export function createLead(input: CreateLeadInput): Lead {
     id: `lead_${String(leadStore.length + 1).padStart(3, "0")}`,
     type: input.type,
     status: "NEW",
+    ownerId: null,
     productSlug: product?.slug ?? null,
     productName: product?.name ?? null,
     name: input.name,
@@ -820,10 +822,23 @@ export function createLead(input: CreateLeadInput): Lead {
   return lead;
 }
 
-export function listLeads(filter?: { status?: LeadStatus; type?: LeadType }): Lead[] {
+export function listLeads(filter?: {
+  status?: LeadStatus;
+  type?: LeadType;
+  ownerId?: LeadOwner | "UNASSIGNED" | "ANY";
+}): Lead[] {
   return leadStore.filter((l) => {
     if (filter?.status && l.status !== filter.status) return false;
     if (filter?.type && l.type !== filter.type) return false;
+    if (filter?.ownerId) {
+      if (filter.ownerId === "UNASSIGNED") {
+        if (l.ownerId !== null) return false;
+      } else if (filter.ownerId === "ANY") {
+        if (l.ownerId === null) return false;
+      } else if (l.ownerId !== filter.ownerId) {
+        return false;
+      }
+    }
     return true;
   });
 }
@@ -847,6 +862,25 @@ export function updateLeadStatus(id: string, status: LeadStatus): Lead | null {
   if (!lead) return null;
 
   lead.status = status;
+  lead.updatedAt = new Date().toISOString();
+  return lead;
+}
+
+/**
+ * Assign a lead to a demo owner (illustrative roster — see LeadOwner in types.ts).
+ *
+ * Passing `null` is the explicit unassign action; the UI exposes it as the "Unassigned"
+ * option, which is the default state on a fresh enquiry. Unknown ids are rejected so a
+ * future route can rely on the discriminated return rather than swallowing a bad write.
+ *
+ * `updatedAt` is bumped on every write so the last-touched column cannot drift from the
+ * owner shown next to it.
+ */
+export function updateLeadOwner(id: string, ownerId: LeadOwner | null): Lead | null {
+  const lead = leadStore.find((l) => l.id === id);
+  if (!lead) return null;
+
+  lead.ownerId = ownerId;
   lead.updatedAt = new Date().toISOString();
   return lead;
 }

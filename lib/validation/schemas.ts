@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LEAD_STATUSES } from "@/lib/data/types";
+import { DEMO_OWNER_IDS, LEAD_STATUSES } from "@/lib/data/types";
 
 /**
  * Shared validation. Imported by both the client form and the API route, so a field
@@ -44,6 +44,33 @@ export type LeadInput = z.infer<typeof leadSchema>;
 export const leadStatusSchema = z.object({
   status: z.enum(LEAD_STATUSES),
 });
+
+/**
+ * Owner is a demo-roster id (see `DEMO_OWNER_IDS` in types.ts) or the literal `null` for
+ * unassign. The `null` is encoded with `.nullable()` because a missing key is the same as
+ * "do not change the owner" — the PATCH route only updates the fields the body supplies.
+ */
+export const leadOwnerIdSchema = z.union([
+  z.enum(DEMO_OWNER_IDS),
+  z.null(),
+]);
+
+/**
+ * PATCH body that may update status, owner, or both. At least one must be present so a
+ * PATCH cannot succeed without changing anything — that would be a green button that does
+ * nothing, exactly the trap the validation is here to prevent. `.strict()` rejects any
+ * field that is not `status` or `ownerId`, so a typo like `{"statuz": ...}` returns 422
+ * rather than a silent no-op.
+ */
+export const leadUpdateSchema = z
+  .object({
+    status: z.enum(LEAD_STATUSES).optional(),
+    ownerId: leadOwnerIdSchema.optional(),
+  })
+  .strict()
+  .refine((value) => value.status !== undefined || value.ownerId !== undefined, {
+    message: "Supply `status` and/or `ownerId`.",
+  });
 
 /**
  * A vendor's public reply. Bounded on both ends: a one-word reply is not a response, and

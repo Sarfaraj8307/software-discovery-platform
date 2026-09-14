@@ -853,9 +853,9 @@ node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/mo
       <tr>
         <td>P1.3</td>
         <td><strong>Lead ownership and hand-off</strong></td>
-        <td>Add an <code>ownerId</code> to Lead, an assignment control in <code>/admin/leads</code>, and a filter. The page already admits this is missing.</td>
+        <td><strong>DONE 2026-09-14.</strong> Added <code>ownerId: LeadOwner | null</code> to the Lead type plus a hardcoded <code>DEMO_OWNERS</code> roster (Alex Morgan, Jordan Nakamura, Riya Patel) — labelled illustrative on the page because auth (P0.2) is the only honest replacement. Extended <code>PATCH /api/leads/[id]</code> with a strict <code>leadUpdateSchema</code> that accepts <code>{status}</code>, <code>{ownerId}</code>, or both (at least one required, no unknown keys). New <code>components/admin/LeadOwnerSelect.tsx</code> mirrors <code>LeadStatusSelect</code> (native <select>, aria-label per row, <code>router.refresh()</code>). <code>/admin/leads</code> grew an Owner column and an owner filter row (All / Unassigned / each roster member); the pill links preserve the active status filter so the URL is always a coherent pair. Verified by <code>scripts/qa/lead-ownership.mjs</code> (11/11): POST 201, ownerId PATCH 200, the row's <code>&lt;select&gt;</code> marks the assigned owner as <code>selected=""</code> (row-precise — earlier "row contains owner name" check passed for any row because every <code>&lt;select&gt;</code> renders all four options, so it was rewritten to assert on the <code>selected</code> attribute), <code>?owner=AM</code> includes the lead, <code>?owner=UNASSIGNED</code> excludes it, combined status+owner PATCH applies both, <code>ownerId: null</code> unassigns, invalid ownerId 422, unknown id 404, empty body 422, unknown field 422. Existing <code>lead-status</code> guard re-run 7/7 (no regression); <code>portal-runtime</code> 6/6.</td>
         <td class="num">2</td>
-        <td>P0.1, P0.2</td>
+        <td>None — ships against the in-memory leadStore; durability and real-user roster land with P0.1 / P0.2.</td>
       </tr>
       <tr>
         <td>P1.4</td>
@@ -955,7 +955,7 @@ NODE_OPTIONS= npm start         # serve the production build</code></pre>
 
 <footer>
   <p>Generated from the live workspace; last updated 2026-09-14. All figures measured against a served production build, not inferred.</p>
-  <p><strong>Post-script:</strong> P0.3 (soft 404) is now FIXED at commit 55d38d9 — the three <code>loading.tsx</code> streaming shells were removed so invalid slugs on <code>/product/[slug]</code>, <code>/categories/[slug]</code> and <code>/compare/[slugs]</code> return a real 404 (verified by <code>scripts/qa/soft-404.mjs</code>, 6/6). P1.4 (lead export CSV) is now DONE — <code>GET /api/leads/export</code> streams a real RFC 4180 CSV scoped to the demo vendor and is verified end-to-end by <code>scripts/qa/lead-export.mjs</code> (6/6). P0.4 (score/methodology contradiction) remains a deferred user decision — changing the maths would regenerate the dataset.</p>
+  <p><strong>Post-script:</strong> P0.3 (soft 404) FIXED at commit 55d38d9 — the three <code>loading.tsx</code> streaming shells were removed so invalid slugs on <code>/product/[slug]</code>, <code>/categories/[slug]</code> and <code>/compare/[slugs]</code> return a real 404 (verified by <code>scripts/qa/soft-404.mjs</code>, 6/6). P1.4 (lead export CSV) DONE — <code>GET /api/leads/export</code> streams a real RFC 4180 CSV scoped to the demo vendor and is verified end-to-end by <code>scripts/qa/lead-export.mjs</code> (6/6). P1.1 (review submission wizard) DONE — <code>POST /api/reviews</code> creates a PENDING review that enters the moderation queue; verified by <code>scripts/qa/review-submission.mjs</code> (7/7). P1.3 (lead ownership) DONE — <code>ownerId</code> on Lead, strict <code>leadUpdateSchema</code> on PATCH, Owner column + filter on <code>/admin/leads</code>; verified by <code>scripts/qa/lead-ownership.mjs</code> (11/11). P0.4 (score/methodology contradiction) and P0.1 / P0.2 (persistence + auth) remain deferred user decisions.</p>
 </footer>
 
 </div>

@@ -30,6 +30,7 @@ import type {
   Lead,
   LeadStatus,
   LeadType,
+  LeadOwner,
   PricingModel,
   PricingPlan,
   Product,
@@ -39,6 +40,7 @@ import type {
   SentimentPill,
   VerificationLabel,
 } from "./types";
+import { DEMO_OWNER_IDS } from "./types";
 
 export const DATASET_GENERATED_AT = "2026-09-12";
 const EPOCH = Date.parse("2026-09-12T00:00:00Z");
@@ -934,11 +936,16 @@ function buildLeads(products: Product[]): Lead[] {
   for (let i = 0; i < 64; i++) {
     const product = rng.pick(products);
     const r = new Rng(`lead:${i}`);
+    // ownerId is the FIRST PRNG call on `r` so the position of every downstream pick
+    // (status, type, name, email, company, phone, message, intent, sourceLocation) is
+    // unchanged — the rest of the seeded catalogue stays byte-identical.
+    const ownerId: LeadOwner | null = r.bool(0.45) ? r.pick(DEMO_OWNER_IDS) : null;
     const status = r.pick(statuses);
     leads.push({
       id: `lead_${String(i + 1).padStart(3, "0")}`,
       type: r.pick(types),
       status,
+      ownerId,
       productSlug: product.slug,
       productName: product.name,
       name: `${r.pick(FIRST_NAMES)} ${r.pick(LAST_NAMES)}`,

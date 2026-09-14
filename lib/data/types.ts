@@ -26,6 +26,27 @@ export type LeadStatus = "NEW" | "CONTACTED" | "QUALIFIED" | "CLOSED" | "SPAM";
  */
 export const LEAD_STATUSES = ["NEW", "CONTACTED", "QUALIFIED", "CLOSED", "SPAM"] as const;
 
+/**
+ * Demo roster for lead assignment on /admin/leads. Until auth (P0.2) lands there is no real
+ * user table to draw from, so the only honest roster is one labelled as illustrative. The
+ * "Unassigned" option is the default and is rendered as `null` on the lead, not as a string
+ * id, so the type system keeps the two cases distinct.
+ */
+export type LeadOwner = "AM" | "JN" | "RP";
+
+export const DEMO_OWNERS: { id: LeadOwner; name: string; role: string }[] = [
+  { id: "AM", name: "Alex Morgan", role: "Inbound lead desk" },
+  { id: "JN", name: "Jordan Nakamura", role: "Enterprise routing" },
+  { id: "RP", name: "Riya Patel", role: "SMB & partner referrals" },
+];
+
+/**
+ * Tuple of demo-owner ids, typed so `z.enum()` accepts it directly. Mirrors the
+ * `LEAD_STATUSES` pattern above — `as const` keeps the literal tuple so the Zod schema
+ * compiles without a cast.
+ */
+export const DEMO_OWNER_IDS = ["AM", "JN", "RP"] as const satisfies readonly LeadOwner[];
+
 export type ReviewStatus = "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED";
 
 export type ProductStatus = "DRAFT" | "PENDING" | "APPROVED" | "ARCHIVED";
@@ -308,6 +329,12 @@ export interface Lead {
   id: string;
   type: LeadType;
   status: LeadStatus;
+  /**
+   * Demo-owner id from the illustrative roster, or null when unassigned.
+   * Real auth (P0.2) replaces this with a foreign key into a User table; the
+   * shape stays the same.
+   */
+  ownerId: LeadOwner | null;
   productSlug: string | null;
   productName: string | null;
   name: string;
