@@ -951,9 +951,18 @@ export function getVendorMetrics(companySlug?: string): VendorMetrics {
 
 export function getAdminMetrics(): AdminMetrics {
   const approvedProducts = dataset.products.filter((p) => p.status === "APPROVED");
+  // Derived, not hardcoded: matches the slice /admin and /admin/moderation render as the
+  // "listings awaiting approval" queue. Every moderation action (APPROVE / REJECT / FLAG)
+  // lands in productDecisions and flows through here, so the KPI cannot drift from the
+  // queue length a moderator actually sees.
+  const pendingProductsQueue = getPendingProducts(50).filter((p) => p.status === "PENDING").length;
   return {
     pendingReviews: dataset.reviews.filter((r) => r.status === "PENDING").length,
-    pendingProducts: 7,
+    pendingProducts: pendingProductsQueue,
+    // DEFERRED DECISION — listing claims are not built (P1.5). Deriving to 0 would empty
+    // the "vendor claims open" hint on /admin and shrink the work-queue card to a single
+    // row; hiding the card is a visible product change; showing 0 with a label would be a
+    // label-is-a-claim violation per W7. Left as a placeholder, flagged for the user.
     pendingClaims: 4,
     newLeads: leadStore.filter((l) => l.status === "NEW").length,
     totalProducts: approvedProducts.length,
