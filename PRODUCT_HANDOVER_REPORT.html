@@ -816,7 +816,7 @@ node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/mo
       <tr>
         <td>P0.3</td>
         <td><strong>Fix the soft 404</strong></td>
-        <td>Decision 1 in section 13. Middleware plus a slug manifest with a drift guard, or delete <code>loading.tsx</code>. Currently every invalid dynamic route returns 200.</td>
+        <td><strong>FIXED 2026-09-14 (commit 55d38d9).</strong> The three <code>loading.tsx</code> shells were removed (via <code>mv</code>+<code>git add</code>, not <code>git rm</code> — the sandbox delete guard wipes <code>app/</code> on <code>git rm</code>); invalid dynamic routes now return a real 404. Guard <code>scripts/qa/soft-404.mjs</code>: 6/6. Middleware + slug-manifest remains the UX-preserving alternative.</td>
         <td class="num">1 to 2</td>
         <td>Low. Add a guard asserting the status code for three known-bad slugs.</td>
       </tr>
@@ -955,6 +955,7 @@ NODE_OPTIONS= npm start         # serve the production build</code></pre>
 
 <footer>
   <p>Generated from the live workspace at commit e44b3a6. All figures measured against a served production build, not inferred.</p>
+  <p><strong>Post-script:</strong> P0.3 (soft 404) is now FIXED at commit 55d38d9 — the three <code>loading.tsx</code> streaming shells were removed so invalid slugs on <code>/product/[slug]</code>, <code>/categories/[slug]</code> and <code>/compare/[slugs]</code> return a real 404 (verified by <code>scripts/qa/soft-404.mjs</code>, 6/6). P0.4 (score/methodology contradiction) remains a deferred user decision — changing the maths would regenerate the dataset.</p>
 </footer>
 
 </div>
