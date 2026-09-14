@@ -1,0 +1,31 @@
+# render.yaml — Render Blueprint for the Software Discovery Platform.
+#
+# SCOPE: Render only reads this file for services managed by a Blueprint.
+# If this service was created by hand in the Render Dashboard, Render
+# ignores this file entirely — in that case the change that actually fixes
+# port detection is the `start` script in package.json, which no longer
+# pins a port. See the comment there.
+
+services:
+  - type: web
+    name: software-discovery-platform
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22.11.0"
+      - key: NODE_ENV
+        value: production
+      # Public URL of the deployed site. Prompts for a value on first
+      # Blueprint creation rather than committing it to the repo.
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      # PORT is intentionally NOT declared here.
+      #
+      # Render injects PORT at runtime and routes traffic to that exact
+      # port. Declaring it would override the platform value and break port
+      # detection. `next start` reads PORT natively and falls back to 3000
+      # when it is unset, so local development is unaffected.
