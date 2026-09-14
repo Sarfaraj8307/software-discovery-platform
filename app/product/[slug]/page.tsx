@@ -550,7 +550,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
                     Reviews
                   </h2>
                   <Button asChild variant="outline" size="sm">
-                    <Link href={`/product/${product.slug}#contact`}>Write a review</Link>
+                    <Link href={`/reviews/new?product=${product.slug}`}>Write a review</Link>
                   </Button>
                 </div>
 

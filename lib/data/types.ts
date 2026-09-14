@@ -239,6 +239,32 @@ export interface Review {
   createdAt: string;
 }
 
+/**
+ * The shape a public review-submission form is allowed to supply. Every other `Review`
+ * field (id, status, helpfulCount, vendorResponse, createdAt, plus defaults for the
+ * optional author fields) is assigned by `submitReview` so it cannot be spoofed by a
+ * client. This is the data-layer contract the validation schema must mirror.
+ */
+export interface ReviewSubmissionInput {
+  productSlug: string;
+  authorName: string;
+  authorRole?: string;
+  authorCompanySize: CompanySize;
+  authorIndustry?: string;
+  useDuration?: string;
+  rating: number;
+  easeRating: number;
+  valueRating: number;
+  supportRating: number;
+  functionalityRating: number;
+  title: string;
+  body: string;
+  pros?: string;
+  cons?: string;
+  verification: VerificationLabel;
+  source?: string;
+}
+
 /* ------------------------------------------------------------ COMPARISON */
 
 export interface Comparison {

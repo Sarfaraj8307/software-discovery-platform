@@ -34,6 +34,7 @@ import type {
   Resource,
   Review,
   ReviewStatus,
+  ReviewSubmissionInput,
   SearchResults,
   SortKey,
   VendorMetrics,
@@ -980,8 +981,65 @@ export function getReviewBreakdowns(): {
 export function getModerationQueue(limit = 20): Review[] {
   return dataset.reviews
     .filter((r) => r.status === "PENDING" || r.status === "FLAGGED")
-    .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt))
+    // Newest first: a moderator must see submissions as they arrive. Oldest-first would push
+    // fresh submissions past the slice once the queue is full and bury them.
+    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
     .slice(0, limit);
+}
+
+/**
+ * Public review submission. Creates the review as PENDING and drops it into the moderation
+ * queue — it is NOT appended to any product's public list until a moderator approves it
+ * (see getReviewsForProduct, which filters to APPROVED). The optional author fields get
+ * safe defaults here so a client can never mint a review carrying a spoofed status,
+ * helpfulCount, vendorResponse or createdAt.
+ *
+ * The by-product index is kept in sync so an approved submission later becomes visible on
+ * its product page; without this it would sit in the queue forever but never render.
+ */
+let reviewSeq = 0;
+
+export function submitReview(input: ReviewSubmissionInput): Review {
+  const review: Review = {
+    id: `rev_sub_${Date.now().toString(36)}_${(reviewSeq += 1)}`,
+    productSlug: input.productSlug,
+    authorName: input.authorName.trim(),
+    authorRole: input.authorRole?.trim() || "Reviewer",
+    authorCompanySize: input.authorCompanySize,
+    authorIndustry: input.authorIndustry?.trim() || "Software",
+    useDuration: input.useDuration?.trim() || "Not specified",
+    rating: input.rating,
+    easeRating: input.easeRating,
+    valueRating: input.valueRating,
+    supportRating: input.supportRating,
+    functionalityRating: input.functionalityRating,
+    title: input.title.trim(),
+    body: input.body.trim(),
+    pros: input.pros?.trim() || "",
+    cons: input.cons?.trim() || "",
+    verification: input.verification,
+    source: input.source?.trim() || "self-submitted",
+    helpfulCount: 0,
+    status: "PENDING",
+    vendorResponse: null,
+    createdAt: new Date().toISOString(),
+  };
+
+  dataset.reviews.unshift(review);
+
+  const bucket = reviewsByProduct.get(input.productSlug) ?? [];
+  bucket.push(review);
+  reviewsByProduct.set(input.productSlug, bucket);
+
+  return review;
+}
+
+/** Lightweight { slug, name } list for the submission form's product picker. */
+export function listProductOptions(): { slug: string; name: string }[] {
+  return dataset.products
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((p) => ({ slug: p.slug, name: p.name }));
 }
 
 export function getPendingProducts(limit = 12): Product[] {

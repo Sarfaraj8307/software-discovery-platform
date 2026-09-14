@@ -18,6 +18,11 @@ import { StarRating, VerificationBadge } from "@/components/domain/atoms";
 
 export const metadata: Metadata = { title: "Moderation queue" };
 
+// The queue reads runtime-mutable globalThis state (submitted reviews, moderation decisions).
+// Without this, Next statically prerenders the page at build time and serves a frozen snapshot,
+// so new submissions and decisions never appear until the next deploy. Force per-request render.
+export const dynamic = "force-dynamic";
+
 const REVIEW_COLUMNS: Column<Review>[] = [
   {
     key: "review",

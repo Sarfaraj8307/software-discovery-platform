@@ -471,7 +471,7 @@ const dataset: Dataset = (globalForDataset.__dataset ??= seeded);</code></pre>
       <tr><td>Review reading and filtering</td><td class="num"><span class="pill p-ok">Live</span></td><td>5 per page, sortable by recent / helpful / rating, filterable by star and by verification.</td></tr>
       <tr><td>Helpful votes</td><td class="num"><span class="pill p-warn">Local only</span></td><td><code>HelpfulButton</code> is client-side state. Not persisted.</td></tr>
       <tr><td>Saved / shortlisted items</td><td class="num"><span class="pill p-mute">Not built</span></td><td>Deferred with auth.</td></tr>
-      <tr><td>Write a review</td><td class="num"><span class="pill p-mute">Not built</span></td><td>Deferred. The review-wizard is the largest single missing buyer feature.</td></tr>
+      <tr><td>Write a review</td><td class="num"><span class="pill p-ok">Live</span></td><td>Multi-step wizard at <code>/reviews/new</code> POSTs to <code>/api/reviews</code> and enters the moderation queue as PENDING. The product page CTA points here (2026-09-14).</td></tr>
     </tbody>
   </table>
   </div>
@@ -839,9 +839,9 @@ node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/mo
       <tr>
         <td>P1.1</td>
         <td><strong>Review submission wizard</strong></td>
-        <td>The largest missing buyer feature. Multi-step form, rating, pros/cons, verification self-declaration. Submissions enter the existing moderation queue as PENDING — that machinery is already built and guarded.</td>
+        <td><strong>DONE 2026-09-14.</strong> Public multi-step form at <code>/reviews/new</code> (rating, pros/cons, verification self-declaration) that POSTs to <code>/api/reviews</code> and enters the existing moderation queue as PENDING — invisible on public product pages until a moderator approves. Accessible radiogroup star input, per-step client validation, 422 surfacing, reference id on success. The product page "Write a review" CTA now points here. Verified end-to-end by <code>scripts/qa/review-submission.mjs</code> (7/7).</td>
         <td class="num">4 to 6</td>
-        <td>P0.1, P0.2</td>
+        <td>None — ships against the in-memory moderation queue; durability lands with P0.1.</td>
       </tr>
       <tr>
         <td>P1.2</td>

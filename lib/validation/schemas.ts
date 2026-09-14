@@ -119,3 +119,64 @@ export function toFieldErrors(error: z.ZodError): FieldErrors {
 export const searchQuerySchema = z.object({
   q: z.string().trim().max(120).optional().default(""),
 });
+
+/* ==========================================================================
+   REVIEW SUBMISSION
+   ========================================================================= */
+
+export const VERIFICATION_LABELS = ["VALIDATED", "CURRENT_USER", "INCENTIVIZED", "GUEST"] as const;
+
+export const COMPANY_SIZES = ["small", "mid", "enterprise"] as const;
+
+/**
+ * Public review-submission payload. Mirrors `ReviewSubmissionInput` in types.ts field-for-field;
+ * `submitReview` owns the fields a client must never supply (id, status, helpfulCount,
+ * vendorResponse, createdAt). Ratings are coerced so the form can send strings or numbers.
+ */
+export const reviewSubmissionSchema = z.object({
+  productSlug: z.string().trim().min(1, "Choose a product").max(200),
+  authorName: z
+    .string()
+    .trim()
+    .min(2, "Please enter your name")
+    .max(120, "That name is too long"),
+  authorRole: z.string().trim().max(120).optional().or(z.literal("")),
+  authorCompanySize: z.enum(COMPANY_SIZES),
+  authorIndustry: z.string().trim().max(120).optional().or(z.literal("")),
+  useDuration: z.string().trim().max(80).optional().or(z.literal("")),
+  rating: z.coerce.number().min(1, "Add an overall rating").max(5),
+  easeRating: z.coerce.number().min(1).max(5),
+  valueRating: z.coerce.number().min(1).max(5),
+  supportRating: z.coerce.number().min(1).max(5),
+  functionalityRating: z.coerce.number().min(1).max(5),
+  title: z
+    .string()
+    .trim()
+    .min(4, "Give your review a short title")
+    .max(160, "Titles are capped at 160 characters"),
+  body: z
+    .string()
+    .trim()
+    .min(20, "Please write at least a sentence about your experience")
+    .max(4000, "Reviews are capped at 4,000 characters"),
+  pros: z.string().trim().max(500, "Keep this under 500 characters").optional().or(z.literal("")),
+  cons: z.string().trim().max(500, "Keep this under 500 characters").optional().or(z.literal("")),
+  verification: z.enum(VERIFICATION_LABELS),
+  source: z.string().trim().max(80).optional().or(z.literal("")),
+});
+
+export type ReviewSubmission = z.infer<typeof reviewSubmissionSchema>;
+
+/**
+ * Generic field-error extractor for any ZodError. The leads route keeps `toFieldErrors`
+ * typed to LeadInput; this serves the review form (and any future schema) without coupling
+ * the helper to one input type.
+ */
+export function toFieldErrorsGeneric(error: z.ZodError): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const issue of error.issues) {
+    const key = issue.path[0];
+    if (typeof key === "string" && !(key in out)) out[key] = issue.message;
+  }
+  return out;
+}
