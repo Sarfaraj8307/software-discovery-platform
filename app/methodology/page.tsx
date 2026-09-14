@@ -10,6 +10,20 @@ export const metadata: Metadata = {
   description:
     "The published methodology behind every score in the directory: how the composite score is calculated, how reviews are verified, and how sponsored placements are labelled.",
   alternates: { canonical: "/methodology" },
+  openGraph: {
+    siteName: "Software Discovery",
+    locale: "en_US",
+    title: "How we rank software",
+    description:
+      "The published methodology behind every score in the directory: how the composite score is calculated, how reviews are verified, and how sponsored placements are labelled.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "How we rank software",
+    description:
+      "The published methodology behind every score in the directory: how the composite score is calculated, how reviews are verified, and how sponsored placements are labelled.",
+  },
 };
 
 /** The weights below mirror the formula in the catalogue generator exactly. */

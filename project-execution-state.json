@@ -2,7 +2,7 @@
   "$comment": "Persistent execution state for the visual-transformation + productionization program. Read this FIRST at the start of any session, before inspecting anything else. Update after every meaningful milestone. Keep it small and honest.",
   "project": "Software Discovery Platform",
   "repo": "https://github.com/Sarfaraj8307/software-discovery-platform",
-  "updatedAt": "2026-09-14T15:30:00.000Z",
+  "updatedAt": "2026-09-14T15:50:00.000Z",
   "mode": "autonomous",
   "currentPhase": "Backend P0 in progress. W7 (visual program) COMPLETE; B1 moderation, B2 lead status, B3 vendor replies, B4 listing edits all DONE and guarded. Two defensive fixes shipped: the dataset singleton (route handlers and pages now share one in-memory copy, proven by a 36→28 approved-reviews aggregate probe), and a review anchor (id=\"review-<id>\") that gives every review a stable deep link.",
   "currentObjective": "The dataset bug was the load-bearing one this session. Route handlers and pages were getting separate copies of the dataset because module scope in a production Next build is per route bundle, so an API write returned 201 and the public page never showed it — exactly what the codebase's own globalThis comment on leadStore warned about, but dataset itself was missed. After parking dataset on globalThis, an aggregate probe (rejecting 9 reviews on the demo vendor's products dropped the \"approved reviews\" KPI on /vendor/reviews from 36 to 28) proved route and page now share state. The vendor-reply guard was rewritten to post a unique marker and grep for THAT — the previous version asserted on \"Your response\", which also appears in the form label, so it stayed green on a false premise. The guard now genuinely proves the write reaches both /vendor/reviews and the product page. /vendor/reviews now also sorts Responded by respondedAt desc — the section heading promises most recent first and a slice of 10 was burying just-published replies.",
@@ -207,6 +207,57 @@
       "deferredDecisionsSurfaced": [
         "pendingClaims: 4 is a placeholder for the P1.5 listing-claims system. Three honest options (derive to 0, hide the card, relabel the card) are visible product changes and need an explicit user decision. Flagged in the source as a deferred decision; the guard does not cover it because every honest option is a copy or layout change, not a number-derivation fix."
       ]
+    },
+    "E2E3_og_twitter_coverage": {
+      "status": "DONE (2026-09-14)",
+      "what": [
+        "app/layout.tsx — root openGraph (siteName, locale, default title + template, description, type=website) and twitter (card, default title + template, description) blocks. Both lists have empty `images` deliberately: there is no real brand artwork yet (audit E5 deferred).",
+        "Seven static routes added per-page openGraph + twitter blocks: /, /about, /privacy, /terms, /methodology, /categories, /compare. Each block declares siteName + locale explicitly so the parent is not silently dropped.",
+        "Three dynamic routes added only twitter blocks (openGraph already existed): /product/[slug], /categories/[slug], /compare/[slugs]. Each gained siteName + locale on its openGraph so the parent is not silently dropped, and a twitter block with card=summary, page title and description.",
+        "Noindex routes (/search, /login, /admin/*, /vendor/*, /graph, /reviews/new) intentionally excluded — they do not need OG/Twitter. /reviews/new is noindex for the wizard itself but /reviews/new/confirmation (when wired) would rejoin indexable territory.",
+        "Comparison /compare/[slugs] keeps openGraph.type=article because a comparison is a point-in-time editorial artefact rather than an evergreen directory page."
+      ],
+      "why": "Audit items E2 (17 of 21 routes missing OG/Twitter) and E3 (no root-level fallback). Cleanest buildable P1-adjacent item not blocked on a deferred decision: the metadata layer is purely declarative, has no schema work, no UI work, and no PRNG order to preserve.",
+      "gotchaFound": "Next.js metadata does field-level merge within nested blocks. The parent's `openGraph.siteName` and `openGraph.locale` are NOT inherited when a child declares its own `openGraph` — siteName and locale must be on every per-page openGraph block. Confirmed by the first falsification probe (dropping twitter:title from /about did NOT remove it from the served HTML because the parent's title template fills it in). The fix is structural: declare siteName + locale on every block, not try to rely on the parent.",
+      "guard": {
+        "name": "scripts/qa/og-metadata-coverage.mjs",
+        "assertions": 80,
+        "routes": [
+          "/",
+          "/about",
+          "/privacy",
+          "/terms",
+          "/methodology",
+          "/categories",
+          "/compare",
+          "/product/<discovered>",
+          "/categories/<discovered>",
+          "/compare/<discovered>"
+        ],
+        "checksPerRoute": [
+          "route returns 200",
+          "og:title",
+          "og:description",
+          "og:site_name",
+          "og:type",
+          "twitter:card",
+          "twitter:title",
+          "twitter:description"
+        ],
+        "discovery": "Dynamic slugs are discovered from the served HTML (first /product/<slug> on /, first /categories/<slug> on /categories, first /compare/<slugs> on /compare) so the guard is stable across the deterministic catalogue seed without hardcoding slugs.",
+        "falsifiability": "PROVEN 2026-09-14: dropped og:type from /about, rebuilt, restarted on port 3054, re-ran the guard. Failed with exactly one finding: 'FAIL /about has meta property=\"og:type\" — missing'. Restored the source, rebuilt, restarted on port 3055, guard went green. Both states verified by a real HTTP probe, not by reading a build manifest."
+      },
+      "noRegressions": [
+        "scripts/qa/lead-status.mjs PASS (7/7) — lead pipeline unaffected.",
+        "scripts/qa/lead-ownership.mjs PASS (11/11) — ownership pipeline unaffected.",
+        "scripts/qa/portal-runtime.mjs PASS (6/6) — globalThis singleton still wired correctly, writes still propagate to /admin and /vendor.",
+        "scripts/qa/admin-metrics-honesty.mjs PASS (6/6) — the P2.3 derivation still ties KPI to listings-table pills.",
+        "tsc 0, eslint 0, next build 0. Build route table shows every E2/E3-touched route still in its expected class (Static for compliance/category/compare hubs, Dynamic for product/category/compare detail, SSG for compare comparisons)."
+      ],
+      "deferredDecisionsSurfaced": [
+        "og:image is intentionally absent from every block — audit E5 deferred imagery. When real brand artwork (1200x630 source) lands, the root layout is the single place to add it AND per-page overrides should switch to route-specific artwork. Decision: NO automated image generation with ImageResponse until there is a real source image to vary from.",
+        "metadataBase is still 'https://software-discovery.example' (placeholder). When a real domain is chosen, change ONE string in app/layout.tsx and all per-page relative URLs become absolute automatically."
+      ]
     }
   },
   "baseline": {
@@ -282,10 +333,10 @@
   },
   "lastValidation": {
     "at": "2026-09-14",
-    "result": "P2.3 (derive admin pending counters) COMPLETE 2026-09-14. getAdminMetrics().pendingProducts is now derived from getPendingProducts(50).filter(p => p.status === 'PENDING').length instead of the hardcoded literal 7, so the 'Pending listings' KPI on /admin, the nav badge, and the 'Listing approvals' work-queue card all agree with the count of PENDING pills in the listings table on /admin/moderation. pendingClaims remains the hardcoded literal 4 with a comment flagging it as a deferred user decision (P1.5 listing claims are not built). Guard scripts/qa/admin-metrics-honesty.mjs: 6/6 on the restored build, PROVEN FALSIFIABLE by a second build that hardcoded pendingProductsQueue to 5 — the guard failed with 'KPI 5 vs pills 17' on the integrity assertion, then passed again when the source was restored. No regressions: lead-status 7/7, lead-ownership 11/11, portal-runtime 6/6. tsc 0, eslint 0, next build 0."
+    "result": "E2/E3 (OG/Twitter metadata coverage) COMPLETE 2026-09-14. Root layout openGraph + twitter blocks (siteName, locale, default title/description, twitter card). Seven static routes gained per-page OG/Twitter: /, /about, /privacy, /terms, /methodology, /categories, /compare. Three dynamic routes gained twitter blocks plus siteName+locale on their existing OG blocks: /product/[slug], /categories/[slug], /compare/[slugs]. Noindex routes intentionally excluded. og:image intentionally absent (audit E5 deferred). Guard scripts/qa/og-metadata-coverage.mjs: 80/80 (10 routes x 8 checks), PROVEN FALSIFIABLE by dropping og:type from /about — guard failed with 'FAIL /about has meta property=\"og:type\" — missing'. Restored, rebuilt, green. No regressions: lead-status 7/7, lead-ownership 11/11, portal-runtime 6/6, admin-metrics-honesty 6/6. tsc 0, eslint 0, next build 0. Total: 110/110 across five guard suites."
   },
   "lastCheckpoint": "3580518",
-  "nextAutonomousAction": "P2.3 (pending counters) DONE 2026-09-14. getAdminMetrics().pendingProducts is now derived from the actual listings queue; the KPI cannot drift from what a moderator sees on /admin/moderation. The guard (scripts/qa/admin-metrics-honesty.mjs, 6/6) is proven falsifiable by a deliberate pendingProductsQueue=5 probe. pendingClaims: 4 is still a placeholder and is FLAGGED for an explicit user decision in the source comment — deriving to 0, hiding the card, or relabelling it are all visible product changes, not number-derivation fixes. All P1 features that did NOT require a deferred decision are DONE (P1.1, P1.3, P1.4). Remaining items are still BLOCKED on user decisions, not builds: (1) P0.4 score/methodology contradiction (Guest-exclusion + sponsored-exclusion). HIGH BLAST RADIUS: changing the maths regenerates the dataset. DEFER to explicit user decision. (2) P0.1 persistence store behind the 56 repository accessors. Unblocks auth and five P1 features. (3) P0.2 auth layer. Deferred until P0.1 is decided. (4) pendingClaims: 4 user decision (this phase). After those: P1.2 (saved items), P1.5 (listing claims), P1.6 (revalidation on write), and P2.2 (stale graph artifact at built_at_commit 91a419c, currently 33+ commits behind — visible on /graph, regenerated by scripts/graphify-build.sh, large 1.4 MB commit so do NOT fold into other work). Do NOT add recharts. Do NOT use rm on app/ files the sandbox delete guard wipes the whole directory; use mv plus git add instead (see environmentGotchas).",
+  "nextAutonomousAction": "E2/E3 (OG/Twitter metadata coverage) DONE 2026-09-14. Root fallback in app/layout.tsx + seven static routes gain per-page OG/Twitter + three dynamic routes gain twitter + siteName/locale. Guard scripts/qa/og-metadata-coverage.mjs: 80/80, falsification-proven. New gotcha recorded: Next.js metadata does FIELD-level merge, so parent openGraph.siteName/locale are not inherited by children that declare openGraph — must be repeated on every block. title.template IS inherited, so per-page twitter blocks only need the literal title. Remaining items are still BLOCKED on user decisions, not builds: (1) P0.4 score/methodology contradiction (Guest-exclusion + sponsored-exclusion). HIGH BLAST RADIUS. (2) P0.1 persistence store behind the 56 repository accessors. (3) P0.2 auth layer (deferred until P0.1 is decided). (4) pendingClaims: 4 user decision. (5) metadataBase: 'https://software-discovery.example' needs a real domain. After those: P1.2 (saved items), P1.5 (listing claims), P1.6 (revalidation on write), P2.1 (persist helpful votes — buildable, multi-file), and P2.2 (stale graph artifact at built_at_commit 91a419c — 13+ commits behind HEAD, regenerated by scripts/graphify-build.sh, large 1.4 MB commit so do NOT fold into other work). Do NOT add recharts. Do NOT use rm on app/ files — use mv plus git add instead (sandbox delete guard wipes app/).",
   "environmentGotchas": [
     "Never chain `rm` before a build — the delete guard blocks it and `&&` short-circuits, leaving a stale log.",
     "Clear NODE_OPTIONS for builds; set CODEBUDDY_SAFE_DELETE_BULK_THRESHOLD=1000000 for npm install.",
@@ -300,6 +351,7 @@
     "`curl -w` can exit 23 on Git Bash even on success, which breaks `&&` chains — check the printed status, not the exit code.",
     "`timeout N sh script.sh | tail -n` does NOT bound a wedged agent-browser run: timeout kills the shell, an orphaned browser child keeps the pipe open, and tail never sees EOF. Bound it as `... > out.txt 2>&1` and read the file, or run without a pipe.",
     "agent-browser tolerates only ~8-11 page checks before wedging. Split any matrix (routes x breakpoints) into small runs of 2-3 routes and write each to a file; do not pipe to tail. A run killed by SIGTERM may still have written valid partial results — always cat the file.",
-    "HTTP_PROXY/HTTPS_PROXY env vars are injected by the WorkBuddy runtime (used by MCP / AI services) and sabotage localhost connections: curl and Node fetch route through http://127.0.0.1:51558 and serve cached responses from a previously-killed next start, so a guard that reads the served HTML can return stale numbers even when the build artifact on disk is fresh. Always run localhost guards with env -u HTTP_PROXY -u HTTPS_PROXY -u http_proxy -u https_proxy node ... to bypass the proxy."
+    "HTTP_PROXY/HTTPS_PROXY env vars are injected by the WorkBuddy runtime (used by MCP / AI services) and sabotage localhost connections: curl and Node fetch route through http://127.0.0.1:51558 and serve cached responses from a previously-killed next start, so a guard that reads the served HTML can return stale numbers even when the build artifact on disk is fresh. Always run localhost guards with env -u HTTP_PROXY -u HTTPS_PROXY -u http_proxy -u https_proxy node ... to bypass the proxy.",
+    "Next.js metadata does FIELD-level merge within nested blocks: a child's `openGraph` completely REPLACES the parent's at the object level — `openGraph.siteName` and `openGraph.locale` are dropped unless the child redeclares them. The parent's `title.template` IS inherited field-by-field, so per-page twitter blocks only need the literal title. The right shape: declare `siteName: \"Software Discovery\"` and `locale: \"en_US\"` on every per-page openGraph block (10 files in E2/E3). Verified by the first E2/E3 falsification probe — dropping twitter:title from /about did NOT remove it from the served HTML (the parent template filled it in); dropping og:type from /about DID fail. The lesson generalises: do not try to inherit through nested blocks; declare the explicit shape you want on every level."
   ]
 }

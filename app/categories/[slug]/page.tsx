@@ -43,9 +43,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: data.category.seoDescription,
     alternates: { canonical: `/categories/${data.category.slug}` },
     openGraph: {
+      siteName: "Software Discovery",
+      locale: "en_US",
       title: data.category.seoTitle,
       description: data.category.seoDescription,
       type: "website",
+    },
+    twitter: {
+      card: "summary",
+      title: data.category.seoTitle,
+      description: data.category.seoDescription,
     },
   };
 }

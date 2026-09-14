@@ -13,6 +13,20 @@ export const metadata: Metadata = {
   description:
     "Build a side-by-side comparison of any two to four software products, or start from one of the most-viewed comparisons in the directory.",
   alternates: { canonical: "/compare" },
+  openGraph: {
+    siteName: "Software Discovery",
+    locale: "en_US",
+    title: "Compare software side by side",
+    description:
+      "Build a side-by-side comparison of any two to four software products, or start from one of the most-viewed comparisons in the directory.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Compare software side by side",
+    description:
+      "Build a side-by-side comparison of any two to four software products, or start from one of the most-viewed comparisons in the directory.",
+  },
 };
 
 export default function CompareHubPage() {

@@ -15,6 +15,20 @@ export const metadata: Metadata = {
   description:
     "Browse every software category and subcategory in the directory, with product counts and independent rankings.",
   alternates: { canonical: "/categories" },
+  openGraph: {
+    siteName: "Software Discovery",
+    locale: "en_US",
+    title: "All software categories",
+    description:
+      "Browse every software category and subcategory in the directory, with product counts and independent rankings.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "All software categories",
+    description:
+      "Browse every software category and subcategory in the directory, with product counts and independent rankings.",
+  },
 };
 
 export default function CategoriesPage() {

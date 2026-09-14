@@ -50,7 +50,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       data.summary[0] ??
       `Compare ${names.join(", ")} on ratings, pricing, features and integrations.`,
     alternates: { canonical: `/compare/${data.canonicalSlug}` },
-    openGraph: { title: `${heading} — comparison`, type: "article" },
+    openGraph: {
+      siteName: "Software Discovery",
+      locale: "en_US",
+      title: `${heading} — comparison`,
+      type: "article",
+    },
+    twitter: {
+      card: "summary",
+      title: `${heading} — comparison`,
+      description:
+        data.summary[0] ??
+        `Compare ${names.join(", ")} on ratings, pricing, features and integrations.`,
+    },
   };
 }
 

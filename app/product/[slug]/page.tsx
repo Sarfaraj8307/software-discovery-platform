@@ -82,9 +82,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: `${product.name} — ${product.tagline} Rated ${formatRating(product.ratingAvg)}/5 from ${formatCount(product.ratingCount)} ratings. Compare pricing, features and alternatives.`,
     alternates: { canonical: `/product/${product.slug}` },
     openGraph: {
+      siteName: "Software Discovery",
+      locale: "en_US",
       title: `${product.name} — reviews, pricing and alternatives`,
       description: product.tagline,
       type: "website",
+    },
+    twitter: {
+      card: "summary",
+      title: `${product.name} — reviews, pricing and alternatives`,
+      description: product.tagline,
     },
   };
 }

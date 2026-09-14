@@ -37,6 +37,34 @@ export const metadata: Metadata = {
     "Compare business software on verified reviews, transparent scoring and structured feature data. Independent rankings — vendors cannot pay for placement.",
   applicationName: "Software Discovery",
   robots: { index: true, follow: true },
+  // OG/Twitter root fallback (audit E2/E3). Per-route metadata merges with these; pages
+  // without their own openGraph/twitter blocks (e.g. compliance pages, the homepage)
+  // inherit siteName, locale, default title/description and the template from here.
+  //
+  // `images` is deliberately omitted: there is no real brand artwork yet (audit E5).
+  // `ImageResponse`-generated cards are deferred until the imagery work begins, at which
+  // point a single 1200x630 source image should be added here *and* per-route overrides
+  // should switch to route-specific artwork.
+  openGraph: {
+    type: "website",
+    siteName: "Software Discovery",
+    title: {
+      default: "Software Discovery — compare business software on evidence",
+      template: "%s | Software Discovery",
+    },
+    description:
+      "Compare business software on verified reviews, transparent scoring and structured feature data. Independent rankings — vendors cannot pay for placement.",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary",
+    title: {
+      default: "Software Discovery — compare business software on evidence",
+      template: "%s | Software Discovery",
+    },
+    description:
+      "Compare business software on verified reviews, transparent scoring and structured feature data. Independent rankings — vendors cannot pay for placement.",
+  },
 };
 
 export const viewport: Viewport = {

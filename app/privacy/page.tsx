@@ -8,6 +8,20 @@ export const metadata: Metadata = {
   description:
     "What data this directory collects, why it collects it, how long it is kept, and the choices available to you.",
   alternates: { canonical: "/privacy" },
+  openGraph: {
+    siteName: "Software Discovery",
+    locale: "en_US",
+    title: "Privacy policy",
+    description:
+      "What data this directory collects, why it collects it, how long it is kept, and the choices available to you.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Privacy policy",
+    description:
+      "What data this directory collects, why it collects it, how long it is kept, and the choices available to you.",
+  },
 };
 
 export default function PrivacyPage() {

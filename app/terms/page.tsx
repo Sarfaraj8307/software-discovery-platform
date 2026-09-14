@@ -8,6 +8,20 @@ export const metadata: Metadata = {
   description:
     "The terms that govern use of this software directory, including acceptable use, review policy and the limits of our liability.",
   alternates: { canonical: "/terms" },
+  openGraph: {
+    siteName: "Software Discovery",
+    locale: "en_US",
+    title: "Terms of use",
+    description:
+      "The terms that govern use of this software directory, including acceptable use, review policy and the limits of our liability.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Terms of use",
+    description:
+      "The terms that govern use of this software directory, including acceptable use, review policy and the limits of our liability.",
+  },
 };
 
 export default function TermsPage() {

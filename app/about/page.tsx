@@ -13,6 +13,20 @@ export const metadata: Metadata = {
   description:
     "Who builds this directory, how listings are sourced and maintained, and how vendors can get their product included.",
   alternates: { canonical: "/about" },
+  openGraph: {
+    siteName: "Software Discovery",
+    locale: "en_US",
+    title: "About the directory",
+    description:
+      "Who builds this directory, how listings are sourced and maintained, and how vendors can get their product included.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "About the directory",
+    description:
+      "Who builds this directory, how listings are sourced and maintained, and how vendors can get their product included.",
+  },
 };
 
 export default function AboutPage() {

@@ -24,6 +24,20 @@ export const metadata: Metadata = {
   description:
     "Compare business software on verified reviews, transparent scoring and structured feature data. Independent rankings across 18 categories — vendors cannot pay for placement.",
   alternates: { canonical: "/" },
+  openGraph: {
+    siteName: "Software Discovery",
+    locale: "en_US",
+    title: "Software Discovery — compare business software on evidence",
+    description:
+      "Compare business software on verified reviews, transparent scoring and structured feature data. Independent rankings across 18 categories — vendors cannot pay for placement.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Software Discovery — compare business software on evidence",
+    description:
+      "Compare business software on verified reviews, transparent scoring and structured feature data. Independent rankings across 18 categories — vendors cannot pay for placement.",
+  },
 };
 
 export default function HomePage() {
