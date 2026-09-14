@@ -1,0 +1,962 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Software Discovery Platform - Full Product Report and Enhancement Roadmap</title>
+<style>
+  :root{
+    --bg:#ffffff; --fg:#18181b; --card:#ffffff; --subtle:#fafafa; --muted:#f4f4f5;
+    --muted-fg:#6f6f78; --border:#e4e4e7; --border-strong:#d4d4d8;
+    --primary:#2563eb; --primary-subtle:#eff6ff; --primary-border:#bfdbfe;
+    --success:#047857; --success-subtle:#ecfdf5; --success-border:#a7f3d0;
+    --warning:#b45309; --warning-subtle:#fffbeb; --warning-border:#fde68a;
+    --danger:#d42020; --danger-subtle:#fef2f2; --danger-border:#fecaca;
+    --inverse:#0b1020; --inverse-fg:#f4f4f7; --inverse-muted:#a9b1c7; --inverse-accent:#93c5fd;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0; background:var(--muted); color:var(--fg);
+    font:15px/1.65 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 96px}
+  .masthead{background:var(--inverse);color:var(--inverse-fg);padding:56px 0 44px;margin-bottom:32px}
+  .masthead .wrap{padding-bottom:0}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--inverse-muted);margin:0 0 12px}
+  .masthead h1{margin:0 0 10px;font-size:34px;line-height:1.18;letter-spacing:-.025em;font-weight:700}
+  .masthead p.lede{margin:0;max-width:70ch;color:var(--inverse-muted);font-size:16px}
+  .stamp{margin-top:24px;display:flex;flex-wrap:wrap;gap:8px}
+  .stamp span{font-size:12px;border:1px solid #26304d;border-radius:999px;padding:4px 12px;color:var(--inverse-muted)}
+  section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px 30px;margin:0 0 22px;box-shadow:0 1px 2px rgba(24,24,27,.04)}
+  h2{margin:0 0 6px;font-size:22px;letter-spacing:-.02em;font-weight:700}
+  h2 .num{color:var(--primary);font-variant-numeric:tabular-nums;margin-right:10px}
+  h3{margin:26px 0 8px;font-size:16px;font-weight:650;letter-spacing:-.01em}
+  h4{margin:18px 0 6px;font-size:14px;font-weight:650}
+  .sub{margin:0 0 18px;color:var(--muted-fg);font-size:13.5px}
+  p{margin:0 0 12px}
+  ul,ol{margin:0 0 12px;padding-left:22px}
+  li{margin:0 0 6px}
+  a{color:var(--primary)}
+  code{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    background:var(--muted);border:1px solid var(--border);border-radius:4px;padding:1px 5px;}
+  pre{background:var(--inverse);color:var(--inverse-fg);border-radius:8px;padding:16px 18px;
+    overflow-x:auto;font:12.5px/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;margin:12px 0 16px;}
+  pre code{background:none;border:0;color:inherit;padding:0}
+  table{width:100%;border-collapse:collapse;margin:10px 0 18px;font-size:13.5px}
+  caption{caption-side:top;text-align:left;font-size:12px;color:var(--muted-fg);padding-bottom:8px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+  thead th{background:var(--subtle);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-fg);font-weight:700;border-bottom:1px solid var(--border-strong)}
+  tbody tr:last-child td{border-bottom:0}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  tbody tr:hover{background:var(--subtle)}
+  .scroll{overflow-x:auto}
+  .pill{display:inline-block;font-size:11px;font-weight:650;padding:2px 8px;border-radius:999px;border:1px solid;white-space:nowrap}
+  .p-ok{color:var(--success);background:var(--success-subtle);border-color:var(--success-border)}
+  .p-warn{color:var(--warning);background:var(--warning-subtle);border-color:var(--warning-border)}
+  .p-bad{color:var(--danger);background:var(--danger-subtle);border-color:var(--danger-border)}
+  .p-info{color:var(--primary);background:var(--primary-subtle);border-color:var(--primary-border)}
+  .p-mute{color:var(--muted-fg);background:var(--muted);border-color:var(--border)}
+  .note{border:1px solid var(--border);border-left:3px solid var(--primary);background:var(--primary-subtle);border-radius:0 8px 8px 0;padding:14px 16px;margin:14px 0;font-size:13.5px}
+  .note.warn{border-left-color:var(--warning);background:var(--warning-subtle)}
+  .note.bad{border-left-color:var(--danger);background:var(--danger-subtle)}
+  .note p:last-child{margin-bottom:0}
+  .note .t{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0 8px}
+  .kpi{border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--subtle)}
+  .kpi .v{font-size:24px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .kpi .l{font-size:11.5px;color:var(--muted-fg);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+  .kpi .h{font-size:12px;color:var(--muted-fg);margin-top:6px}
+  .toc{columns:2;column-gap:32px;font-size:13.5px}
+  .toc a{display:block;padding:3px 0;color:var(--fg);text-decoration:none;border-bottom:1px solid var(--border)}
+  .toc a:hover{color:var(--primary);border-color:var(--primary)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  @media (max-width:820px){.grid2{grid-template-columns:1fr}.toc{columns:1}}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
+  .muted{color:var(--muted-fg)}
+  .small{font-size:12.5px}
+  .flush{margin-bottom:0}
+  hr{border:0;border-top:1px solid var(--border);margin:26px 0}
+  .figure{border:1px solid var(--border);border-radius:10px;background:var(--subtle);padding:18px;margin:14px 0;overflow-x:auto}
+  .figure svg{display:block;margin:0 auto;max-width:100%;height:auto}
+  footer{color:var(--muted-fg);font-size:12.5px;text-align:center;padding:8px 0 0}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="wrap">
+    <p class="eyebrow">Product handover and enhancement dossier</p>
+    <h1>Software Discovery Platform</h1>
+    <p class="lede">A complete technical and product account of the build as it stands today: architecture, every surface, the data model, the quality harness, measured performance, and a prioritised roadmap for what comes next.</p>
+    <div class="stamp">
+      <span>Next.js 16.3.5 / React 19.3 / TypeScript 5.6 / Tailwind v4</span>
+      <span>42 commits / 20 routes / 7 API endpoints</span>
+      <span>Generated 14 Sep 2026</span>
+      <span>HEAD e44b3a6</span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<section id="toc">
+  <h2><span class="num">00</span>Contents</h2>
+  <nav class="toc">
+    <a href="#exec">01 / Executive summary</a>
+    <a href="#scope">02 / What it is, and what is locked</a>
+    <a href="#arch">03 / Architecture</a>
+    <a href="#state">04 / State, data flow and the singleton rule</a>
+    <a href="#ia">05 / Information architecture and route map</a>
+    <a href="#model">06 / Data model</a>
+    <a href="#features">07 / Feature inventory</a>
+    <a href="#api">08 / Backend API surface</a>
+    <a href="#design">09 / Design system and accessibility</a>
+    <a href="#qa">10 / Quality harness</a>
+    <a href="#perf">11 / Measured performance</a>
+    <a href="#history">12 / Build history</a>
+    <a href="#known">13 / Known issues and open decisions</a>
+    <a href="#deferred">14 / Deliberately not built</a>
+    <a href="#roadmap">15 / Enhancement roadmap</a>
+    <a href="#quickstart">16 / Developer quickstart and gotchas</a>
+  </nav>
+</section>
+
+<section id="exec">
+  <h2><span class="num">01</span>Executive summary</h2>
+  <p class="sub">What exists, how healthy it is, and the one thing to read before planning anything.</p>
+
+  <p>This is a <strong>B2B software discovery and comparison marketplace</strong> in the G2 / Capterra class, built from scratch in this workspace. It is not a migration or a re-skin. It ships a 230-product catalogue with 72 categories and 180 curated comparisons, a buyer-facing search and comparison experience, a vendor portal, an admin portal, and a small but real write-back API.</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">230</div><div class="l">Products</div><div class="h">72 categories / 180 comparisons</div></div>
+    <div class="kpi"><div class="v">1,176</div><div class="l">Reviews</div><div class="h">848 verified (VALIDATED + CURRENT_USER)</div></div>
+    <div class="kpi"><div class="v">20</div><div class="l">Routes</div><div class="h">plus 7 API endpoints</div></div>
+    <div class="kpi"><div class="v">59</div><div class="l">Components</div><div class="h">16 directories, no charting library</div></div>
+    <div class="kpi"><div class="v">100%</div><div class="l">Under JS budget</div><div class="h">heaviest route 1,196 KB of 1,536 KB</div></div>
+    <div class="kpi"><div class="v">30</div><div class="l">Guard assertions</div><div class="h">4 backend guards, all passing</div></div>
+  </div>
+
+  <h3>State of the build</h3>
+  <div class="scroll">
+  <table>
+    <caption>Verification status at commit e44b3a6</caption>
+    <thead><tr><th>Gate</th><th>Result</th><th>What it actually proves</th></tr></thead>
+    <tbody>
+      <tr><td>TypeScript</td><td><span class="pill p-ok">0 errors</span></td><td>Types line up. Nothing more.</td></tr>
+      <tr><td>ESLint</td><td><span class="pill p-ok">0 warnings</span></td><td>No lint debt.</td></tr>
+      <tr><td>Production build</td><td><span class="pill p-ok">exit 0</span></td><td>285 pages generated, no compile failure.</td></tr>
+      <tr><td>Route smoke</td><td><span class="pill p-ok">25 / 25</span></td><td>Every route returns the expected status.</td></tr>
+      <tr><td>Trust-signal audit</td><td><span class="pill p-ok">PASS</span></td><td>Every number labelled "verified" is a count of verified records; JSON-LD matches what renders.</td></tr>
+      <tr><td>Backend guards</td><td><span class="pill p-ok">30 / 30</span></td><td>Moderation, lead status, vendor replies, listing edits (including that the write actually reaches the page).</td></tr>
+      <tr><td>First-load JS</td><td><span class="pill p-ok">18 / 18</span></td><td>All measured routes under the 1,536 KB contract.</td></tr>
+      <tr><td>Horizontal overflow</td><td><span class="pill p-ok">28 / 28</span></td><td>7 routes x 4 breakpoints, no sideways scroll.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <span class="t">Read this before planning</span>
+    <p>The single most important architectural fact in this codebase: <b>all data is synthetic, generated deterministically at module load, and the app has no database and no authentication.</b> Every write (a lead, a moderation decision, a vendor reply, a listing-edit proposal) mutates an in-memory object and is <b>lost on restart</b>. Any enhancement that needs durable state starts with the repository swap described in section 15, not with a new page.</p>
+  </div>
+
+  <h3>The three things worth knowing</h3>
+  <ol>
+    <li><strong>One module is the whole data layer.</strong> <code>lib/data/repository.ts</code> exposes 56 accessors and is the only thing any page or route imports. A swap to Prisma or Drizzle touches one file. This was deliberate and it holds: no page imports <code>seed.ts</code>.</li>
+    <li><strong>Mutable state lives on <code>globalThis</code>, and it must.</strong> Production Next.js instantiates a module once per route bundle, so a plain module-level array diverges: an API route writes and returns 201, and the page never shows it. This bug was real and was fixed in e44b3a6. Any new mutable store needs the same wrapper.</li>
+    <li><strong>The dataset is defined by its PRNG.</strong> <code>lib/data/seed.ts</code> keeps a private copy of the generator. Refactoring it onto the shared <code>lib/procedural.ts</code> PRNG would change every product, score and review, invalidating every number recorded in this report. Do not do it.</li>
+  </ol>
+</section>
+
+<section id="scope">
+  <h2><span class="num">02</span>What it is, and what is locked</h2>
+  <p class="sub">The product definition and the decisions that are settled. Re-litigating these costs time; changing them is a product decision, not a bug fix.</p>
+
+  <div class="grid2">
+    <div>
+      <h3>In scope, shipped</h3>
+      <ul>
+        <li>Public catalogue: home, search, categories, product profiles, side-by-side comparison</li>
+        <li>Trust layer: verified-review labels, an explicit methodology page, disclosed synthetic data</li>
+        <li>Vendor portal: overview, enquiries, listings, reviews (pinned to one demo vendor)</li>
+        <li>Admin portal: dashboard, leads, moderation queue, SEO consistency gate</li>
+        <li>Write-back API: enquiries, lead status, moderation decisions, vendor replies, listing-edit proposals</li>
+        <li>Knowledge graph surface (<code>/graph</code>) from a pre-built Graphify artifact</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Locked decisions, do not re-litigate</h3>
+      <ul>
+        <li><strong>Light enterprise aesthetic only.</strong> Zinc-200 borders, single blue accent <code>#2563EB</code>. Dark mode, neon and glassmorphism were explicitly rejected.</li>
+        <li><strong>All data is synthetic and disclosed as such.</strong> A <code>DemoDataNotice</code> sits in the root footer and both portal layouts. Keep it.</li>
+        <li><strong>No authentication.</strong> The portals are pinned to <code>DEMO_VENDOR_SLUG = "salesforce"</code>; moderation records the literal actor <code>"unauthenticated"</code> rather than inventing an identity.</li>
+        <li><strong>1.5 MB initial-JS contract.</strong> 1,536 KB. Every route is measured against it.</li>
+        <li><strong>No charting library.</strong> <code>recharts</code> is installed and imported nowhere; all charts are hand-rolled SVG. Do not add it.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note">
+    <span class="t">Boundary that matters commercially</span>
+    <p>Vendors can propose copy (tagline, short description) but <b>cannot edit anything that feeds the composite score</b>: ratings, review counts, feature coverage. That boundary is documented on <code>/vendor/products</code> and enforced by the schema, not by the UI. Protecting it is the credibility of the whole product.</p>
+  </div>
+</section>
+
+<section id="arch">
+  <h2><span class="num">03</span>Architecture</h2>
+  <p class="sub">How the pieces fit, and the constraints that keep the JS budget honest.</p>
+
+  <h3>Stack</h3>
+  <div class="scroll">
+  <table>
+    <caption>Runtime and build dependencies that actually matter</caption>
+    <thead><tr><th>Layer</th><th>Choice</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Framework</td><td>Next.js 16.3.5 (App Router, Turbopack)</td><td>Server components by default. React 19.3.</td></tr>
+      <tr><td>Language</td><td>TypeScript 5.6, strict</td><td><code>tsc --noEmit</code> is a gate, not a suggestion.</td></tr>
+      <tr><td>Styling</td><td>Tailwind CSS v4 (CSS-first <code>@theme</code>)</td><td>No JS config file. Tokens are CSS custom properties.</td></tr>
+      <tr><td>Primitives</td><td>Radix UI (16 packages)</td><td>Dialog, Select, Tabs, Tooltip and friends. Accessible by default.</td></tr>
+      <tr><td>Validation</td><td>Zod 4</td><td>Server-side only, at every API boundary.</td></tr>
+      <tr><td>Motion</td><td>GSAP + <code>motion</code></td><td>Scroll reveal, hero scene. Reduced-motion respected.</td></tr>
+      <tr><td>3D</td><td><code>three</code> (lazy, width-gated)</td><td>Homepage hero only. Never shipped to phones.</td></tr>
+      <tr><td>Icons</td><td><code>lucide-react</code></td><td>Tree-shaken; only named imports.</td></tr>
+      <tr><td>Database</td><td><em>None</em></td><td>Seeded in-memory dataset. See section 15.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Module map</h3>
+  <div class="scroll">
+  <table>
+    <caption>Where things live</caption>
+    <thead><tr><th>Path</th><th>Responsibility</th></tr></thead>
+    <tbody>
+      <tr><td><code>lib/data/repository.ts</code></td><td><strong>The entire data layer.</strong> 56 accessors. The only module pages import for data.</td></tr>
+      <tr><td><code>lib/data/seed.ts</code></td><td>Deterministic dataset generator. Private PRNG. 230 products, 1,176 reviews, 72 categories, 180 comparisons.</td></tr>
+      <tr><td><code>lib/data/types.ts</code></td><td>Every entity interface and shared enum/const (<code>LEAD_STATUSES</code> lives here so Zod stays out of client bundles).</td></tr>
+      <tr><td><code>lib/data/catalog.ts</code>, <code>taxonomy.ts</code>, <code>queries.ts</code></td><td>Static taxonomy definitions and query helpers consumed by the repository.</td></tr>
+      <tr><td><code>lib/ranking.ts</code></td><td><strong>The only</strong> source of tier thresholds (Leader = 87). Scores clamped to [58, 99].</td></tr>
+      <tr><td><code>lib/procedural.ts</code></td><td>Second PRNG for rendering (gradients, thumbnails, illustrations). Deliberately separate from the seed PRNG.</td></tr>
+      <tr><td><code>lib/viz.ts</code></td><td>Literal Tailwind class strings, so the v4 scanner emits them.</td></tr>
+      <tr><td><code>lib/search/index.ts</code></td><td>Client/server search index and scoring.</td></tr>
+      <tr><td><code>lib/validation/schemas.ts</code></td><td>7 Zod schemas, one per write endpoint.</td></tr>
+      <tr><td><code>lib/portals.ts</code></td><td><code>DEMO_VENDOR_SLUG</code> and portal navigation. The single seam auth will replace.</td></tr>
+      <tr><td><code>app/globals.css</code></td><td><code>@theme</code> token block. Every colour has a measured contrast ratio in a comment.</td></tr>
+      <tr><td><code>components/</code></td><td>59 components across 16 directories (ui, domain, product, reviews, compare, vendor, admin, viz, graph, ...).</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Rendering strategy</h3>
+  <p>The build output classifies every route. This matters because in-memory writes are only visible on routes that render per request.</p>
+  <div class="scroll">
+  <table>
+    <caption>From <code>next build</code> output at e44b3a6</caption>
+    <thead><tr><th>Mode</th><th>Routes</th><th>Implication</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill p-mute">Static</span></td><td><code>/</code>, <code>/about</code>, <code>/categories</code>, <code>/compare</code>, <code>/graph</code>, <code>/login</code>, <code>/methodology</code>, <code>/privacy</code>, <code>/terms</code>, <code>/robots.txt</code>, <code>/sitemap.xml</code></td><td>Prerendered once. Cannot reflect a runtime write.</td></tr>
+      <tr><td><span class="pill p-info">SSG</span></td><td><code>/compare/[slugs]</code> (80 paths)</td><td>Prerendered from <code>generateStaticParams</code>.</td></tr>
+      <tr><td><span class="pill p-info">Dynamic</span></td><td><code>/product/[slug]</code>, <code>/categories/[slug]</code>, <code>/search</code>, <code>/vendor/*</code>, <code>/admin/*</code>, all <code>/api/*</code></td><td>Server-rendered on demand. These see runtime writes.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note warn">
+    <span class="t">Consequence to plan around</span>
+    <p><code>/product/[slug]</code> has <code>generateStaticParams</code>, but only for the featured, trending and top-per-category products. The rest render on demand. So a vendor reply is visible on most product profiles but would be stale on a prerendered one. If you make writes durable (section 15), decide deliberately whether product pages become <code>force-dynamic</code> or take an ISR revalidation path.</p>
+  </div>
+
+  <h3>Heavy assets are JS-gated, never CSS-hidden</h3>
+  <p>Two components carry weight that would blow the budget if it shipped unconditionally:</p>
+  <ul>
+    <li><code>HeroScene</code> dynamically imports <code>three</code> behind a viewport-width gate.</li>
+    <li><code>GraphFrame</code> gates the 1.4 MB self-contained Graphify viewer behind the same pattern.</li>
+  </ul>
+  <p>The gate runs inside an effect and renders <em>nothing</em> until it passes, so SSR and the first client render agree (no hydration mismatch). A CSS hide such as <code>hidden sm:block</code> would still download the asset, which is why it is not used.</p>
+</section>
+
+<section id="state">
+  <h2><span class="num">04</span>State, data flow and the singleton rule</h2>
+  <p class="sub">The one bug class that has already bitten this codebase, and the rule that prevents it recurring.</p>
+
+  <div class="figure">
+    <svg viewBox="0 0 900 330" width="900" height="330" role="img" aria-label="Data flow: seed generates the dataset, the repository owns it on globalThis, pages and API routes both read and write through it.">
+      <defs>
+        <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3.2" orient="auto">
+          <path d="M0,0 L7,3.2 L0,6.4 z" fill="#6f6f78"/>
+        </marker>
+      </defs>
+      <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="12">
+        <rect x="20" y="24" width="180" height="62" rx="8" fill="#f4f4f5" stroke="#d4d4d8"/>
+        <text x="110" y="48" text-anchor="middle" font-weight="700" fill="#18181b">lib/data/seed.ts</text>
+        <text x="110" y="66" text-anchor="middle" fill="#6f6f78">deterministic PRNG</text>
+
+        <rect x="340" y="24" width="220" height="62" rx="8" fill="#eff6ff" stroke="#bfdbfe"/>
+        <text x="450" y="48" text-anchor="middle" font-weight="700" fill="#1d4ed8">globalThis.__dataset</text>
+        <text x="450" y="66" text-anchor="middle" fill="#2563eb">one copy per process</text>
+
+        <rect x="340" y="130" width="220" height="70" rx="8" fill="#ffffff" stroke="#e4e4e7"/>
+        <text x="450" y="154" text-anchor="middle" font-weight="700" fill="#18181b">repository.ts</text>
+        <text x="450" y="172" text-anchor="middle" fill="#6f6f78">56 accessors</text>
+        <text x="450" y="188" text-anchor="middle" fill="#6f6f78">+ globalThis stores</text>
+
+        <rect x="60" y="248" width="200" height="56" rx="8" fill="#ffffff" stroke="#e4e4e7"/>
+        <text x="160" y="272" text-anchor="middle" font-weight="700" fill="#18181b">Pages (server)</text>
+        <text x="160" y="290" text-anchor="middle" fill="#6f6f78">read only</text>
+
+        <rect x="640" y="248" width="200" height="56" rx="8" fill="#ffffff" stroke="#e4e4e7"/>
+        <text x="740" y="272" text-anchor="middle" font-weight="700" fill="#18181b">API routes</text>
+        <text x="740" y="290" text-anchor="middle" fill="#6f6f78">read + write</text>
+
+        <line x1="200" y1="55" x2="336" y2="55" stroke="#6f6f78" stroke-width="1.5" marker-end="url(#ar)"/>
+        <line x1="450" y1="86" x2="450" y2="126" stroke="#6f6f78" stroke-width="1.5" marker-end="url(#ar)"/>
+        <line x1="380" y1="200" x2="190" y2="244" stroke="#6f6f78" stroke-width="1.5" marker-end="url(#ar)"/>
+        <line x1="520" y1="200" x2="710" y2="244" stroke="#6f6f78" stroke-width="1.5" marker-end="url(#ar)"/>
+        <line x1="640" y1="276" x2="560" y2="196" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+        <text x="612" y="228" font-size="11" fill="#2563eb">writes</text>
+      </g>
+    </svg>
+  </div>
+
+  <h3>The singleton rule</h3>
+  <p>Production Next.js gives <strong>each route bundle its own module instance</strong>. A plain module-level binding is therefore created more than once, and an API route will happily mutate a copy no page ever reads. The symptom is distinctive and misleading: the write returns 201, the response body is correct, and the UI never changes.</p>
+
+  <div class="note bad">
+    <span class="t">This actually happened here</span>
+    <p>Discovered in the B4 cycle. <code>dataset</code> was module-scoped in the repository while <code>leadStore</code>, <code>moderationLog</code>, <code>productDecisions</code> and <code>listingEdits</code> were already wrapped. A vendor reply returned 201 and appeared on neither the portal nor the product page. It was only caught because the guard posted a unique marker and grepped the rendered HTML for it, rather than asserting on a static string.</p>
+  </div>
+
+  <p>The required pattern, used five times in the repository:</p>
+<pre><code>const globalForDataset = globalThis as unknown as { __dataset?: typeof seeded };
+const dataset: Dataset = (globalForDataset.__dataset ??= seeded);</code></pre>
+
+  <div class="scroll">
+  <table>
+    <caption>Every mutable store, and where it lives</caption>
+    <thead><tr><th>Store</th><th>Key</th><th>Written by</th><th>Read by</th></tr></thead>
+    <tbody>
+      <tr><td><code>dataset</code></td><td><code>__dataset</code></td><td>moderation, reply, listing-edit routes</td><td>every page</td></tr>
+      <tr><td><code>leadStore</code></td><td><code>__leadStore</code></td><td><code>POST /api/leads</code>, lead status PATCH</td><td><code>/vendor/leads</code>, <code>/admin/leads</code></td></tr>
+      <tr><td><code>moderationLog</code></td><td><code>__moderationLog</code></td><td><code>POST /api/moderation</code> (append-only)</td><td><code>/admin/moderation</code></td></tr>
+      <tr><td><code>productDecisions</code></td><td><code>__productDecisions</code></td><td><code>POST /api/moderation</code></td><td><code>getPendingProducts()</code></td></tr>
+      <tr><td><code>listingEdits</code></td><td><code>__listingEdits</code></td><td>propose + decide routes</td><td><code>/vendor/products</code>, <code>/admin/moderation</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>The two-PRNG rule</h3>
+  <p><code>lib/procedural.ts</code> and <code>lib/data/seed.ts</code> each carry a copy of the same mulberry32 generator. That duplication looks like a mistake and is not. The seed PRNG <em>defines the dataset</em>: product names, scores, review text and counts are all functions of its output sequence. Unifying the two would change every generated value and invalidate every number in this report, every screenshot, and every guard baseline.</p>
+  <p>A corollary: <strong>no <code>Math.random()</code> anywhere.</strong> Server and client must agree, so all procedural output is derived from a seeded PRNG or a hash.</p>
+
+  <div class="note">
+    <span class="t">Append-only by construction</span>
+    <p>The moderation log has no delete or edit path. A queue that can be silently rewritten is not defensible when a vendor disputes a rejection, which is the entire reason the log exists alongside the status column. Keep it that way if you move it to a database.</p>
+  </div>
+</section>
+
+<section id="ia">
+  <h2><span class="num">05</span>Information architecture and route map</h2>
+  <p class="sub">Every surface, what it is for, and how it renders.</p>
+
+  <div class="scroll">
+  <table>
+    <caption>All 20 page routes</caption>
+    <thead><tr><th>Route</th><th>Audience</th><th>Purpose</th><th class="num">Mode</th></tr></thead>
+    <tbody>
+      <tr><td><code>/</code></td><td>Buyer</td><td>Homepage: 3D hero scene, category pillars, featured and trending rails, trust band, CTA band.</td><td class="num"><span class="pill p-mute">Static</span></td></tr>
+      <tr><td><code>/search</code></td><td>Buyer</td><td>Full-text search with facets, sort and pagination. Backed by <code>/api/search</code>.</td><td class="num"><span class="pill p-info">Dynamic</span></td></tr>
+      <tr><td><code>/categories</code></td><td>Buyer</td><td>Taxonomy overview across 72 categories grouped by pillar.</td><td class="num"><span class="pill p-mute">Static</span></td></tr>
+      <tr><td><code>/categories/[slug]</code></td><td>Buyer</td><td>Category landing: subcategories, ranked product list, trust bar.</td><td class="num"><span class="pill p-info">Dynamic</span></td></tr>
+      <tr><td><code>/product/[slug]</code></td><td>Buyer</td><td>The core surface: score panel, pricing, features, integrations, media gallery, reviews, alternatives, FAQ, JSON-LD.</td><td class="num"><span class="pill p-info">Dynamic</span></td></tr>
+      <tr><td><code>/compare</code></td><td>Buyer</td><td>Picker to choose 2 to 4 products.</td><td class="num"><span class="pill p-mute">Static</span></td></tr>
+      <tr><td><code>/compare/[slugs]</code></td><td>Buyer</td><td>Side-by-side comparison: score bars, feature matrix, pricing, verdict.</td><td class="num"><span class="pill p-info">SSG</span></td></tr>
+      <tr><td><code>/methodology</code></td><td>Buyer</td><td>How the composite score is computed. Public trust artefact.</td><td class="num"><span class="pill p-mute">Static</span></td></tr>
+      <tr><td><code>/about</code>, <code>/privacy</code>, <code>/terms</code></td><td>Buyer</td><td>Company, privacy, terms.</td><td class="num"><span class="pill p-mute">Static</span></td></tr>
+      <tr><td><code>/login</code></td><td>Buyer / Vendor</td><td>Split brand-visual and form layout. Explicitly states auth is not wired up.</td><td class="num"><span class="pill p-mute">Static</span></td></tr>
+      <tr><td><code>/graph</code></td><td>Buyer</td><td>Knowledge-graph view of category relationships. 1.4 MB viewer behind a width gate; currently <code>noindex</code>.</td><td class="num"><span class="pill p-mute">Static</span></td></tr>
+      <tr><td><code>/vendor</code></td><td>Vendor</td><td>Overview: KPI cards, hand-rolled accessible charts, recent activity.</td><td class="num"><span class="pill p-info">Dynamic</span></td></tr>
+      <tr><td><code>/vendor/leads</code></td><td>Vendor</td><td>Enquiry inbox with per-row status control.</td><td class="num"><span class="pill p-info">Dynamic</span></td></tr>
+      <tr><td><code>/vendor/products</code></td><td>Vendor</td><td>Owned listings, propose-a-change form, disclosures about what is not editable.</td><td class="num"><span class="pill p-info">Dynamic</span></td></tr>
+      <tr><td><code>/vendor/reviews</code></td><td>Vendor</td><td>Awaiting-response queue and published replies. Reply composer with live character count.</td><td class="num"><span class="pill p-info">Dynamic</span></td></tr>
+      <tr><td><code>/admin</code></td><td>Admin</td><td>Dashboard: KPIs, review status and verification composition panels.</td><td class="num"><span class="pill p-info">Dynamic</span></td></tr>
+      <tr><td><code>/admin/leads</code></td><td>Admin</td><td>All enquiries across vendors, with status control.</td><td class="num"><span class="pill p-info">Dynamic</span></td></tr>
+      <tr><td><code>/admin/moderation</code></td><td>Admin</td><td>Review queue, listing approvals, proposed listing changes, append-only decision log.</td><td class="num"><span class="pill p-info">Dynamic</span></td></tr>
+      <tr><td><code>/admin/seo</code></td><td>Admin</td><td>Consistency gate: compares the sitemap, robots.txt and per-route indexation directives.</td><td class="num"><span class="pill p-info">Dynamic</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <span class="t">Navigational note</span>
+    <p>Vendor and admin areas share shell components (<code>SectionHeading</code>, <code>KpiCard</code>, <code>DataTable</code>, <code>StatusPill</code>) but have separate layouts. Both portal layouts render the synthetic-data disclosure, as does the root footer.</p>
+  </div>
+</section>
+
+<section id="model">
+  <h2><span class="num">06</span>Data model</h2>
+  <p class="sub">Entities as defined in <code>lib/data/types.ts</code>. This is effectively the future database schema.</p>
+
+  <div class="scroll">
+  <table>
+    <caption>Core entities</caption>
+    <thead><tr><th>Entity</th><th>Key fields</th><th>Notes for a future schema</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Product</strong><br><span class="small muted">230 records</span></td>
+        <td><code>slug</code>, <code>name</code>, <code>companySlug</code>, <code>categorySlug</code>, <code>tagline</code>, <code>shortDescription</code>, <code>description</code>, <code>score</code>, <code>ratingAvg</code>, <code>ratingCount</code>, <code>reviewCount</code>, <code>status</code>, <code>deployment</code>, <code>pricingModel</code>, <code>pricingPlans[]</code>, <code>features[]</code>, <code>integrations[]</code>, <code>pros</code>/<code>cons</code>, <code>screenshots[]</code>, <code>faq[]</code></td>
+        <td><code>score</code> is the composite in [58, 99]. <code>ratingCount</code> is generated independently of the review records, which is why "N reviews" must never be read off it. <code>status</code> transitions DRAFT / PENDING / APPROVED / ARCHIVED.</td>
+      </tr>
+      <tr>
+        <td><strong>Review</strong><br><span class="small muted">1,176 records</span></td>
+        <td><code>id</code> (<code>rev_&lt;slug&gt;_&lt;n&gt;</code>), <code>productSlug</code>, <code>status</code>, <code>verification</code>, <code>rating</code>, <code>title</code>, <code>body</code>, <code>pros</code>, <code>cons</code>, <code>authorName</code>, <code>authorRole</code>, <code>authorCompanySize</code>, <code>authorIndustry</code>, <code>useDuration</code>, <code>helpfulCount</code>, <code>vendorResponse</code>, <code>createdAt</code></td>
+        <td><code>verification</code> is one of VALIDATED / CURRENT_USER / INCENTIVIZED / GUEST. Only the first two count as verified. 94% seeded APPROVED, the rest PENDING or FLAGGED. <code>vendorResponse</code> is the only field a vendor may write.</td>
+      </tr>
+      <tr>
+        <td><strong>Company</strong><br><span class="small muted">vendor records</span></td>
+        <td><code>slug</code>, <code>name</code>, <code>website</code>, <code>logoDomain</code>, <code>size</code>, <code>founded</code>, <code>hq</code>, <code>description</code></td>
+        <td>The natural place to hang vendor users and entitlement when auth lands.</td>
+      </tr>
+      <tr>
+        <td><strong>Category</strong><br><span class="small muted">72 records</span></td>
+        <td><code>slug</code>, <code>name</code>, <code>pillar</code>, <code>parentSlug</code>, <code>description</code>, <code>productCount</code></td>
+        <td>Two-level taxonomy (pillar then category). Pillar counts are near-uniform, which is why a treemap was built and rejected.</td>
+      </tr>
+      <tr>
+        <td><strong>Comparison</strong><br><span class="small muted">180 records</span></td>
+        <td><code>slug</code>, <code>productSlugs[]</code>, <code>title</code>, <code>sections[]</code>, <code>rows[]</code>, <code>values[]</code>, <code>verdict</code></td>
+        <td>Normalised into sections / rows / value cells. 80 paths are prerendered.</td>
+      </tr>
+      <tr>
+        <td><strong>Lead</strong><br><span class="small muted">runtime-created</span></td>
+        <td><code>id</code>, <code>type</code>, <code>productSlug</code>, <code>companySlug</code>, <code>name</code>, <code>email</code>, <code>company</code>, <code>phone</code>, <code>message</code>, <code>status</code>, <code>createdAt</code>, <code>updatedAt</code></td>
+        <td><code>status</code> is NEW / CONTACTED / QUALIFIED / CLOSED / SPAM. <strong>No owner field</strong>, which is why lead hand-off is not implemented.</td>
+      </tr>
+      <tr>
+        <td><strong>ModerationDecision</strong><br><span class="small muted">append-only</span></td>
+        <td><code>id</code>, <code>targetType</code>, <code>targetId</code>, <code>targetLabel</code>, <code>action</code>, <code>fromStatus</code>, <code>toStatus</code>, <code>note</code>, <code>actor</code>, <code>decidedAt</code></td>
+        <td>Actor is the literal string <code>"unauthenticated"</code> today. The <code>note</code> is the rationale and is rendered as a "Reason" line in the admin log.</td>
+      </tr>
+      <tr>
+        <td><strong>ListingEdit</strong><br><span class="small muted">runtime-created</span></td>
+        <td><code>id</code>, <code>slug</code>, <code>productName</code>, <code>fields { tagline, shortDescription }</code>, <code>status</code>, <code>proposedAt</code>, <code>decidedAt</code></td>
+        <td>PENDING until an admin applies or discards. Only copy fields, never score inputs.</td>
+      </tr>
+      <tr>
+        <td><strong>Feature</strong> / <strong>Integration</strong></td>
+        <td><code>slug</code>, <code>name</code>, <code>groupSlug</code> / <code>category</code></td>
+        <td>Drive the comparison matrix and the product feature coverage panel.</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note warn">
+    <span class="t">Schema smell to fix when you move to a database</span>
+    <p><code>ratingCount</code> and the actual review records are generated independently. That is fine for a demo but it is a correctness trap: any feature that says "verified reviews" or "N reviews" must count records, never read <code>ratingCount</code>. Three separate surfaces got this wrong during W7 before a guard was written to keep them honest.</p>
+  </div>
+</section>
+
+<section id="features">
+  <h2><span class="num">07</span>Feature inventory</h2>
+  <p class="sub">What each area actually does today, including the parts that are honest about their limits.</p>
+
+  <h3>Buyer catalogue</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Feature</th><th class="num">State</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td>Composite score and tiers</td><td class="num"><span class="pill p-ok">Live</span></td><td>Single source of truth in <code>lib/ranking.ts</code>. Leader at 87. Rendered as an animated zero-JS <code>ScoreRing</code>.</td></tr>
+      <tr><td>Product profile</td><td class="num"><span class="pill p-ok">Live</span></td><td>Tabbed: overview, features, pricing, integrations, reviews, alternatives, FAQ. Emits Product JSON-LD with both <code>ratingCount</code> and <code>reviewCount</code>.</td></tr>
+      <tr><td>Search with facets</td><td class="num"><span class="pill p-ok">Live</span></td><td>Category, deployment, pricing, rating, verification filters. Server-rendered, URL-driven state.</td></tr>
+      <tr><td>Side-by-side comparison</td><td class="num"><span class="pill p-ok">Live</span></td><td>2 to 4 products. Score bars, normalised feature matrix, pricing rows, verdict. 80 paths prerendered.</td></tr>
+      <tr><td>Category browsing</td><td class="num"><span class="pill p-ok">Live</span></td><td>72 categories grouped by pillar with ranked listings and a trust bar.</td></tr>
+      <tr><td>Review reading and filtering</td><td class="num"><span class="pill p-ok">Live</span></td><td>5 per page, sortable by recent / helpful / rating, filterable by star and by verification.</td></tr>
+      <tr><td>Helpful votes</td><td class="num"><span class="pill p-warn">Local only</span></td><td><code>HelpfulButton</code> is client-side state. Not persisted.</td></tr>
+      <tr><td>Saved / shortlisted items</td><td class="num"><span class="pill p-mute">Not built</span></td><td>Deferred with auth.</td></tr>
+      <tr><td>Write a review</td><td class="num"><span class="pill p-mute">Not built</span></td><td>Deferred. The review-wizard is the largest single missing buyer feature.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Vendor portal</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Feature</th><th class="num">State</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td>Overview dashboard</td><td class="num"><span class="pill p-ok">Live</span></td><td>KPI cards plus hand-rolled SVG charts. Dependency-free and labelled for screen readers.</td></tr>
+      <tr><td>Enquiry inbox with status</td><td class="num"><span class="pill p-ok">Live</span></td><td>Native <code>&lt;select&gt;</code> per row (no per-instance JS). NEW / CONTACTED / QUALIFIED / CLOSED / SPAM.</td></tr>
+      <tr><td>Reply to reviews</td><td class="num"><span class="pill p-ok">Live</span></td><td>Collapsed composer, 1,200 char cap with live count, 20 char minimum. Scope enforced server-side.</td></tr>
+      <tr><td>Propose listing changes</td><td class="num"><span class="pill p-ok">Live</span></td><td>Tagline and short description only. Queued for admin review, never applied directly.</td></tr>
+      <tr><td>Lead export (CSV)</td><td class="num"><span class="pill p-mute">Not built</span></td><td>The page states it needs the authenticated vendor API. Easily done server-side once scope exists.</td></tr>
+      <tr><td>Claim a listing</td><td class="num"><span class="pill p-mute">Not built</span></td><td><code>/admin</code> shows a pending-claims counter but the flow does not exist.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Admin portal and trust</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Feature</th><th class="num">State</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td>Dashboard composition panels</td><td class="num"><span class="pill p-ok">Live</span></td><td>Review status and verification mixes derived from real records (Approved 1,093 / Pending 53; Validated 604 / Current user 303).</td></tr>
+      <tr><td>Review moderation</td><td class="num"><span class="pill p-ok">Live</span></td><td>Approve / reject / flag with an optional reason. Every decision appends to the audit log.</td></tr>
+      <tr><td>Listing approvals</td><td class="num"><span class="pill p-ok">Live</span></td><td>Queue derived deterministically from the catalogue; decisions held in a <code>productDecisions</code> map so the buttons do not look broken.</td></tr>
+      <tr><td>Proposed listing changes</td><td class="num"><span class="pill p-ok">Live</span></td><td>Apply or discard. Re-deciding an applied proposal returns 409.</td></tr>
+      <tr><td>Decision log</td><td class="num"><span class="pill p-ok">Live</span></td><td>Append-only, renders action, target, from/to status, timestamp and the reason note.</td></tr>
+      <tr><td>SEO consistency gate</td><td class="num"><span class="pill p-ok">Live</span></td><td>Compares generated artefacts (sitemap, robots, per-route directives). Rewritten after the first version could not fail.</td></tr>
+      <tr><td>Lead management</td><td class="num"><span class="pill p-ok">Live</span></td><td>All enquiries, status control per row.</td></tr>
+      <tr><td>Lead hand-off / ownership</td><td class="num"><span class="pill p-mute">Not built</span></td><td>The page states a lead has no owner field yet. Needs a schema addition.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Trust and disclosure</h3>
+  <ul>
+    <li><strong>Verified labels are earned, not decorative.</strong> Only VALIDATED and CURRENT_USER reviews carry a verified badge; INCENTIVIZED and GUEST are labelled as such.</li>
+    <li><strong>Synthetic data is disclosed, not hidden.</strong> <code>DemoDataNotice</code> appears in the root footer and in both portal layouts.</li>
+    <li><strong>The methodology is public.</strong> <code>/methodology</code> explains the composite score. One inconsistency is known and flagged (section 13).</li>
+    <li><strong>JSON-LD matches what renders.</strong> A guard asserts declared <code>reviewCount</code> equals the number of review cards on the page.</li>
+  </ul>
+</section>
+
+<section id="api">
+  <h2><span class="num">08</span>Backend API surface</h2>
+  <p class="sub">Seven endpoints. Every one validates with Zod server-side and enforces scope without a session.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Method and path</th><th>Purpose</th><th>Statuses</th><th>Scope rule</th></tr></thead>
+    <tbody>
+      <tr><td><code>POST /api/leads</code></td><td>Public enquiry submission</td><td>201 / 400 / 422</td><td>None needed (public form)</td></tr>
+      <tr><td><code>PATCH /api/leads/[id]</code></td><td>Move an enquiry between statuses</td><td>200 / 400 / 404 / 422</td><td>None yet; add vendor scope with auth</td></tr>
+      <tr><td><code>POST /api/moderation</code></td><td>Approve / reject / flag a review or listing</td><td>200 / 400 / 404 / 422</td><td>None yet; records actor as <code>unauthenticated</code></td></tr>
+      <tr><td><code>POST /api/moderation/listing-edit</code></td><td>Apply or discard a proposed listing change</td><td>200 / 400 / 404 / 409 / 422</td><td>Admin-only once auth exists</td></tr>
+      <tr><td><code>POST /api/reviews/[id]/response</code></td><td>Publish a vendor reply to a review</td><td>201 / 400 / 403 / 404 / 422</td><td><strong>403 unless the review belongs to the vendor</strong></td></tr>
+      <tr><td><code>POST /api/vendor/listings/[slug]</code></td><td>Propose a listing change</td><td>201 / 400 / 403 / 404 / 422</td><td><strong>403 unless the vendor owns the listing</strong></td></tr>
+      <tr><td><code>GET /api/search</code></td><td>Search index query</td><td>200 / 400 / 422</td><td>Public</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <span class="t">Deliberate status-code choice</span>
+    <p>Cross-vendor writes return <strong>403, not 404</strong>. A 404 would let a caller enumerate which ids exist. That distinction is asserted by the guards, so do not "simplify" it.</p>
+  </div>
+
+  <h3>Validation layer</h3>
+  <p><code>lib/validation/schemas.ts</code> holds seven Zod schemas: <code>leadSchema</code>, <code>leadStatusSchema</code>, <code>vendorResponseSchema</code>, <code>listingEditSchema</code>, <code>listingEditDecisionSchema</code>, <code>moderationDecisionSchema</code>, <code>searchQuerySchema</code>. Shared enums live in <code>types.ts</code> rather than in the schemas, specifically to keep Zod out of client bundles.</p>
+</section>
+
+<section id="design">
+  <h2><span class="num">09</span>Design system and accessibility</h2>
+  <p class="sub">Tokens are CSS custom properties in <code>app/globals.css</code>. Every colour carries a measured contrast ratio in a comment.</p>
+
+  <div class="scroll">
+  <table>
+    <caption>Selected tokens, with the reasoning that produced them</caption>
+    <thead><tr><th>Token</th><th>Value</th><th>Why that value</th></tr></thead>
+    <tbody>
+      <tr><td><code>--color-primary</code></td><td><code>#2563eb</code></td><td>The single accent. Used for links, active states, primary buttons and the vendor-response block.</td></tr>
+      <tr><td><code>--color-border</code></td><td><code>#e4e4e7</code></td><td>Zinc-200, 1px everywhere. <span class="pill p-warn">Open decision</span> whether borders need 3:1.</td></tr>
+      <tr><td><code>--color-input</code></td><td><code>#949499</code></td><td>Was zinc-200 at 1.27:1, failing WCAG 1.4.11. Now about 3:1 on white.</td></tr>
+      <tr><td><code>--color-muted-foreground</code></td><td><code>#6f6f78</code></td><td>Zinc-500 nudged. 4.53:1 on muted, 4.98:1 on white.</td></tr>
+      <tr><td><code>--color-faint</code></td><td><code>#6f6f78</code></td><td>Merged into the same value. The old zinc-400 tier measured 2.56:1 and carried real 10px content text in about 35 places.</td></tr>
+      <tr><td><code>--color-success</code></td><td><code>#047857</code></td><td>Emerald-700. Emerald-600 was 3.77:1 on white and failed wherever it carried small text.</td></tr>
+      <tr><td><code>--color-surface-inverse</code></td><td><code>#0b1020</code></td><td>CTA band and footer. Foreground <code>#f4f4f7</code> measures 17.25:1.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note warn">
+    <span class="t">Rule learned the hard way</span>
+    <p><strong>No grey lighter than <code>--color-muted-foreground</code> can reach 4.5:1.</strong> The three-step grey scale collapsed to two for text; hierarchy is now carried by size and weight instead of by colour. If you add a new grey for text, it will fail. Decorative glyphs may use the faint tone.</p>
+  </div>
+
+  <h3>Accessibility posture</h3>
+  <ul>
+    <li><strong>Target: WCAG 2.2 AA.</strong> 4.5:1 for text, 3:1 for graphics and control boundaries.</li>
+    <li><strong>Verified contrast, not eyeballed.</strong> <code>scripts/qa/contrast-audit.py</code> computes ratios from relative luminance rather than trusting a designer's eye.</li>
+    <li><strong>Keyboard and screen-reader paths</strong> come from Radix primitives; interactive controls carry real labels (lead status selects are labelled per contact, moderation buttons per target).</li>
+    <li><strong>Reduced motion is honoured</strong> — the 3D hero renders statically and scroll reveals are suppressed.</li>
+    <li><strong>Charts are hand-rolled SVG with accessible markup</strong> rather than canvas, so they can be labelled and read.</li>
+    <li><strong>Every review has a stable anchor</strong> (<code>id="review-&lt;id&gt;"</code>), so a single review can be deep-linked and cited.</li>
+  </ul>
+
+  <h3>Tailwind v4 constraint</h3>
+  <p>Tailwind v4 tree-shakes <code>@theme</code> tokens: a utility is emitted only if the scanned source contains the literal class string. A class built at runtime from a template will silently not exist. This is why <code>lib/viz.ts</code> holds literal class strings and why status-bar colour maps are written out in full. There is also <strong>no <code>--duration-*</code> theme namespace</strong> in v4.</p>
+</section>
+
+<section id="qa">
+  <h2><span class="num">10</span>Quality harness</h2>
+  <p class="sub">Every guard exists because something it now catches once shipped broken. Run them all before any commit.</p>
+
+  <div class="scroll">
+  <table>
+    <caption>Scripts in <code>scripts/qa/</code></caption>
+    <thead><tr><th>Script</th><th>What it proves</th><th>Run</th></tr></thead>
+    <tbody>
+      <tr><td><code>smoke.sh</code></td><td>25 routes return the expected status, including a canonical redirect and a genuine 404.</td><td><code>bash scripts/qa/smoke.sh</code></td></tr>
+      <tr><td><code>trust-audit.mjs</code></td><td>JSON-LD <code>reviewCount</code> equals the reviews actually rendered; no surface labels a non-verified number "verified"; no page maps one label to two values.</td><td><code>node scripts/qa/trust-audit.mjs</code></td></tr>
+      <tr><td><code>moderation-api.mjs</code></td><td>7 checks: decision accepted, lands on the requested status, invalid action / target rejected, unknown id 404, malformed 400, and the decision surfaces in the admin log.</td><td><code>node scripts/qa/moderation-api.mjs</code></td></tr>
+      <tr><td><code>lead-status.mjs</code></td><td>7 checks: status transitions, invalid status 422, unknown id 404, malformed 400, and the admin table renders a control per row.</td><td><code>node scripts/qa/lead-status.mjs</code></td></tr>
+      <tr><td><code>vendor-response.mjs</code></td><td>8 checks: reply accepted, marker appears in the portal <em>and</em> on the public product page, another vendor's review 403, too-short 422, unknown 404, malformed 400.</td><td><code>node scripts/qa/vendor-response.mjs</code></td></tr>
+      <tr><td><code>listing-edit.mjs</code></td><td>9 checks: proposal queued not applied, cross-vendor 403, short copy 422, apply reaches the public listing, re-decide 409, unknown 404.</td><td><code>node scripts/qa/listing-edit.mjs</code></td></tr>
+      <tr><td><code>first-load.mjs</code></td><td>Initial JS and CSS per route against the 1,536 KB contract.</td><td><code>node scripts/qa/first-load.mjs / /search ...</code></td></tr>
+      <tr><td><code>overflow.sh</code></td><td>No horizontal scroll across routes x breakpoints.</td><td><code>bash scripts/qa/overflow.sh</code></td></tr>
+      <tr><td><code>contrast-audit.py</code></td><td>Contrast ratios computed from relative luminance.</td><td><code>python scripts/qa/contrast-audit.py</code></td></tr>
+      <tr><td><code>shot-route.sh</code></td><td>Single-route screenshot via agent-browser.</td><td><code>bash scripts/qa/shot-route.sh /route tag 1440 900</code></td></tr>
+      <tr><td><code>ab.sh</code></td><td>Wrapper that strips <code>NODE_OPTIONS</code> and proxy vars so browser automation works in this sandbox.</td><td>used by the scripts above</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note bad">
+    <span class="t">The discipline that matters most</span>
+    <p><strong>A guard that cannot fail is worse than no guard.</strong> Three guards in this project once passed on a false premise, because they asserted on static strings that the page already printed for other reasons — "Your response" also appears in the reply form's own label, so the check passed while the write went somewhere no page read. The fix was to post a unique marker and grep for that. Two real defects were found the moment the guards could go red.</p>
+    <p>Before trusting any new guard: <b>break the feature on purpose and watch the guard go red.</b></p>
+  </div>
+
+  <h3>Pre-commit sequence</h3>
+<pre><code>npm run typecheck
+npm run lint
+NODE_OPTIONS= npm run build
+# start the server, then:
+bash scripts/qa/smoke.sh
+node scripts/qa/trust-audit.mjs
+node scripts/qa/moderation-api.mjs
+node scripts/qa/lead-status.mjs
+node scripts/qa/vendor-response.mjs
+node scripts/qa/listing-edit.mjs
+node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/moderation</code></pre>
+</section>
+
+<section id="perf">
+  <h2><span class="num">11</span>Measured performance</h2>
+  <p class="sub">Initial JS per route, measured against a served production build at e44b3a6. Contract: 1,536 KB.</p>
+
+  <div class="scroll">
+  <table>
+    <caption>Output of <code>node scripts/qa/first-load.mjs</code></caption>
+    <thead><tr><th>Route</th><th class="num">JS</th><th class="num">CSS</th><th class="num">Assets</th><th class="num">Verdict</th></tr></thead>
+    <tbody>
+      <tr><td><code>/product/salesforce-sales-cloud</code></td><td class="num">1,196.4 KB</td><td class="num">75.1 KB</td><td class="num">16</td><td class="num"><span class="pill p-ok">PASS</span></td></tr>
+      <tr><td><code>/</code> (homepage, 3D hero)</td><td class="num">877.5 KB</td><td class="num">75.1 KB</td><td class="num">17</td><td class="num"><span class="pill p-ok">PASS</span></td></tr>
+      <tr><td><code>/compare/salesforce-sales-cloud-vs-hubspot-sales-hub</code></td><td class="num">874.9 KB</td><td class="num">75.1 KB</td><td class="num">17</td><td class="num"><span class="pill p-ok">PASS</span></td></tr>
+      <tr><td><code>/graph</code> (viewer is width-gated)</td><td class="num">818.6 KB</td><td class="num">75.1 KB</td><td class="num">16</td><td class="num"><span class="pill p-ok">PASS</span></td></tr>
+      <tr><td><code>/compare</code></td><td class="num">822.7 KB</td><td class="num">75.1 KB</td><td class="num">16</td><td class="num"><span class="pill p-ok">PASS</span></td></tr>
+      <tr><td><code>/categories</code></td><td class="num">817.0 KB</td><td class="num">75.1 KB</td><td class="num">15</td><td class="num"><span class="pill p-ok">PASS</span></td></tr>
+      <tr><td><code>/methodology</code></td><td class="num">817.0 KB</td><td class="num">75.1 KB</td><td class="num">15</td><td class="num"><span class="pill p-ok">PASS</span></td></tr>
+      <tr><td><code>/about</code></td><td class="num">817.0 KB</td><td class="num">75.1 KB</td><td class="num">15</td><td class="num"><span class="pill p-ok">PASS</span></td></tr>
+      <tr><td><code>/search</code></td><td class="num">809.0 KB</td><td class="num">75.1 KB</td><td class="num">15</td><td class="num"><span class="pill p-ok">PASS</span></td></tr>
+      <tr><td><code>/categories/crm</code></td><td class="num">809.0 KB</td><td class="num">75.1 KB</td><td class="num">15</td><td class="num"><span class="pill p-ok">PASS</span></td></tr>
+      <tr><td><code>/vendor/products</code></td><td class="num">753.8 KB</td><td class="num">75.1 KB</td><td class="num">15</td><td class="num"><span class="pill p-ok">PASS</span></td></tr>
+      <tr><td><code>/admin/moderation</code></td><td class="num">753.7 KB</td><td class="num">75.1 KB</td><td class="num">15</td><td class="num"><span class="pill p-ok">PASS</span></td></tr>
+      <tr><td><code>/vendor/reviews</code></td><td class="num">753.2 KB</td><td class="num">75.1 KB</td><td class="num">15</td><td class="num"><span class="pill p-ok">PASS</span></td></tr>
+      <tr><td><code>/vendor/leads</code></td><td class="num">752.2 KB</td><td class="num">75.1 KB</td><td class="num">15</td><td class="num"><span class="pill p-ok">PASS</span></td></tr>
+      <tr><td><code>/admin/leads</code></td><td class="num">752.2 KB</td><td class="num">75.1 KB</td><td class="num">15</td><td class="num"><span class="pill p-ok">PASS</span></td></tr>
+      <tr><td><code>/vendor</code></td><td class="num">750.9 KB</td><td class="num">75.1 KB</td><td class="num">14</td><td class="num"><span class="pill p-ok">PASS</span></td></tr>
+      <tr><td><code>/admin</code></td><td class="num">750.9 KB</td><td class="num">75.1 KB</td><td class="num">14</td><td class="num"><span class="pill p-ok">PASS</span></td></tr>
+      <tr><td><code>/admin/seo</code></td><td class="num">750.9 KB</td><td class="num">75.1 KB</td><td class="num">14</td><td class="num"><span class="pill p-ok">PASS</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>Headroom:</strong> the heaviest route uses 78% of the budget. The floor is about 751 KB, which is the framework baseline; every feature adds on top. That means roughly 785 KB of genuine headroom for new work, but the product page is already the one to watch if you add interactive surface there.</p>
+
+  <div class="note">
+    <span class="t">How the budget is protected</span>
+    <p>Three mechanisms, in order of preference: (1) <strong>server components with zero JS</strong> for animation — score rings and metric bars animate via <code>stroke-dashoffset</code> on inline CSS custom properties; (2) <strong>native elements over Radix</strong> in tables — a per-row status control is a plain <code>&lt;select&gt;</code>, avoiding per-instance JS; (3) <strong>JS width gates</strong> for heavy assets, which render nothing until the effect passes.</p>
+  </div>
+</section>
+
+<section id="history">
+  <h2><span class="num">12</span>Build history</h2>
+  <p class="sub">42 commits. The phases, in order, so you can see what was decided and when.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Phase</th><th>Commits</th><th>Outcome</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Checkpoint 01</strong></td><td><code>29015af</code></td><td>Recoverable baseline before the visual program began.</td></tr>
+      <tr><td><strong>Visual transformation</strong></td><td><code>7a5b3c0</code>, <code>bc07af7</code></td><td>Token layer, brand mark, hero rebuild, card elevation, category identity plates.</td></tr>
+      <tr><td><strong>Steps 8 to 19</strong></td><td><code>b3eebea</code> to <code>56f3ea9</code></td><td>Product thumbnails, detail hero, homepage rhythm, testimonials, scroll-reveal, sticky nav, skeletons, generated empty states, login, admin and vendor passes, micro-interactions.</td></tr>
+      <tr><td><strong>Perf and CSS hygiene</strong></td><td><code>731843e</code></td><td>Excluded <code>.md</code> docs from Tailwind v4 source scanning, dropping phantom utilities.</td></tr>
+      <tr><td><strong>Graphify</strong></td><td><code>fecd24f</code>, <code>4809f0a</code></td><td>Knowledge graph at <code>/graph</code>, artifact committed so clones ship with it.</td></tr>
+      <tr><td><strong>Contrast fix</strong></td><td><code>3242df5</code></td><td><code>--color-input</code> from 1.27:1 to about 3:1.</td></tr>
+      <tr><td><strong>W1 / W2 / W5</strong></td><td><code>9c69394</code>, <code>ae31d8c</code></td><td>Visual token layer, primitives, product-page visualisation.</td></tr>
+      <tr><td><strong>W5 compare and graph</strong></td><td><code>a477cc4</code>, <code>0b7ed04</code></td><td>Comparable score bars; framed <code>/graph</code> so phones stop downloading the 1.4 MB viewer.</td></tr>
+      <tr><td><strong>W3</strong></td><td><code>95c5314</code></td><td>3D hero that stays out of the way of its own budget; reduced motion proven static.</td></tr>
+      <tr><td><strong>W6</strong></td><td><code>2794c13</code></td><td>A consistency gate that can actually fail. Portal reconnaissance recorded.</td></tr>
+      <tr><td><strong>W7</strong></td><td><code>7da2897</code>, <code>10de437</code>, <code>57d60cb</code></td><td>Trust signals that count what their label says; admin composition panel; overflow item resolved 28/28.</td></tr>
+      <tr><td><strong>B1 moderation</strong></td><td><code>ab1d99e</code></td><td>Moderation decisions with an append-only audit log.</td></tr>
+      <tr><td><strong>B2 lead status</strong></td><td><code>67a0092</code></td><td>Lead status transitions on both portals.</td></tr>
+      <tr><td><strong>B3 vendor replies</strong></td><td><code>63dff5e</code></td><td>Vendor replies to reviews, with server-side scope.</td></tr>
+      <tr><td><strong>B4 listing edits</strong></td><td><code>e44b3a6</code></td><td>Listing-edit proposal queue, plus the dataset singleton fix and three rewritten guards.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <span class="t">How work was chosen</span>
+    <p>Backend items were found by grepping the UI for its own admissions: pages that said "not available in this build", "requires the authenticated vendor API", or offered a control that routed nowhere. That is a repeatable technique and worth doing again when you plan the next increment.</p>
+  </div>
+</section>
+
+<section id="known">
+  <h2><span class="num">13</span>Known issues and open decisions</h2>
+  <p class="sub">Raised and deliberately not changed. Each one needs a decision rather than a silent fix, because each trades something already chosen.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th>#</th><th>Issue</th><th class="num">Severity</th><th>Options and recommendation</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td><strong>Soft 404.</strong> <code>/product/&lt;invalid-slug&gt;</code> returns <strong>200</strong> with a not-found body. <code>loading.tsx</code> flushes the shell before <code>notFound()</code> runs, so the status is already committed. Also affects <code>/categories/[slug]</code> and <code>/compare/[slugs]</code>.</td>
+        <td class="num"><span class="pill p-bad">P0 SEO</span></td>
+        <td><strong>(a)</strong> Delete <code>loading.tsx</code>: correct 404s, lose the skeleton. <strong>(b)</strong> Add <code>middleware.ts</code> plus a roughly 4 KB slug manifest: keeps skeletons, needs a drift guard. <em>Recommendation: (b)</em> if skeletons matter; (a) is cheaper and cannot drift.</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td><strong>Composite score contradicts the methodology copy.</strong> Copy says Guest reviews do not count toward the score and implies sponsored listings are excluded, but <code>volumeFactor</code> derives from <code>ratingCount</code>, which includes them.</td>
+        <td class="num"><span class="pill p-bad">P0 trust</span></td>
+        <td>Fixing the maths changes the generator, which regenerates the dataset and invalidates every recorded number and screenshot. <em>Recommendation: decide first</em> whether to change the maths or the copy. The copy was corrected once; the maths was left alone deliberately.</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td><strong><code>getAdminMetrics()</code> hardcodes</strong> <code>pendingProducts: 7</code> and <code>pendingClaims: 4</code> while neighbouring metrics are derived. Deriving them yields 0 and empties the dashboard narrative.</td>
+        <td class="num"><span class="pill p-warn">P1</span></td>
+        <td>Either seed a real pending queue, or label the numbers as illustrative. <em>Recommendation: seed real pending records</em> so the demo tells a true story.</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td><strong>Stale graph artifact.</strong> <code>/graph</code> renders an artifact built at commit <code>91a419c</code>, now behind HEAD.</td>
+        <td class="num"><span class="pill p-warn">P1</span></td>
+        <td>Regenerate with the Graphify CLI in <code>.venv-graphify/</code>, or drop the route. <code>/graph</code> currently discloses the staleness.</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td><strong><code>/graph</code> indexation changed</strong> to <code>robots: { index: false, follow: true }</code> plus a robots disallow.</td>
+        <td class="num"><span class="pill p-warn">P1</span></td>
+        <td>A visible SEO change made for consistency. <em>Awaiting confirmation</em> that keeping it out of the index is intended.</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td><strong>Prerendered product pages cannot reflect writes.</strong> A subset of <code>/product/[slug]</code> is prerendered, so a vendor reply or applied listing edit would not appear there until the next build.</td>
+        <td class="num"><span class="pill p-warn">P1</span></td>
+        <td>Becomes real the moment writes are durable. Choose <code>force-dynamic</code> or ISR with revalidation on write.</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td><strong><code>--color-border</code> is still <code>#e4e4e7</code></strong> (about 1.2:1). Fine for decorative separators; fails if a border is the only affordance for a control.</td>
+        <td class="num"><span class="pill p-mute">P2</span></td>
+        <td>Separate call from the <code>--color-input</code> fix, which is resolved. Audit whether any control relies on the border alone.</td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td><strong>Helpful votes are local only,</strong> and <code>recharts</code> is installed but unused.</td>
+        <td class="num"><span class="pill p-mute">P2</span></td>
+        <td>Persist votes with the repository work, or remove the affordance. Do not add recharts: hand-rolled SVG keeps the budget and is fully styleable.</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="deferred">
+  <h2><span class="num">14</span>Deliberately not built</h2>
+  <p class="sub">Not oversights. Each was deferred for a reason, and the UI says so rather than pretending.</p>
+
+  <h3>Deferred with authentication</h3>
+  <ul>
+    <li><strong>Authentication and sessions.</strong> <code>/login</code> states plainly that auth is not wired up and no credentials are sent. The portal is pinned to one demo vendor.</li>
+    <li><strong>Saved / shortlisted products.</strong> Needs a user.</li>
+    <li><strong>Review submission wizard.</strong> The largest missing buyer feature. Needs identity and moderation capacity.</li>
+    <li><strong>Listing claims.</strong> <code>/admin</code> shows a counter; the flow does not exist.</li>
+    <li><strong>Lead export (CSV).</strong> The vendor page states it needs the authenticated vendor API. Trivial to add server-side once scope exists.</li>
+    <li><strong>Lead hand-off / ownership.</strong> The admin page states a lead has no owner field yet. Needs a schema addition first.</li>
+  </ul>
+
+  <h3>Deferred by aesthetic or scope decision</h3>
+  <ul>
+    <li><strong>Dark mode, neon, glassmorphism.</strong> Rejected. Light enterprise only.</li>
+    <li><strong>Charting library.</strong> Recharts is installed and imported nowhere. Hand-rolled SVG wins on budget and on accessibility labelling.</li>
+    <li><strong>A treemap on <code>/categories</code>.</strong> Built, measured and rejected: pillar counts span only 1.78x, so area-encoding had nothing to encode. Do not retry.</li>
+    <li><strong>Real screenshots and binary assets.</strong> The build ships none; <code>ScreenshotPlate</code> says so. Generated plates are used instead.</li>
+    <li><strong>Vendor-editable score inputs.</strong> Permanently out of scope by design.</li>
+  </ul>
+</section>
+
+<section id="roadmap">
+  <h2><span class="num">15</span>Enhancement roadmap</h2>
+  <p class="sub">Ordered by what unblocks the most, not by what is most fun. Effort is relative, in half-day units for someone who knows the codebase.</p>
+
+  <div class="note">
+    <span class="t">Sequencing principle</span>
+    <p><b>Durable state first, then auth, then features.</b> Almost every headline feature (saved items, review submission, claims, lead export, notifications) is blocked on a user and a database. Building them against <code>globalThis</code> would be throwaway work. The repository pattern means step 1 is a contained change even though it is the biggest.</p>
+  </div>
+
+  <h3>P0 — foundations that unblock everything</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>#</th><th>Item</th><th>What it involves</th><th class="num">Effort</th><th>Risk</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>P0.1</td>
+        <td><strong>Persistence layer</strong></td>
+        <td>Implement the 56 repository accessors against Postgres via Prisma or Drizzle, using the interfaces in <code>types.ts</code> as the schema. Because no page imports <code>seed.ts</code>, no page changes. Keep a seed script that writes the same deterministic dataset so screenshots stay comparable.</td>
+        <td class="num">6 to 10</td>
+        <td>Medium. The traps are <code>ratingCount</code> semantics and the derived <code>getPendingProducts()</code> queue, which currently synthesises PENDING status.</td>
+      </tr>
+      <tr>
+        <td>P0.2</td>
+        <td><strong>Authentication</strong></td>
+        <td>Introduce sessions. Replace <code>DEMO_VENDOR_SLUG</code> in <code>lib/portals.ts</code> with the session company slug — that file exists precisely to be this seam. Replace the literal <code>"unauthenticated"</code> actor in the moderation route with the session principal.</td>
+        <td class="num">4 to 6</td>
+        <td>Low, given P0.1. Every scope check already exists server-side; auth only supplies the identity.</td>
+      </tr>
+      <tr>
+        <td>P0.3</td>
+        <td><strong>Fix the soft 404</strong></td>
+        <td>Decision 1 in section 13. Middleware plus a slug manifest with a drift guard, or delete <code>loading.tsx</code>. Currently every invalid dynamic route returns 200.</td>
+        <td class="num">1 to 2</td>
+        <td>Low. Add a guard asserting the status code for three known-bad slugs.</td>
+      </tr>
+      <tr>
+        <td>P0.4</td>
+        <td><strong>Resolve the score / methodology contradiction</strong></td>
+        <td>Decision 2 in section 13. Either exclude Guest reviews and sponsored listings from <code>volumeFactor</code>, or correct the copy. This is a trust issue, not a cosmetic one: the page makes a promise about how the number is computed.</td>
+        <td class="num">1 to 3</td>
+        <td><b>High blast radius.</b> Changing the maths regenerates the dataset and invalidates every number in this report. Decide before touching it.</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>P1 — features that make the product feel complete</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>#</th><th>Item</th><th>What it involves</th><th class="num">Effort</th><th>Blocked by</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>P1.1</td>
+        <td><strong>Review submission wizard</strong></td>
+        <td>The largest missing buyer feature. Multi-step form, rating, pros/cons, verification self-declaration. Submissions enter the existing moderation queue as PENDING — that machinery is already built and guarded.</td>
+        <td class="num">4 to 6</td>
+        <td>P0.1, P0.2</td>
+      </tr>
+      <tr>
+        <td>P1.2</td>
+        <td><strong>Saved / shortlisted products</strong></td>
+        <td>Server-side list per user plus a lightweight client store. Keep it zero-JS on first paint; the pattern already exists.</td>
+        <td class="num">2 to 3</td>
+        <td>P0.1, P0.2</td>
+      </tr>
+      <tr>
+        <td>P1.3</td>
+        <td><strong>Lead ownership and hand-off</strong></td>
+        <td>Add an <code>ownerId</code> to Lead, an assignment control in <code>/admin/leads</code>, and a filter. The page already admits this is missing.</td>
+        <td class="num">2</td>
+        <td>P0.1, P0.2</td>
+      </tr>
+      <tr>
+        <td>P1.4</td>
+        <td><strong>Lead export (CSV)</strong></td>
+        <td>A route handler streaming <code>text/csv</code> scoped to the vendor's own enquiries. Roughly 4 KB of server code, no client JS.</td>
+        <td class="num">1</td>
+        <td>P0.2 for real scoping</td>
+      </tr>
+      <tr>
+        <td>P1.5</td>
+        <td><strong>Listing claims</strong></td>
+        <td>Vendor asserts ownership of an unclaimed product; admin approves. Reuses the listing-edit proposal queue pattern exactly.</td>
+        <td class="num">3</td>
+        <td>P0.1, P0.2</td>
+      </tr>
+      <tr>
+        <td>P1.6</td>
+        <td><strong>Revalidation on write</strong></td>
+        <td>Decision 6 in section 13. Make product pages reflect writes: ISR with <code>revalidatePath</code> on reply and apply, or <code>force-dynamic</code>.</td>
+        <td class="num">1 to 2</td>
+        <td>P0.1</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>P2 — polish, depth and defensibility</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>#</th><th>Item</th><th>What it involves</th><th class="num">Effort</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td>P2.1</td><td><strong>Persist helpful votes</strong></td><td>Currently client-local state only. Either persist through the repository or remove the affordance.</td><td class="num">1</td><td>Leaving it local is a small honesty problem.</td></tr>
+      <tr><td>P2.2</td><td><strong>Regenerate the graph artifact</strong></td><td>Rebuild with the Graphify CLI in <code>.venv-graphify/</code>, or drop <code>/graph</code>.</td><td class="num">1</td><td>Currently stale and disclosed as such.</td></tr>
+      <tr><td>P2.3</td><td><strong>Derive the admin pending counters</strong></td><td>Seed real pending records so <code>pendingProducts</code> and <code>pendingClaims</code> stop being hardcoded.</td><td class="num">1</td><td>Needs a product call on the demo narrative.</td></tr>
+      <tr><td>P2.4</td><td><strong>Notification emails</strong></td><td>Vendor notified on new enquiry and new review; admin notified on new submission.</td><td class="num">3 to 4</td><td>External side effect: confirm before enabling.</td></tr>
+      <tr><td>P2.5</td><td><strong>Moderator roles and permissions</strong></td><td>Extend the actor model beyond a single principal; the audit log already stores it per decision.</td><td class="num">3</td><td>Builds cleanly on P0.2.</td></tr>
+      <tr><td>P2.6</td><td><strong>Vendor analytics depth</strong></td><td>Profile views, enquiry conversion, share of voice in category.</td><td class="num">4 to 6</td><td>Requires event capture, which does not exist today.</td></tr>
+      <tr><td>P2.7</td><td><strong>Comparison persistence and sharing</strong></td><td>Save a comparison set and share a link. Currently URL-only, which is already good for SEO.</td><td class="num">2</td><td>Low risk.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Recommended order</h3>
+  <ol>
+    <li><strong>P0.3 and P0.4 first</strong> — both are decisions with small diffs. They clear the two things that are actively wrong rather than merely absent.</li>
+    <li><strong>P0.1 then P0.2</strong> — persistence, then identity. Together they unblock six P1 items. Do the repository work behind the existing 56 accessors so no page moves.</li>
+    <li><strong>P1.1 review submission</strong> — the biggest buyer-facing gap, and the moderation pipeline to receive it already exists.</li>
+    <li><strong>P1.4 and P1.3</strong> — quick wins that remove two admissions the UI currently makes about itself.</li>
+    <li><strong>P1.5, P1.2, P1.6</strong> — the rest of the complete-feeling set.</li>
+  </ol>
+
+  <div class="note warn">
+    <span class="t">Guard every one of these</span>
+    <p>Every item above changes something a guard currently asserts. Before shipping, run the full harness in section 10, and where a new write is introduced, post a unique marker and assert it reaches the rendered page. That habit has already caught two defects here that a type-check and a green build both missed.</p>
+  </div>
+</section>
+
+<section id="quickstart">
+  <h2><span class="num">16</span>Developer quickstart and gotchas</h2>
+  <p class="sub">What to run, and the environment traps that cost the most time.</p>
+
+<pre><code>npm install
+npm run dev          # http://localhost:3000
+npm run typecheck
+npm run lint
+NODE_OPTIONS= npm run build     # clear NODE_OPTIONS or the build can hang
+NODE_OPTIONS= npm start         # serve the production build</code></pre>
+
+  <h4>Environment gotchas</h4>
+  <ul>
+    <li><strong>Clear <code>NODE_OPTIONS</code></strong> for builds and browser QA. The sandbox injects a node shim that saturates and hangs child processes.</li>
+    <li><strong>Never chain <code>rm</code> before a build.</strong> A delete guard blocks the <code>rm</code>, the <code>&amp;&amp;</code> short-circuits, and you read a stale log and declare success.</li>
+    <li><strong>Confirm the PID owning port 3000</strong> before trusting a 200; a stale server serves old code.</li>
+    <li><strong>Bash <code>cd</code> into the workspace fails intermittently</strong> (about 1 in 3). Retry in a loop.</li>
+    <li><strong>Node cannot always see <code>C:/...</code> absolute paths</strong> here; prefer relative paths from the project root.</li>
+    <li><strong><code>timeout N sh script.sh | tail</code> does not bound a wedged browser run</strong> — an orphan holds the pipe open. Redirect to a file.</li>
+    <li><strong>Browser automation wedges after roughly 8 to 11 page checks.</strong> Split matrices into runs of 2 to 3 routes. Route calls through <code>scripts/qa/ab.sh</code>.</li>
+    <li><strong>WMIC is blocked</strong>, so leaked browser processes cannot be distinguished from the user's own. Kill none.</li>
+  </ul>
+
+  <h4>Code conventions that matter</h4>
+  <ul>
+    <li><strong>React inserts a comment marker between interpolated text nodes.</strong> Any regex against rendered HTML must allow for it.</li>
+    <li><strong>Never use <code>Math.random()</code>.</strong> Use the seeded PRNG so SSR and hydration agree.</li>
+    <li><strong>Derive state during render</strong>, not <code>setState</code> in an effect. <code>getSnapshot</code> must be referentially stable in <code>useSyncExternalStore</code>.</li>
+    <li><strong>A sticky element must be checked against what it duplicates.</strong> Do not repeat the same numbers at the same scroll position.</li>
+    <li><strong>Do not hardcode what the framework appends</strong> — the root layout already adds the site suffix to every title.</li>
+    <li><strong>Parallel edits to one file silently drop one.</strong> One file per message, then re-read.</li>
+    <li><strong><code>formatPercent()</code> scales by 100</strong> (expects <code>0.64</code>); <code>formatPercentValue()</code> does not. Mixing them produces figures like 1240%.</li>
+  </ul>
+
+  <div class="note">
+    <span class="t">Where to look next</span>
+    <p><code>project-execution-state.json</code> at the repo root carries the live phase, locked decisions, baselines, known issues and the full environment-gotcha list. It is the machine-readable companion to this report and is updated as work completes.</p>
+  </div>
+</section>
+
+<footer>
+  <p>Generated from the live workspace at commit e44b3a6. All figures measured against a served production build, not inferred.</p>
+</footer>
+
+</div>
+</body>
+</html>
