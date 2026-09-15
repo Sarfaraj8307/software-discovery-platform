@@ -77,6 +77,27 @@ here because a fresh clone would otherwise lose them. Each one cost real time to
   first table, not the one you meant, and leaves the file with unbalanced tags. Anchor on the first
   row's content instead.
 
+**Git**
+
+- **New git refs cannot be created in this sandbox.** `.git/refs/heads/` is not writable, so
+  `git checkout -b`, `git branch <name> <start>` and `git update-ref` all fail to create a branch —
+  and **all three report success while creating nothing**, so the failure is silent. (`git checkout -b`
+  prints "Switched to a new branch" and leaves you on an *unborn* HEAD: the whole tree then shows as
+  staged-new, and committing would produce a root commit with no shared history.) Committing and
+  pushing on an **existing** branch work normally.
+- **To publish work on a new branch without moving the current one:**
+
+  ```bash
+  git add <files>
+  TREE=$(git write-tree)
+  SHA=$(git commit-tree "$TREE" -p <base-commit> -m "message")
+  git push origin "$SHA:refs/heads/<new-branch>"
+  ```
+
+  This creates the branch on the remote with correct history and leaves your local branch untouched.
+  You cannot check the new branch out locally — fetching it needs a new ref too, so read it through
+  the GitHub API or work from a fresh clone.
+
 **Running the tests**
 
 - **Run the whole suite with one command — do not run guards by hand:**
