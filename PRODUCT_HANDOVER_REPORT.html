@@ -612,13 +612,14 @@ const dataset: Dataset = (globalForDataset.__dataset ??= seeded);</code></pre>
 
 <section id="qa">
   <h2><span class="num">10</span>Quality harness</h2>
-  <p class="sub">Every guard exists because something it now catches once shipped broken. Run them all before any commit.</p>
+  <p class="sub">Every guard exists because something it now catches once shipped broken. Run them all before any commit — <code>node scripts/qa/run-all.mjs --base &lt;url&gt;</code> does it in one command.</p>
 
   <div class="scroll">
   <table>
     <caption>Scripts in <code>scripts/qa/</code></caption>
     <thead><tr><th>Script</th><th>What it proves</th><th>Run</th></tr></thead>
     <tbody>
+      <tr><td><code>run-all.mjs</code></td><td><strong>Runs all 16 guards and keeps the three exit codes apart.</strong> Retries on 429 instead of reporting a regression, labels <em>could not run</em> separately from <em>failed</em>, and flags any guard that exits 0 having reported no checks. <code>--only</code> / <code>--skip</code> / <code>--list</code> for iteration.</td><td><code>node scripts/qa/run-all.mjs --base &lt;url&gt;</code></td></tr>
       <tr><td><code>smoke.sh</code></td><td>25 routes return the expected status, including a canonical redirect and a genuine 404.</td><td><code>bash scripts/qa/smoke.sh</code></td></tr>
       <tr><td><code>trust-audit.mjs</code></td><td>JSON-LD <code>reviewCount</code> equals the reviews actually rendered; no surface labels a non-verified number "verified"; no page maps one label to two values.</td><td><code>node scripts/qa/trust-audit.mjs</code></td></tr>
       <tr><td><code>moderation-api.mjs</code></td><td>7 checks: decision accepted, lands on the requested status, invalid action / target rejected, unknown id 404, malformed 400, and the decision surfaces in the admin log.</td><td><code>node scripts/qa/moderation-api.mjs</code></td></tr>
@@ -653,33 +654,25 @@ const dataset: Dataset = (globalForDataset.__dataset ??= seeded);</code></pre>
 <pre><code>npm run typecheck
 npm run lint
 NODE_OPTIONS= npm run build
-# start the server, then run these ONE AT A TIME (see note below):
-bash scripts/qa/smoke.sh
-node scripts/qa/trust-audit.mjs
-node scripts/qa/moderation-api.mjs
-node scripts/qa/lead-status.mjs
-node scripts/qa/vendor-response.mjs
-node scripts/qa/listing-edit.mjs
-node scripts/qa/lead-ownership.mjs
-node scripts/qa/lead-export.mjs
-node scripts/qa/review-submission.mjs
-node scripts/qa/helpful-votes.mjs
-node scripts/qa/portal-runtime.mjs
-node scripts/qa/admin-metrics-honesty.mjs
-node scripts/qa/og-metadata-coverage.mjs
-node scripts/qa/soft-404.mjs
-node scripts/qa/graph-artifact.mjs
-node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/moderation</code></pre>
+# start the server, then run the whole suite in one command:
+node scripts/qa/run-all.mjs --base http://127.0.0.1:3000
 
-  <div class="note warn">
-    <span class="t">Do not run the whole suite back-to-back from one IP</span>
-    <p><code>POST /api/leads</code> and <code>POST /api/reviews</code> carry a sliding-window limiter (5 per 60s) keyed on <code>x-forwarded-for</code>, else <code>x-real-ip</code>, else the literal <code>"unknown"</code>. The guards send none of those headers, so <em>all of them share one bucket</em>. Firing the suite in a tight loop makes the lead- and review-dependent guards return <b>429</b>, which reads exactly like a regression. Space them ~13s apart, or wait a minute for the window to clear.</p>
+# the browser guards are NOT part of the runner — they wedge after ~8-11 page
+# checks, so they need the split-run technique. Run them separately:
+bash scripts/qa/smoke.sh
+bash scripts/qa/overflow.sh
+
+  <div class="note">
+    <span class="t">The runner exists because running the suite by hand manufactures false regressions</span>
+    <p><code>POST /api/leads</code> and <code>POST /api/reviews</code> carry a sliding-window limiter (5 per 60s) keyed on <code>x-forwarded-for</code>, else <code>x-real-ip</code>, else the literal <code>"unknown"</code>. The guards send none of those headers, so <em>all of them share one bucket</em>. Firing the suite back-to-back makes the lead- and review-dependent guards return <b>429</b>, which reads exactly like a regression — and has been misreported as one. <code>run-all.mjs</code> detects 429 in a guard's output and retries, so contention stops looking like breakage.</p>
+    <p><b>Measured, same server, seconds apart:</b> <code>portal-runtime</code> run directly returned <code>2 pass, 4 fail</code> (429 on its POST). Run through <code>run-all.mjs</code> it waited 20s, retried, and returned <code>6 pass, 0 fail</code>. Same guard, same build — the only difference is who ran it.</p>
+    <p>Exit codes are a three-way contract, not a boolean: <b>0</b> every assertion passed, <b>1</b> an assertion failed, <b>2</b> the guard <em>could not run</em> (server down, slug underivable). The runner keeps 2 apart from 1, because treating "could not run" as a failure is wrong and treating it as success is worse. It also flags any guard that exits 0 having reported no checks at all — a pass that verified nothing is not a pass.</p>
   </div>
 </section>
 
 <section id="perf">
   <h2><span class="num">11</span>Measured performance</h2>
-  <p class="sub">Initial JS per route, measured against a served production build at e44b3a6. Contract: 1,536 KB.</p>
+  <p class="sub">Initial JS per route, measured against a served production build at e44b3a6. <code>/</code>, <code>/graph</code>, <code>/product/zoom</code> and <code>/admin</code> re-measured 2026-09-15 at checkpoint 455d75a and unchanged; the remaining rows are the original e44b3a6 measurement. Contract: 1,536 KB.</p>
 
   <div class="scroll">
   <table>
