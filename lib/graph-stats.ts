@@ -6,7 +6,7 @@ import path from "node:path";
  * artifact Graphify emits rather than from a hand-written list of numbers.
  *
  * WHY THIS READS THE FILE INSTEAD OF IMPORTING IT
- * `public/graphify/graph.json` is roughly 950 KB. A static `import` would fold
+ * `public/graphify/graph.json` is roughly 1.3 MB. A static `import` would fold
  * that into the module graph, where any client component could accidentally
  * pull it across the network boundary. Reading it here keeps the file a
  * build-time detail: the page ships five integers, not a megabyte of JSON.

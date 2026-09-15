@@ -89,9 +89,9 @@
     <p class="lede">A complete technical and product account of the build as it stands today: architecture, every surface, the data model, the quality harness, measured performance, and a prioritised roadmap for what comes next.</p>
     <div class="stamp">
       <span>Next.js 16.3.5 / React 19.3 / TypeScript 5.6 / Tailwind v4</span>
-      <span>56 commits / 20 routes / 10 API endpoints</span>
+      <span>57 commits / 20 routes / 10 API endpoints</span>
       <span>Generated 15 Sep 2026</span>
-      <span>HEAD b28e2ad + P2.1</span>
+      <span>HEAD cf068fb</span>
     </div>
   </div>
 </div>
@@ -106,13 +106,13 @@
   <table>
     <tbody>
       <tr><th>Status</th><td>Backend productionisation in progress. Visual program (W0–W7) complete. Public catalogue, vendor portal and admin portal all live against an in-memory synthetic dataset.</td></tr>
-      <tr><th>Last completed</th><td><strong>P2.1 — persist helpful votes.</strong> Server-backed toggle via <code>POST /api/reviews/[id]/helpful</code> with a per-browser HttpOnly cookie. Guard 14/14, falsification-proven. Surfaced and fixed two pre-existing defects (see Issues).</td></tr>
-      <tr><th>Current</th><td>P2.1 committed and pushed. Nothing in flight.</td></tr>
-      <tr><th>Next logical task</th><td><strong>P2.2 — regenerate the stale graph artifact</strong> (<code>built_at_commit 91a419c</code>). Run <code>scripts/graphify-build.sh</code>; it rewrites <code>public/graphify/graph.json</code> + <code>graph.html</code>. ~1.4 MB commit — keep it standalone.</td></tr>
+      <tr><th>Last completed</th><td><strong>P2.2 — refresh the knowledge-graph artifact.</strong> <code>built_at_commit</code> is now <code>cf068fb</code> (was <code>91a419c</code>, 38 commits behind); 1,207 nodes / 3,074 links / 83 communities. Regeneration exposed a silent self-containment regression in graphify 0.9.61 — fixed by <code>scripts/inline-graph-lib.mjs</code>.</td></tr>
+      <tr><th>Current</th><td>P2.2 committed and pushed. Nothing in flight.</td></tr>
+      <tr><th>Next logical task</th><td><strong>Promote the graph self-containment check to <code>scripts/qa/graph-artifact.mjs</code></strong> — the one gap P2.2 left. Assert the served viewer has zero external <code>&lt;script src&gt;</code>, contains the inlined library, and that <code>/graph</code> discloses the current HEAD short SHA. Small, and it guards the exact silent regression this cycle found.</td></tr>
       <tr><th>Blocked on a decision</th><td>P0.4 (score/methodology contradiction, HIGH BLAST RADIUS) · P0.1 (persistence store) · P0.2 (auth, after P0.1) · <code>pendingClaims: 4</code> · <code>metadataBase</code> placeholder · <code>og:image</code> (no artwork).</td></tr>
-      <tr><th>Recently changed</th><td><code>lib/data/repository.ts</code> · <code>lib/data/seed.ts</code> · <code>app/api/reviews/[id]/helpful/route.ts</code> (new) · <code>components/reviews/HelpfulButton.tsx</code> · <code>components/reviews/ReviewCard.tsx</code> · <code>app/product/[slug]/page.tsx</code> · <code>scripts/qa/helpful-votes.mjs</code> (new)</td></tr>
-      <tr><th>Important issues</th><td>Rate limiter (5/min/IP) is shared by every QA guard — running the suite back-to-back returns <strong>429</strong> and looks like a regression; space guards ~13 s apart. Stale <code>next start</code> can own a port indefinitely. <code>rm</code> is blocked by the sandbox delete guard and wipes <code>app/</code> if chained.</td></tr>
-      <tr><th>Last verification</th><td><strong>PASS.</strong> tsc 0 · eslint 0 · next build 0 · helpful-votes 14/14 · lead-status 7/7 · lead-ownership 11/11 · portal-runtime 6/6 · admin-metrics-honesty 6/6 · og-metadata-coverage 80/80 · soft-404 6/6 · moderation-api 7/7 · vendor-response 7/7 · listing-edit 9/9 · lead-export 6/6 · review-submission 7/7 · trust-audit PASS. Total 166 assertions, 0 failures.</td></tr>
+      <tr><th>Recently changed</th><td><code>public/graphify/graph.json</code> + <code>graph.html</code> · <code>scripts/inline-graph-lib.mjs</code> (new) · <code>scripts/vendor/vis-network-9.1.6.min.js</code> (new) · <code>scripts/graphify-build.sh</code> · <code>eslint.config.mjs</code> · <code>lib/graph-stats.ts</code></td></tr>
+      <tr><th>Important issues</th><td>Rate limiter (5/min/IP) is shared by every QA guard — running the suite back-to-back returns <strong>429</strong> and looks like a regression; space guards ~13 s apart. <code>rm</code> is blocked by the sandbox delete guard and wipes <code>app/</code> if chained. Never edit a shell script while it is executing (bash reads progressively).</td></tr>
+      <tr><th>Last verification</th><td><strong>PASS.</strong> tsc 0 · eslint 0 errors · next build 0 · 13 guard suites green (og-metadata 80/80, helpful-votes 14/14, lead-ownership 11/11, listing-edit 9/9, moderation-api 7/7, vendor-response 7/7, lead-status 7/7, review-submission 7/7, soft-404 6/6, portal-runtime 6/6, lead-export 6/6, admin-metrics-honesty 6/6, trust-audit PASS) · bundle budget / 877.5 KB, /graph 818.6 KB (budget 1,536 KB).</td></tr>
     </tbody>
   </table>
   </div>
@@ -716,7 +716,7 @@ node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/mo
 
 <section id="history">
   <h2><span class="num">12</span>Build history</h2>
-  <p class="sub">56 commits. The phases, in order, so you can see what was decided and when.</p>
+  <p class="sub">57 commits. The phases, in order, so you can see what was decided and when.</p>
 
   <div class="scroll">
   <table>
@@ -743,7 +743,8 @@ node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/mo
       <tr><td><strong>P1.3 lead ownership</strong></td><td><code>f424d87</code></td><td><code>ownerId</code> on Lead, strict PATCH schema, Owner column and filter. Two guard defects caught and fixed during verification.</td></tr>
       <tr><td><strong>P2.3 honest counters</strong></td><td><code>3580518</code></td><td>Derived <code>pendingProducts</code> from the real listings queue; falsification-proven by a deliberate wrong-value probe.</td></tr>
       <tr><td><strong>E2/E3 metadata</strong></td><td><code>2fbcf8c</code></td><td>Root OG/Twitter fallback plus per-page blocks on ten routes. Discovered that Next.js metadata merges field-by-field, so <code>siteName</code>/<code>locale</code> must be repeated on every block.</td></tr>
-      <tr><td><strong>P2.1 helpful votes</strong></td><td><em>this commit</em></td><td>Server-backed Helpful toggle with cookie identity; surfaced and fixed a <code>Rng.logInt(0, n)</code> NaN defect that had also made "sort by helpful" a no-op.</td></tr>
+      <tr><td><strong>P2.1 helpful votes</strong></td><td><code>cf068fb</code></td><td>Server-backed Helpful toggle with cookie identity; surfaced and fixed a <code>Rng.logInt(0, n)</code> NaN defect that had also made "sort by helpful" a no-op.</td></tr>
+      <tr><td><strong>P2.2 graph artifact</strong></td><td><em>this commit</em></td><td>Refreshed the committed knowledge graph (38 commits stale) and restored self-containment after graphify 0.9.61 silently switched to an external CDN.</td></tr>
     </tbody>
   </table>
   </div>
@@ -782,9 +783,9 @@ node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/mo
       </tr>
       <tr>
         <td>4</td>
-        <td><strong>Stale graph artifact.</strong> <code>/graph</code> renders an artifact built at commit <code>91a419c</code>, now many commits behind HEAD.</td>
-        <td class="num"><span class="pill p-warn">P1</span></td>
-        <td>Regenerate with the Graphify CLI in <code>.venv-graphify/</code> (<code>scripts/graphify-build.sh</code>), or drop the route. <code>/graph</code> currently discloses the staleness. <strong>This is P2.2 — the next buildable item.</strong></td>
+        <td><del><strong>Stale graph artifact.</strong> <code>/graph</code> rendered an artifact built at commit <code>91a419c</code>, 38 commits behind HEAD.</del> <strong>FIXED</strong> (P2.2) — regenerated; <code>built_at_commit</code> is now <code>cf068fb</code> with 1,207 nodes / 3,074 links / 83 communities. <code>/graph</code> derives both its stats and its commit disclosure from the artifact, so both updated automatically.</td>
+        <td class="num"><span class="pill p-ok">FIXED</span></td>
+        <td>Regeneration exposed a silent regression: graphify 0.9.61 emits vis-network as an external unpkg CDN tag, where the previous artifact had it inlined. Restored by <code>scripts/inline-graph-lib.mjs</code>. <strong>Open gap:</strong> that self-containment check is an ad-hoc probe, not yet a committed guard.</td>
       </tr>
       <tr>
         <td>5</td>
@@ -961,7 +962,7 @@ node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/mo
         <td class="num">1</td>
         <td>Cookie is the honest stand-in until P0.2 auth; the storage shape does not change when it lands.</td>
       </tr>
-      <tr><td>P2.2</td><td><strong>Regenerate the graph artifact</strong></td><td>Rebuild with the Graphify CLI in <code>.venv-graphify/</code>, or drop <code>/graph</code>.</td><td class="num">1</td><td>Currently stale and disclosed as such. <strong>Next buildable item.</strong></td></tr>
+      <tr><td>P2.2</td><td><strong>Regenerate the graph artifact</strong></td><td><strong>DONE 2026-09-15.</strong> <code>scripts/graphify-build.sh</code> regenerated <code>public/graphify/graph.json</code> + <code>graph.html</code>; <code>built_at_commit</code> moved from <code>91a419c</code> (38 commits stale) to <code>cf068fb</code>, now 1,207 nodes / 3,074 links / 83 communities across 152 source files. The rebuild exposed a silent regression — graphify 0.9.61 emits vis-network as an external unpkg CDN tag where the older release inlined it, halving the artifact and leaving the viewer dependent on the network. <code>scripts/inline-graph-lib.mjs</code> restores self-containment by inlining the byte-identical pinned 9.1.6 build from <code>scripts/vendor/</code>; it is idempotent and fails loudly rather than shipping a half-inlined document.</td><td class="num">1</td><td>Open gap: the self-containment check is an ad-hoc probe, not a committed guard. Promoting it is the next task.</td></tr>
       <tr>
         <td>P2.3</td>
         <td><strong>Derive the admin pending counters</strong></td>
@@ -1003,8 +1004,14 @@ npm run lint
 NODE_OPTIONS= npm run build     # clear NODE_OPTIONS or the build can hang
 NODE_OPTIONS= npm start         # serve the production build</code></pre>
 
+  <h4>Regenerating the knowledge graph</h4>
+  <pre><code>bash scripts/graphify-build.sh   # extract -> publish -> inline the viewer library</code></pre>
+  <p>The published artifact (<code>public/graphify/graph.json</code> + <code>graph.html</code>) is <strong>committed</strong>, so a fresh clone ships with the graph; only <code>graphify-out/</code> and the <code>.venv-graphify/</code> virtualenv are ignored. The third pipeline step matters: <strong>graphify 0.9.61 emits vis-network as an external unpkg CDN tag</strong>, where the release that produced the original artifact inlined it. <code>scripts/inline-graph-lib.mjs</code> restores self-containment by substituting the pinned 9.1.6 build from <code>scripts/vendor/</code>. It is idempotent and fails loudly rather than shipping a half-inlined document. If graphify is ever upgraded, verify the served viewer still has <strong>zero external <code>&lt;script src&gt;</code> references</strong> — the failure mode is a blank canvas that looks identical to a successful build.</p>
+
   <h4>Environment gotchas</h4>
   <ul>
+    <li><strong>Never edit a shell script while it is executing.</strong> Bash reads a script progressively by byte offset, so an edit mid-run shifts the content under the interpreter and produces a spurious "syntax error near unexpected token" at a line that is perfectly valid. Re-run the unchanged script instead.</li>
+    <li><strong>Space the QA guards ~13&nbsp;s apart.</strong> <code>POST /api/leads</code> and <code>POST /api/reviews</code> carry a 5-per-60s limiter keyed on <code>x-forwarded-for</code> → <code>x-real-ip</code> → <code>"unknown"</code>. Every guard sends none of those headers, so they all share one bucket; running the suite back-to-back returns <strong>429</strong> and reads exactly like a regression.</li>
     <li><strong>Clear <code>NODE_OPTIONS</code></strong> for builds and browser QA. The sandbox injects a node shim that saturates and hangs child processes.</li>
     <li><strong>Never chain <code>rm</code> before a build.</strong> A delete guard blocks the <code>rm</code>, the <code>&amp;&amp;</code> short-circuits, and you read a stale log and declare success.</li>
     <li><strong>Confirm the PID owning port 3000</strong> before trusting a 200; a stale server serves old code.</li>

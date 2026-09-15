@@ -15,6 +15,12 @@ const config = [
       "_reference/**",
       "qa-screenshots/**",
       "next-env.d.ts",
+      // Vendored third-party build inputs. vis-network-9.1.6.min.js is minified
+      // upstream and is only ever inlined verbatim into the Graphify viewer by
+      // scripts/inline-graph-lib.mjs — linting it produces ~1,500 findings that
+      // describe someone else's code, and drowning the signal is how a real
+      // finding gets missed.
+      "scripts/vendor/**",
     ],
   },
   ...coreWebVitals,
