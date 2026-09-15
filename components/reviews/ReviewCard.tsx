@@ -17,8 +17,23 @@ const SIZE_LABELS: Record<string, string> = {
  * Verification badges sit at the top of the card, not in a footer: a reader should know
  * how much weight to give a review before reading it, not after. Negative content is
  * never hidden or edited.
+ *
+ * `displayHelpfulCount` and `hasVotedHelpful` come from the page that renders the card,
+ * which reads the `helpful_voter` cookie server-side and looks up the user's vote in
+ * the `helpfulVotes` map (lib/data/repository.ts). The button itself stays a pure
+ * client component; the only "is the user a voter" question is answered upstream.
  */
-export function ReviewCard({ review, className }: { review: Review; className?: string }) {
+export function ReviewCard({
+  review,
+  displayHelpfulCount,
+  hasVotedHelpful,
+  className,
+}: {
+  review: Review;
+  displayHelpfulCount: number;
+  hasVotedHelpful: boolean;
+  className?: string;
+}) {
   return (
     <article
       // Stable per-review anchor. A review is a linkable entity — a vendor quoting one in
@@ -107,7 +122,11 @@ export function ReviewCard({ review, className }: { review: Review; className?: 
       {/* ------------------------------------------------------------ footer */}
       <footer className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
         <div className="flex items-center gap-2">
-          <HelpfulButton initialCount={review.helpfulCount} />
+          <HelpfulButton
+            reviewId={review.id}
+            initialCount={displayHelpfulCount}
+            initialHasVoted={hasVotedHelpful}
+          />
           <button
             type="button"
             className="rounded-control px-2 py-1.5 text-2xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"

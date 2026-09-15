@@ -89,18 +89,39 @@
     <p class="lede">A complete technical and product account of the build as it stands today: architecture, every surface, the data model, the quality harness, measured performance, and a prioritised roadmap for what comes next.</p>
     <div class="stamp">
       <span>Next.js 16.3.5 / React 19.3 / TypeScript 5.6 / Tailwind v4</span>
-      <span>42 commits / 20 routes / 7 API endpoints</span>
-      <span>Generated 14 Sep 2026</span>
-      <span>HEAD e44b3a6</span>
+      <span>56 commits / 20 routes / 10 API endpoints</span>
+      <span>Generated 15 Sep 2026</span>
+      <span>HEAD b28e2ad + P2.1</span>
     </div>
   </div>
 </div>
 
 <div class="wrap">
 
+<section id="snapshot">
+  <h2><span class="num">★</span>Current snapshot</h2>
+  <p class="sub">Read this first. It is the compressed state of the project; everything below is the detail behind it.</p>
+
+  <div class="scroll">
+  <table>
+    <tbody>
+      <tr><th>Status</th><td>Backend productionisation in progress. Visual program (W0–W7) complete. Public catalogue, vendor portal and admin portal all live against an in-memory synthetic dataset.</td></tr>
+      <tr><th>Last completed</th><td><strong>P2.1 — persist helpful votes.</strong> Server-backed toggle via <code>POST /api/reviews/[id]/helpful</code> with a per-browser HttpOnly cookie. Guard 14/14, falsification-proven. Surfaced and fixed two pre-existing defects (see Issues).</td></tr>
+      <tr><th>Current</th><td>P2.1 committed and pushed. Nothing in flight.</td></tr>
+      <tr><th>Next logical task</th><td><strong>P2.2 — regenerate the stale graph artifact</strong> (<code>built_at_commit 91a419c</code>). Run <code>scripts/graphify-build.sh</code>; it rewrites <code>public/graphify/graph.json</code> + <code>graph.html</code>. ~1.4 MB commit — keep it standalone.</td></tr>
+      <tr><th>Blocked on a decision</th><td>P0.4 (score/methodology contradiction, HIGH BLAST RADIUS) · P0.1 (persistence store) · P0.2 (auth, after P0.1) · <code>pendingClaims: 4</code> · <code>metadataBase</code> placeholder · <code>og:image</code> (no artwork).</td></tr>
+      <tr><th>Recently changed</th><td><code>lib/data/repository.ts</code> · <code>lib/data/seed.ts</code> · <code>app/api/reviews/[id]/helpful/route.ts</code> (new) · <code>components/reviews/HelpfulButton.tsx</code> · <code>components/reviews/ReviewCard.tsx</code> · <code>app/product/[slug]/page.tsx</code> · <code>scripts/qa/helpful-votes.mjs</code> (new)</td></tr>
+      <tr><th>Important issues</th><td>Rate limiter (5/min/IP) is shared by every QA guard — running the suite back-to-back returns <strong>429</strong> and looks like a regression; space guards ~13 s apart. Stale <code>next start</code> can own a port indefinitely. <code>rm</code> is blocked by the sandbox delete guard and wipes <code>app/</code> if chained.</td></tr>
+      <tr><th>Last verification</th><td><strong>PASS.</strong> tsc 0 · eslint 0 · next build 0 · helpful-votes 14/14 · lead-status 7/7 · lead-ownership 11/11 · portal-runtime 6/6 · admin-metrics-honesty 6/6 · og-metadata-coverage 80/80 · soft-404 6/6 · moderation-api 7/7 · vendor-response 7/7 · listing-edit 9/9 · lead-export 6/6 · review-submission 7/7 · trust-audit PASS. Total 166 assertions, 0 failures.</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
 <section id="toc">
   <h2><span class="num">00</span>Contents</h2>
   <nav class="toc">
+    <a href="#snapshot">★ / Current snapshot</a>
     <a href="#exec">01 / Executive summary</a>
     <a href="#scope">02 / What it is, and what is locked</a>
     <a href="#arch">03 / Architecture</a>
@@ -324,7 +345,7 @@
     <p>Discovered in the B4 cycle. <code>dataset</code> was module-scoped in the repository while <code>leadStore</code>, <code>moderationLog</code>, <code>productDecisions</code> and <code>listingEdits</code> were already wrapped. A vendor reply returned 201 and appeared on neither the portal nor the product page. It was only caught because the guard posted a unique marker and grepped the rendered HTML for it, rather than asserting on a static string.</p>
   </div>
 
-  <p>The required pattern, used five times in the repository:</p>
+  <p>The required pattern, used six times in the repository:</p>
 <pre><code>const globalForDataset = globalThis as unknown as { __dataset?: typeof seeded };
 const dataset: Dataset = (globalForDataset.__dataset ??= seeded);</code></pre>
 
@@ -338,6 +359,7 @@ const dataset: Dataset = (globalForDataset.__dataset ??= seeded);</code></pre>
       <tr><td><code>moderationLog</code></td><td><code>__moderationLog</code></td><td><code>POST /api/moderation</code> (append-only)</td><td><code>/admin/moderation</code></td></tr>
       <tr><td><code>productDecisions</code></td><td><code>__productDecisions</code></td><td><code>POST /api/moderation</code></td><td><code>getPendingProducts()</code></td></tr>
       <tr><td><code>listingEdits</code></td><td><code>__listingEdits</code></td><td>propose + decide routes</td><td><code>/vendor/products</code>, <code>/admin/moderation</code></td></tr>
+      <tr><td><code>helpfulVotes</code></td><td><code>__helpfulVotes</code></td><td><code>POST /api/reviews/[id]/helpful</code></td><td><code>/product/[slug]</code></td></tr>
     </tbody>
   </table>
   </div>
@@ -345,6 +367,7 @@ const dataset: Dataset = (globalForDataset.__dataset ??= seeded);</code></pre>
   <h3>The two-PRNG rule</h3>
   <p><code>lib/procedural.ts</code> and <code>lib/data/seed.ts</code> each carry a copy of the same mulberry32 generator. That duplication looks like a mistake and is not. The seed PRNG <em>defines the dataset</em>: product names, scores, review text and counts are all functions of its output sequence. Unifying the two would change every generated value and invalidate every number in this report, every screenshot, and every guard baseline.</p>
   <p>A corollary: <strong>no <code>Math.random()</code> anywhere.</strong> Server and client must agree, so all procedural output is derived from a seeded PRNG or a hash.</p>
+  <p>A second corollary, learned the hard way in P2.1: <strong>a generated field that nothing renders is a field nobody has ever checked.</strong> <code>Rng.logInt(0, n)</code> passed <code>Math.log(0)</code> = <code>-Infinity</code> into the log-uniform roll, so every review's <code>helpfulCount</code> had been <code>NaN</code> since the baseline commit and the "sort by helpful" control had silently done nothing. Both were invisible for as long as no UI printed the number. When wiring an existing generated value into a surface, assert the <em>rendered</em> value is the right type — not merely that the field exists.</p>
 
   <div class="note">
     <span class="t">Append-only by construction</span>
@@ -469,7 +492,7 @@ const dataset: Dataset = (globalForDataset.__dataset ??= seeded);</code></pre>
       <tr><td>Side-by-side comparison</td><td class="num"><span class="pill p-ok">Live</span></td><td>2 to 4 products. Score bars, normalised feature matrix, pricing rows, verdict. 80 paths prerendered.</td></tr>
       <tr><td>Category browsing</td><td class="num"><span class="pill p-ok">Live</span></td><td>72 categories grouped by pillar with ranked listings and a trust bar.</td></tr>
       <tr><td>Review reading and filtering</td><td class="num"><span class="pill p-ok">Live</span></td><td>5 per page, sortable by recent / helpful / rating, filterable by star and by verification.</td></tr>
-      <tr><td>Helpful votes</td><td class="num"><span class="pill p-warn">Local only</span></td><td><code>HelpfulButton</code> is client-side state. Not persisted.</td></tr>
+      <tr><td>Helpful votes</td><td class="num"><span class="pill p-ok">Live</span></td><td>Server-backed toggle via <code>POST /api/reviews/[id]/helpful</code>. Per-browser HttpOnly cookie identifies the voter; the seeded baseline is never mutated (display = baseline + votes). Survives a refresh; consistent across tabs. (2026-09-14)</td></tr>
       <tr><td>Saved / shortlisted items</td><td class="num"><span class="pill p-mute">Not built</span></td><td>Deferred with auth.</td></tr>
       <tr><td>Write a review</td><td class="num"><span class="pill p-ok">Live</span></td><td>Multi-step wizard at <code>/reviews/new</code> POSTs to <code>/api/reviews</code> and enters the moderation queue as PENDING. The product page CTA points here (2026-09-14).</td></tr>
     </tbody>
@@ -485,8 +508,8 @@ const dataset: Dataset = (globalForDataset.__dataset ??= seeded);</code></pre>
       <tr><td>Enquiry inbox with status</td><td class="num"><span class="pill p-ok">Live</span></td><td>Native <code>&lt;select&gt;</code> per row (no per-instance JS). NEW / CONTACTED / QUALIFIED / CLOSED / SPAM.</td></tr>
       <tr><td>Reply to reviews</td><td class="num"><span class="pill p-ok">Live</span></td><td>Collapsed composer, 1,200 char cap with live count, 20 char minimum. Scope enforced server-side.</td></tr>
       <tr><td>Propose listing changes</td><td class="num"><span class="pill p-ok">Live</span></td><td>Tagline and short description only. Queued for admin review, never applied directly.</td></tr>
-      <tr><td>Lead export (CSV)</td><td class="num"><span class="pill p-mute">Not built</span></td><td>The page states it needs the authenticated vendor API. Easily done server-side once scope exists.</td></tr>
-      <tr><td>Claim a listing</td><td class="num"><span class="pill p-mute">Not built</span></td><td><code>/admin</code> shows a pending-claims counter but the flow does not exist.</td></tr>
+      <tr><td>Lead export (CSV)</td><td class="num"><span class="pill p-ok">Live</span></td><td><code>GET /api/leads/export</code> streams a real RFC 4180 CSV of every lead, scoped to the demo vendor with a 403 for a mismatch. (2026-09-14)</td></tr>
+      <tr><td>Claim a listing</td><td class="num"><span class="pill p-mute">Not built</span></td><td><code>/admin</code> shows a pending-claims counter but the flow does not exist (P1.5).</td></tr>
     </tbody>
   </table>
   </div>
@@ -502,8 +525,8 @@ const dataset: Dataset = (globalForDataset.__dataset ??= seeded);</code></pre>
       <tr><td>Proposed listing changes</td><td class="num"><span class="pill p-ok">Live</span></td><td>Apply or discard. Re-deciding an applied proposal returns 409.</td></tr>
       <tr><td>Decision log</td><td class="num"><span class="pill p-ok">Live</span></td><td>Append-only, renders action, target, from/to status, timestamp and the reason note.</td></tr>
       <tr><td>SEO consistency gate</td><td class="num"><span class="pill p-ok">Live</span></td><td>Compares generated artefacts (sitemap, robots, per-route directives). Rewritten after the first version could not fail.</td></tr>
-      <tr><td>Lead management</td><td class="num"><span class="pill p-ok">Live</span></td><td>All enquiries, status control per row.</td></tr>
-      <tr><td>Lead hand-off / ownership</td><td class="num"><span class="pill p-mute">Not built</span></td><td>The page states a lead has no owner field yet. Needs a schema addition.</td></tr>
+      <tr><td>Lead management</td><td class="num"><span class="pill p-ok">Live</span></td><td>All enquiries, status control per row, owner assignment per row.</td></tr>
+      <tr><td>Lead hand-off / ownership</td><td class="num"><span class="pill p-ok">Live</span></td><td><code>ownerId</code> on Lead plus an owner filter (All / Unassigned / each demo owner). The three-person roster is hard-coded and labelled illustrative — auth is the honest way to replace it. (2026-09-14)</td></tr>
     </tbody>
   </table>
   </div>
@@ -519,16 +542,19 @@ const dataset: Dataset = (globalForDataset.__dataset ??= seeded);</code></pre>
 
 <section id="api">
   <h2><span class="num">08</span>Backend API surface</h2>
-  <p class="sub">Seven endpoints. Every one validates with Zod server-side and enforces scope without a session.</p>
+  <p class="sub">Ten endpoints. Every one validates with Zod server-side and enforces scope without a session.</p>
 
   <div class="scroll">
   <table>
     <thead><tr><th>Method and path</th><th>Purpose</th><th>Statuses</th><th>Scope rule</th></tr></thead>
     <tbody>
-      <tr><td><code>POST /api/leads</code></td><td>Public enquiry submission</td><td>201 / 400 / 422</td><td>None needed (public form)</td></tr>
-      <tr><td><code>PATCH /api/leads/[id]</code></td><td>Move an enquiry between statuses</td><td>200 / 400 / 404 / 422</td><td>None yet; add vendor scope with auth</td></tr>
+      <tr><td><code>POST /api/leads</code></td><td>Public enquiry submission</td><td>201 / 400 / 422 / 429</td><td>None needed (public form); 5/min per IP</td></tr>
+      <tr><td><code>PATCH /api/leads/[id]</code></td><td>Move an enquiry between statuses, or assign an owner</td><td>200 / 400 / 404 / 422</td><td>None yet; add vendor scope with auth</td></tr>
+      <tr><td><code>GET /api/leads/export</code></td><td>Stream every lead as RFC 4180 CSV</td><td>200 / 403</td><td><strong>403 unless <code>companySlug</code> matches the vendor</strong></td></tr>
       <tr><td><code>POST /api/moderation</code></td><td>Approve / reject / flag a review or listing</td><td>200 / 400 / 404 / 422</td><td>None yet; records actor as <code>unauthenticated</code></td></tr>
       <tr><td><code>POST /api/moderation/listing-edit</code></td><td>Apply or discard a proposed listing change</td><td>200 / 400 / 404 / 409 / 422</td><td>Admin-only once auth exists</td></tr>
+      <tr><td><code>POST /api/reviews</code></td><td>Public review submission</td><td>201 / 400 / 422 / 429</td><td>None needed; enters the queue as PENDING; 5/min per IP</td></tr>
+      <tr><td><code>POST /api/reviews/[id]/helpful</code></td><td>Toggle the viewer's "Helpful" vote</td><td>200 / 404</td><td>Per-browser <code>helpful_voter</code> cookie; POST-only (GET → 405)</td></tr>
       <tr><td><code>POST /api/reviews/[id]/response</code></td><td>Publish a vendor reply to a review</td><td>201 / 400 / 403 / 404 / 422</td><td><strong>403 unless the review belongs to the vendor</strong></td></tr>
       <tr><td><code>POST /api/vendor/listings/[slug]</code></td><td>Propose a listing change</td><td>201 / 400 / 403 / 404 / 422</td><td><strong>403 unless the vendor owns the listing</strong></td></tr>
       <tr><td><code>GET /api/search</code></td><td>Search index query</td><td>200 / 400 / 422</td><td>Public</td></tr>
@@ -599,6 +625,14 @@ const dataset: Dataset = (globalForDataset.__dataset ??= seeded);</code></pre>
       <tr><td><code>lead-status.mjs</code></td><td>7 checks: status transitions, invalid status 422, unknown id 404, malformed 400, and the admin table renders a control per row.</td><td><code>node scripts/qa/lead-status.mjs</code></td></tr>
       <tr><td><code>vendor-response.mjs</code></td><td>8 checks: reply accepted, marker appears in the portal <em>and</em> on the public product page, another vendor's review 403, too-short 422, unknown 404, malformed 400.</td><td><code>node scripts/qa/vendor-response.mjs</code></td></tr>
       <tr><td><code>listing-edit.mjs</code></td><td>9 checks: proposal queued not applied, cross-vendor 403, short copy 422, apply reaches the public listing, re-decide 409, unknown 404.</td><td><code>node scripts/qa/listing-edit.mjs</code></td></tr>
+      <tr><td><code>lead-ownership.mjs</code></td><td>11 checks: owner assignment, the row's own <code>&lt;select&gt;</code> marks it selected, the owner filter includes/excludes correctly, combined status+owner PATCH, unassign, and 422 for an invalid owner, an empty body and an unknown field.</td><td><code>node scripts/qa/lead-ownership.mjs</code></td></tr>
+      <tr><td><code>portal-runtime.mjs</code></td><td>6 checks: a posted lead reaches <em>both</em> <code>/admin/leads</code> and <code>/vendor/leads</code>, proving the <code>globalThis</code> singleton and the portal layouts' <code>force-dynamic</code> are both wired.</td><td><code>node scripts/qa/portal-runtime.mjs</code></td></tr>
+      <tr><td><code>admin-metrics-honesty.mjs</code></td><td>6 checks: the "Pending listings" KPI equals the count of PENDING pills in the listings table, across all three render sites, and is no longer the old literal 7.</td><td><code>node scripts/qa/admin-metrics-honesty.mjs</code></td></tr>
+      <tr><td><code>og-metadata-coverage.mjs</code></td><td>80 checks: 10 routes x (og:title, og:description, og:site_name, og:type, twitter:card, twitter:title, twitter:description, 200). Dynamic slugs are discovered from the served HTML.</td><td><code>node scripts/qa/og-metadata-coverage.mjs</code></td></tr>
+      <tr><td><code>soft-404.mjs</code></td><td>6 checks: valid product/category/compare slugs 200, invalid variants 404 — the regression guard for the <code>loading.tsx</code> soft-404.</td><td><code>node scripts/qa/soft-404.mjs</code></td></tr>
+      <tr><td><code>lead-export.mjs</code></td><td>6 checks: a posted lead's id appears in the exported CSV (end-to-end), <code>text/csv</code> content type, header row, salesforce filename, cross-vendor 403.</td><td><code>node scripts/qa/lead-export.mjs</code></td></tr>
+      <tr><td><code>review-submission.mjs</code></td><td>7 checks: wizard 200, submission 201 PENDING, the token is absent from the public page while pending and present in the moderation queue, malformed 422.</td><td><code>node scripts/qa/review-submission.mjs</code></td></tr>
+      <tr><td><code>helpful-votes.mjs</code></td><td>14 checks: vote toggles on the server, the cookie is set once and reused, the count returns to baseline on a second click, a fresh cookie increments independently, unknown id 404, GET 405.</td><td><code>node scripts/qa/helpful-votes.mjs</code></td></tr>
       <tr><td><code>first-load.mjs</code></td><td>Initial JS and CSS per route against the 1,536 KB contract.</td><td><code>node scripts/qa/first-load.mjs / /search ...</code></td></tr>
       <tr><td><code>overflow.sh</code></td><td>No horizontal scroll across routes x breakpoints.</td><td><code>bash scripts/qa/overflow.sh</code></td></tr>
       <tr><td><code>contrast-audit.py</code></td><td>Contrast ratios computed from relative luminance.</td><td><code>python scripts/qa/contrast-audit.py</code></td></tr>
@@ -618,14 +652,27 @@ const dataset: Dataset = (globalForDataset.__dataset ??= seeded);</code></pre>
 <pre><code>npm run typecheck
 npm run lint
 NODE_OPTIONS= npm run build
-# start the server, then:
+# start the server, then run these ONE AT A TIME (see note below):
 bash scripts/qa/smoke.sh
 node scripts/qa/trust-audit.mjs
 node scripts/qa/moderation-api.mjs
 node scripts/qa/lead-status.mjs
 node scripts/qa/vendor-response.mjs
 node scripts/qa/listing-edit.mjs
+node scripts/qa/lead-ownership.mjs
+node scripts/qa/lead-export.mjs
+node scripts/qa/review-submission.mjs
+node scripts/qa/helpful-votes.mjs
+node scripts/qa/portal-runtime.mjs
+node scripts/qa/admin-metrics-honesty.mjs
+node scripts/qa/og-metadata-coverage.mjs
+node scripts/qa/soft-404.mjs
 node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/moderation</code></pre>
+
+  <div class="note warn">
+    <span class="t">Do not run the whole suite back-to-back from one IP</span>
+    <p><code>POST /api/leads</code> and <code>POST /api/reviews</code> carry a sliding-window limiter (5 per 60s) keyed on <code>x-forwarded-for</code>, else <code>x-real-ip</code>, else the literal <code>"unknown"</code>. The guards send none of those headers, so <em>all of them share one bucket</em>. Firing the suite in a tight loop makes the lead- and review-dependent guards return <b>429</b>, which reads exactly like a regression. Space them ~13s apart, or wait a minute for the window to clear.</p>
+  </div>
 </section>
 
 <section id="perf">
@@ -669,7 +716,7 @@ node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/mo
 
 <section id="history">
   <h2><span class="num">12</span>Build history</h2>
-  <p class="sub">42 commits. The phases, in order, so you can see what was decided and when.</p>
+  <p class="sub">56 commits. The phases, in order, so you can see what was decided and when.</p>
 
   <div class="scroll">
   <table>
@@ -690,6 +737,13 @@ node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/mo
       <tr><td><strong>B2 lead status</strong></td><td><code>67a0092</code></td><td>Lead status transitions on both portals.</td></tr>
       <tr><td><strong>B3 vendor replies</strong></td><td><code>63dff5e</code></td><td>Vendor replies to reviews, with server-side scope.</td></tr>
       <tr><td><strong>B4 listing edits</strong></td><td><code>e44b3a6</code></td><td>Listing-edit proposal queue, plus the dataset singleton fix and three rewritten guards.</td></tr>
+      <tr><td><strong>P0.3 soft 404</strong></td><td><code>55d38d9</code></td><td>Removed the three <code>loading.tsx</code> shells so invalid dynamic slugs return a real 404 instead of 200 with a not-found body.</td></tr>
+      <tr><td><strong>P1.4 lead export</strong></td><td><code>76321a2</code></td><td>RFC 4180 CSV export with the same cross-vendor 403 contract as the other write routes.</td></tr>
+      <tr><td><strong>P1.1 review submission</strong></td><td><code>eb68592</code>, <code>8b27ffb</code></td><td>Public multi-step submission wizard feeding the moderation queue; also fixed a queue-sort defect that was burying new submissions behind the slice.</td></tr>
+      <tr><td><strong>P1.3 lead ownership</strong></td><td><code>f424d87</code></td><td><code>ownerId</code> on Lead, strict PATCH schema, Owner column and filter. Two guard defects caught and fixed during verification.</td></tr>
+      <tr><td><strong>P2.3 honest counters</strong></td><td><code>3580518</code></td><td>Derived <code>pendingProducts</code> from the real listings queue; falsification-proven by a deliberate wrong-value probe.</td></tr>
+      <tr><td><strong>E2/E3 metadata</strong></td><td><code>2fbcf8c</code></td><td>Root OG/Twitter fallback plus per-page blocks on ten routes. Discovered that Next.js metadata merges field-by-field, so <code>siteName</code>/<code>locale</code> must be repeated on every block.</td></tr>
+      <tr><td><strong>P2.1 helpful votes</strong></td><td><em>this commit</em></td><td>Server-backed Helpful toggle with cookie identity; surfaced and fixed a <code>Rng.logInt(0, n)</code> NaN defect that had also made "sort by helpful" a no-op.</td></tr>
     </tbody>
   </table>
   </div>
@@ -710,27 +764,27 @@ node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/mo
     <tbody>
       <tr>
         <td>1</td>
-        <td><strong>Soft 404.</strong> <code>/product/&lt;invalid-slug&gt;</code> returns <strong>200</strong> with a not-found body. <code>loading.tsx</code> flushes the shell before <code>notFound()</code> runs, so the status is already committed. Also affects <code>/categories/[slug]</code> and <code>/compare/[slugs]</code>.</td>
-        <td class="num"><span class="pill p-bad">P0 SEO</span></td>
-        <td><strong>(a)</strong> Delete <code>loading.tsx</code>: correct 404s, lose the skeleton. <strong>(b)</strong> Add <code>middleware.ts</code> plus a roughly 4 KB slug manifest: keeps skeletons, needs a drift guard. <em>Recommendation: (b)</em> if skeletons matter; (a) is cheaper and cannot drift.</td>
+        <td><strong>Soft 404.</strong> <del><code>/product/&lt;invalid-slug&gt;</code> returned <strong>200</strong> with a not-found body because <code>loading.tsx</code> flushed the shell before <code>notFound()</code> ran.</del> <strong>FIXED</strong> at <code>55d38d9</code> — the three shells were removed, so <code>/product/[slug]</code>, <code>/categories/[slug]</code> and <code>/compare/[slugs]</code> now return a real 404. Option (b) (middleware + slug manifest) remains available if the loading skeleton turns out to matter on a real deployment.</td>
+        <td class="num"><span class="pill p-ok">FIXED</span></td>
+        <td>Verified by <code>scripts/qa/soft-404.mjs</code> (6/6). The on-demand render is 74–130 ms locally, so the lost skeleton barely showed.</td>
       </tr>
       <tr>
         <td>2</td>
         <td><strong>Composite score contradicts the methodology copy.</strong> Copy says Guest reviews do not count toward the score and implies sponsored listings are excluded, but <code>volumeFactor</code> derives from <code>ratingCount</code>, which includes them.</td>
         <td class="num"><span class="pill p-bad">P0 trust</span></td>
-        <td>Fixing the maths changes the generator, which regenerates the dataset and invalidates every recorded number and screenshot. <em>Recommendation: decide first</em> whether to change the maths or the copy. The copy was corrected once; the maths was left alone deliberately.</td>
+        <td>Fixing the maths changes the generator, which regenerates the dataset and invalidates every recorded number and screenshot. <em>Recommendation: decide first</em> whether to change the maths or the copy. The copy was corrected once; the maths was left alone deliberately. <strong>Still open — needs a decision.</strong></td>
       </tr>
       <tr>
         <td>3</td>
-        <td><strong><code>getAdminMetrics()</code> hardcodes</strong> <code>pendingProducts: 7</code> and <code>pendingClaims: 4</code> while neighbouring metrics are derived. Deriving them yields 0 and empties the dashboard narrative.</td>
-        <td class="num"><span class="pill p-warn">P1</span></td>
-        <td>Either seed a real pending queue, or label the numbers as illustrative. <em>Recommendation: seed real pending records</em> so the demo tells a true story.</td>
+        <td><strong><code>getAdminMetrics()</code> hardcoded counters.</strong> <del><code>pendingProducts: 7</code></del> <strong>FIXED</strong> (P2.3) — now derived from the real listings queue, so the KPI, the sidebar badge and the queue card all agree with the table on <code>/admin/moderation</code>. <code>pendingClaims: 4</code> <strong>remains hardcoded</strong>, with a source comment flagging it.</td>
+        <td class="num"><span class="pill p-warn">P1 (partial)</span></td>
+        <td>For <code>pendingClaims</code> the three honest options — derive to 0, hide the card, or relabel it — are visible product changes, not number-derivation fixes, so they need an explicit decision. Listing claims (P1.5) is not built.</td>
       </tr>
       <tr>
         <td>4</td>
-        <td><strong>Stale graph artifact.</strong> <code>/graph</code> renders an artifact built at commit <code>91a419c</code>, now behind HEAD.</td>
+        <td><strong>Stale graph artifact.</strong> <code>/graph</code> renders an artifact built at commit <code>91a419c</code>, now many commits behind HEAD.</td>
         <td class="num"><span class="pill p-warn">P1</span></td>
-        <td>Regenerate with the Graphify CLI in <code>.venv-graphify/</code>, or drop the route. <code>/graph</code> currently discloses the staleness.</td>
+        <td>Regenerate with the Graphify CLI in <code>.venv-graphify/</code> (<code>scripts/graphify-build.sh</code>), or drop the route. <code>/graph</code> currently discloses the staleness. <strong>This is P2.2 — the next buildable item.</strong></td>
       </tr>
       <tr>
         <td>5</td>
@@ -742,7 +796,7 @@ node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/mo
         <td>6</td>
         <td><strong>Prerendered product pages cannot reflect writes.</strong> A subset of <code>/product/[slug]</code> is prerendered, so a vendor reply or applied listing edit would not appear there until the next build.</td>
         <td class="num"><span class="pill p-warn">P1</span></td>
-        <td>Becomes real the moment writes are durable. Choose <code>force-dynamic</code> or ISR with revalidation on write.</td>
+        <td>Becomes real the moment writes are durable. Choose <code>force-dynamic</code> or ISR with revalidation on write. (The write routes that exist today all run against the in-memory store, so this is latent rather than live.)</td>
       </tr>
       <tr>
         <td>7</td>
@@ -752,9 +806,15 @@ node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/mo
       </tr>
       <tr>
         <td>8</td>
-        <td><strong>Helpful votes are local only,</strong> and <code>recharts</code> is installed but unused.</td>
+        <td><del><strong>Helpful votes are local only.</strong></del> <strong>FIXED</strong> (P2.1) — the toggle is now server-backed through <code>POST /api/reviews/[id]/helpful</code> with a per-browser HttpOnly cookie, so a vote survives a refresh and is consistent across tabs. The same work surfaced and fixed a pre-existing <code>Rng.logInt(0, n)</code> NaN defect. <code>recharts</code> is still installed but unused — that part stands.</td>
+        <td class="num"><span class="pill p-ok">FIXED</span></td>
+        <td>Verified by <code>scripts/qa/helpful-votes.mjs</code> (14/14, falsification-proven). Do not add recharts: hand-rolled SVG keeps the budget and is fully styleable.</td>
+      </tr>
+      <tr>
+        <td>9</td>
+        <td><strong>Metadata is complete but imagery is absent.</strong> Every indexable route now carries OG/Twitter tags (E2/E3), but <code>og:image</code> is intentionally omitted from every block — there is no real brand artwork yet (audit E5).</td>
         <td class="num"><span class="pill p-mute">P2</span></td>
-        <td>Persist votes with the repository work, or remove the affordance. Do not add recharts: hand-rolled SVG keeps the budget and is fully styleable.</td>
+        <td>When a real 1200x630 source image exists, add it once in <code>app/layout.tsx</code> and let per-page blocks override. Do <em>not</em> generate placeholder art with <code>ImageResponse</code> — there is nothing honest to vary from.</td>
       </tr>
     </tbody>
   </table>
@@ -768,11 +828,18 @@ node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/mo
   <h3>Deferred with authentication</h3>
   <ul>
     <li><strong>Authentication and sessions.</strong> <code>/login</code> states plainly that auth is not wired up and no credentials are sent. The portal is pinned to one demo vendor.</li>
-    <li><strong>Saved / shortlisted products.</strong> Needs a user.</li>
-    <li><strong>Review submission wizard.</strong> The largest missing buyer feature. Needs identity and moderation capacity.</li>
-    <li><strong>Listing claims.</strong> <code>/admin</code> shows a counter; the flow does not exist.</li>
-    <li><strong>Lead export (CSV).</strong> The vendor page states it needs the authenticated vendor API. Trivial to add server-side once scope exists.</li>
-    <li><strong>Lead hand-off / ownership.</strong> The admin page states a lead has no owner field yet. Needs a schema addition first.</li>
+    <li><strong>Saved / shortlisted products.</strong> Needs a user. (P1.2 — blocked on P0.2.)</li>
+    <li><strong>Listing claims.</strong> <code>/admin</code> shows a counter; the flow does not exist. (P1.5 — blocked on P0.1.)</li>
+    <li><strong>Moderator roles and permissions.</strong> The audit log already stores an actor per decision; there is only one principal to store today.</li>
+    <li><strong>Notification emails.</strong> A vendor should be told about a new enquiry or review. An external side effect — confirm before enabling.</li>
+  </ul>
+
+  <h3>Shipped since this list was first written</h3>
+  <ul>
+    <li><strong>Review submission wizard</strong> — DONE (P1.1). Public 3-step wizard at <code>/reviews/new</code>; submissions enter the moderation queue as PENDING.</li>
+    <li><strong>Lead export (CSV)</strong> — DONE (P1.4). <code>GET /api/leads/export</code>, scoped to the demo vendor with the same 403 contract.</li>
+    <li><strong>Lead ownership / hand-off</strong> — DONE (P1.3). <code>ownerId</code> on Lead, assignment control and owner filter on <code>/admin/leads</code>. The demo roster is hard-coded and labelled as illustrative; auth is the honest way to replace it.</li>
+    <li><strong>Persistent helpful votes</strong> — DONE (P2.1). Server-backed toggle with a per-browser cookie.</li>
   </ul>
 
   <h3>Deferred by aesthetic or scope decision</h3>
@@ -887,8 +954,14 @@ node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/mo
   <table>
     <thead><tr><th>#</th><th>Item</th><th>What it involves</th><th class="num">Effort</th><th>Note</th></tr></thead>
     <tbody>
-      <tr><td>P2.1</td><td><strong>Persist helpful votes</strong></td><td>Currently client-local state only. Either persist through the repository or remove the affordance.</td><td class="num">1</td><td>Leaving it local is a small honesty problem.</td></tr>
-      <tr><td>P2.2</td><td><strong>Regenerate the graph artifact</strong></td><td>Rebuild with the Graphify CLI in <code>.venv-graphify/</code>, or drop <code>/graph</code>.</td><td class="num">1</td><td>Currently stale and disclosed as such.</td></tr>
+      <tr>
+        <td>P2.1</td>
+        <td><strong>Persist helpful votes</strong></td>
+        <td><strong>DONE 2026-09-14.</strong> The button was pure client-side <code>useState</code> with lock-once behaviour, so a vote reset on refresh and the count was per-tab. It is now server-backed: <code>POST /api/reviews/[id]/helpful</code> toggles a per-browser vote in a <code>globalThis</code> <code>Map&lt;reviewId, Set&lt;voterId&gt;&gt;</code>, identified by an HttpOnly <code>helpful_voter</code> cookie (one UUID per browser, one year, <code>sameSite=lax</code>). The seeded <code>review.helpfulCount</code> is never mutated — the display count is <code>baseline + votes.size</code>, so the generated dataset stays byte-stable. The product page reads the cookie with <code>cookies()</code> and passes per-review state into <code>ReviewCard</code>. Verified by <code>scripts/qa/helpful-votes.mjs</code> (14/14); <em>proven falsifiable</em> by making <code>voteHelpful</code> add-only, which turned exactly 4 assertions red, then restoring it. <strong>Two pre-existing defects surfaced:</strong> <code>Rng.logInt(0, n)</code> computed <code>Math.log(0)</code> = -Infinity, so <em>every</em> review's <code>helpfulCount</code> had been <code>NaN</code> since the baseline — invisible until this feature rendered it — and the "sort by helpful" control was consequently a silent no-op. Both fixed by clamping the log lower bound to 1 (same PRNG draw count, so no other field shifts).</td>
+        <td class="num">1</td>
+        <td>Cookie is the honest stand-in until P0.2 auth; the storage shape does not change when it lands.</td>
+      </tr>
+      <tr><td>P2.2</td><td><strong>Regenerate the graph artifact</strong></td><td>Rebuild with the Graphify CLI in <code>.venv-graphify/</code>, or drop <code>/graph</code>.</td><td class="num">1</td><td>Currently stale and disclosed as such. <strong>Next buildable item.</strong></td></tr>
       <tr>
         <td>P2.3</td>
         <td><strong>Derive the admin pending counters</strong></td>
@@ -961,7 +1034,7 @@ NODE_OPTIONS= npm start         # serve the production build</code></pre>
 
 <footer>
   <p>Generated from the live workspace; last updated 2026-09-14. All figures measured against a served production build, not inferred.</p>
-  <p><strong>Post-script:</strong> P0.3 (soft 404) FIXED at commit 55d38d9 — the three <code>loading.tsx</code> streaming shells were removed so invalid slugs on <code>/product/[slug]</code>, <code>/categories/[slug]</code> and <code>/compare/[slugs]</code> return a real 404 (verified by <code>scripts/qa/soft-404.mjs</code>, 6/6). P1.4 (lead export CSV) DONE — <code>GET /api/leads/export</code> streams a real RFC 4180 CSV scoped to the demo vendor and is verified end-to-end by <code>scripts/qa/lead-export.mjs</code> (6/6). P1.1 (review submission wizard) DONE — <code>POST /api/reviews</code> creates a PENDING review that enters the moderation queue; verified by <code>scripts/qa/review-submission.mjs</code> (7/7). P1.3 (lead ownership) DONE — <code>ownerId</code> on Lead, strict <code>leadUpdateSchema</code> on PATCH, Owner column + filter on <code>/admin/leads</code>; verified by <code>scripts/qa/lead-ownership.mjs</code> (11/11). P2.3 (derive admin pending counters) PARTIAL DONE — <code>getAdminMetrics().pendingProducts</code> is now derived from the actual listings queue instead of the hardcoded literal 7; verified by <code>scripts/qa/admin-metrics-honesty.mjs</code> (6/6, falsification-proven). <code>pendingClaims</code> stays at the literal 4 with a comment in the source flagging it for an explicit user decision — the three honest options (derive to 0, hide the card, relabel it) are visible product changes, not number-derivation fixes. E2/E3 (OG/Twitter metadata coverage) DONE — root fallback in <code>app/layout.tsx</code> plus per-page blocks on the seven static public routes plus twitter blocks on the three dynamic routes; <code>og:image</code> deliberately absent (audit E5 deferred); <code>scripts/qa/og-metadata-coverage.mjs</code> (80/80, falsification-proven). P0.4 (score/methodology contradiction) and P0.1 / P0.2 (persistence + auth) remain deferred user decisions.</p>
+  <p><strong>Post-script:</strong> P0.3 (soft 404) FIXED at commit 55d38d9 — the three <code>loading.tsx</code> streaming shells were removed so invalid slugs on <code>/product/[slug]</code>, <code>/categories/[slug]</code> and <code>/compare/[slugs]</code> return a real 404 (verified by <code>scripts/qa/soft-404.mjs</code>, 6/6). P1.4 (lead export CSV) DONE — <code>GET /api/leads/export</code> streams a real RFC 4180 CSV scoped to the demo vendor and is verified end-to-end by <code>scripts/qa/lead-export.mjs</code> (6/6). P1.1 (review submission wizard) DONE — <code>POST /api/reviews</code> creates a PENDING review that enters the moderation queue; verified by <code>scripts/qa/review-submission.mjs</code> (7/7). P1.3 (lead ownership) DONE — <code>ownerId</code> on Lead, strict <code>leadUpdateSchema</code> on PATCH, Owner column + filter on <code>/admin/leads</code>; verified by <code>scripts/qa/lead-ownership.mjs</code> (11/11). P2.3 (derive admin pending counters) PARTIAL DONE — <code>getAdminMetrics().pendingProducts</code> is now derived from the actual listings queue instead of the hardcoded literal 7; verified by <code>scripts/qa/admin-metrics-honesty.mjs</code> (6/6, falsification-proven). <code>pendingClaims</code> stays at the literal 4 with a comment in the source flagging it for an explicit user decision — the three honest options (derive to 0, hide the card, relabel it) are visible product changes, not number-derivation fixes. P2.1 (persist helpful votes) DONE — the Helpful control is now server-backed through <code>POST /api/reviews/[id]/helpful</code> with an HttpOnly per-browser cookie, verified by <code>scripts/qa/helpful-votes.mjs</code> (14/14, falsification-proven); the work also surfaced and fixed a long-standing <code>Rng.logInt(0, n)</code> NaN defect that had made every review's <code>helpfulCount</code> <code>NaN</code> and turned "sort by helpful" into a no-op. E2/E3 (OG/Twitter metadata coverage) DONE — root fallback in <code>app/layout.tsx</code> plus per-page blocks on the seven static public routes plus twitter blocks on the three dynamic routes; <code>og:image</code> deliberately absent (audit E5 deferred); <code>scripts/qa/og-metadata-coverage.mjs</code> (80/80, falsification-proven). P0.4 (score/methodology contradiction) and P0.1 / P0.2 (persistence + auth) remain deferred user decisions.</p>
 </footer>
 
 </div>

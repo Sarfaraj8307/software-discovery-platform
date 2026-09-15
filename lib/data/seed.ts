@@ -110,7 +110,13 @@ class Rng {
 
   /** Log-uniform-ish integer — makes long-tail review counts look natural. */
   logInt(min: number, max: number): number {
-    const lo = Math.log(min);
+    // `Math.log(0)` is -Infinity, which propagates NaN through the float+exp below.
+    // Clamp the lower bound to 1 so a caller that wants a count in [0, max] gets a
+    // log-distributed integer in [1, max]; the 0-vs-1 distinction is below the
+    // rendering resolution and below `Math.round`. Without this clamp, `helpfulCount`
+    // (the only caller with min=0) seeded as NaN and the product page rendered
+    // "<span>NaN</span>" once P2.1 wired the value into the UI.
+    const lo = Math.log(Math.max(min, 1));
     const hi = Math.log(max);
     return Math.round(Math.exp(this.float(lo, hi)));
   }

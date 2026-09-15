@@ -664,6 +664,86 @@ export function decideListingEdit(id: string, apply: boolean): ListingEdit | nul
   return edit;
 }
 
+/* ------------------------------------------------------ helpful votes */
+
+const globalForHelpfulVotes = globalThis as unknown as {
+  __helpfulVotes?: Map<string, Set<string>>;
+};
+/**
+ * User-generated "Helpful" votes on reviews.
+ *
+ * Stored as `Map<reviewId, Set<voterId>>` so each (review, voter) pair is at most one
+ * vote (clicking again removes it). The seeded `review.helpfulCount` stays untouched —
+ * it represents the synthetic editorial baseline and is part of the PRNG-defined
+ * dataset, so it must not be mutated. The displayed count is `baseline + votes.size`.
+ *
+ * `voterId` is a per-browser random UUID stored in an HttpOnly cookie by the route
+ * handler (`POST /api/reviews/[id]/helpful`). It is per browser, persistent across
+ * sessions for one year, and never identifies a person — only a device. The eventual
+ * auth system (P0.2) replaces the cookie with the session principal; the data shape
+ * here does not change.
+ *
+ * Lives on globalThis for the same reason as `leadStore` and the moderation log:
+ * the route handler and the page must share one copy of the map, otherwise an API
+ * write returns 200 and the page shows the old count.
+ */
+const helpfulVotes: Map<string, Set<string>> =
+  globalForHelpfulVotes.__helpfulVotes ??= new Map();
+
+/**
+ * Toggle `voterId`'s vote on `reviewId`. Returns the new state, or null if the
+ * review does not exist (caller turns that into a 404).
+ */
+export function voteHelpful(
+  reviewId: string,
+  voterId: string,
+): { helpfulCount: number; hasVoted: boolean } | null {
+  const review = dataset.reviews.find((r) => r.id === reviewId);
+  if (!review) return null;
+
+  let voters = helpfulVotes.get(reviewId);
+  if (!voters) {
+    voters = new Set();
+    helpfulVotes.set(reviewId, voters);
+  }
+  if (voters.has(voterId)) {
+    voters.delete(voterId);
+  } else {
+    voters.add(voterId);
+  }
+  return {
+    helpfulCount: review.helpfulCount + voters.size,
+    hasVoted: voters.has(voterId),
+  };
+}
+
+/** What the page should display for `reviewId`: baseline + user votes. */
+export function getDisplayHelpfulCount(reviewId: string): number {
+  const review = dataset.reviews.find((r) => r.id === reviewId);
+  if (!review) return 0;
+  return review.helpfulCount + (helpfulVotes.get(reviewId)?.size ?? 0);
+}
+
+/** Whether the given voter has voted on `reviewId`. */
+export function hasVotedForReview(reviewId: string, voterId: string): boolean {
+  return helpfulVotes.get(reviewId)?.has(voterId) ?? false;
+}
+
+/**
+ * Bulk lookup for a voter across many reviews — used by the product page to pass
+ * `hasVoted` props to every ReviewCard without a per-card cookie read.
+ */
+export function getHelpfulVotesForVoter(
+  voterId: string,
+  reviewIds: readonly string[],
+): Map<string, boolean> {
+  const out = new Map<string, boolean>();
+  for (const id of reviewIds) {
+    out.set(id, helpfulVotes.get(id)?.has(voterId) ?? false);
+  }
+  return out;
+}
+
 export type RespondResult =
   | { ok: true; review: Review }
   | { ok: false; reason: "NOT_FOUND" | "WRONG_VENDOR" };

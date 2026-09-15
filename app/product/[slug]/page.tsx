@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import {
   ArrowUpRight,
   Building2,
@@ -15,7 +16,9 @@ import { cn, formatCompact, formatCount, formatPrice, formatRating, monthYear } 
 import { getProductPageData } from "@/lib/data/queries";
 import {
   getCategoryProducts,
+  getDisplayHelpfulCount,
   getFeaturedProducts,
+  getHelpfulVotesForVoter,
   getTrendingProducts,
   listCategories,
 } from "@/lib/data/repository";
@@ -117,6 +120,19 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
     reviewSummary,
     reviewQuery,
   } = data;
+
+  // Server-side vote state for the current viewer. The cookie carries one UUID per
+  // browser; a missing/empty cookie means the viewer has not voted yet. Computed
+  // once for the whole page so each ReviewCard gets the right props without a per-card
+  // cookie read.
+  const voterId = (await cookies()).get("helpful_voter")?.value ?? "";
+  const visibleReviewIds = reviews.items.map((r) => r.id);
+  const votedFor = voterId
+    ? getHelpfulVotesForVoter(voterId, visibleReviewIds)
+    : new Map<string, boolean>();
+  const displayCounts = new Map<string, number>(
+    visibleReviewIds.map((id) => [id, getDisplayHelpfulCount(id)] as const),
+  );
 
   const basePath = `/product/${product.slug}`;
   const updated = monthYear("2026-09-12");
@@ -689,7 +705,12 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
                   <>
                     <div className="mt-5 space-y-3">
                       {reviews.items.map((review) => (
-                        <ReviewCard key={review.id} review={review} />
+                        <ReviewCard
+                          key={review.id}
+                          review={review}
+                          displayHelpfulCount={displayCounts.get(review.id) ?? review.helpfulCount}
+                          hasVotedHelpful={votedFor.get(review.id) ?? false}
+                        />
                       ))}
                     </div>
 
