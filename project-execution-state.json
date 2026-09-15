@@ -312,6 +312,17 @@
         "The seeded helpfulCount values themselves changed (NaN -> log-distributed integers in [1, 180]). That is a data-layer correction, not a design change; no guard or report asserts a specific helpfulCount, and the review total is unchanged."
       ]
     },
+    "T2_guard_honesty_fixes": {
+      "status": "DONE (2026-09-15)",
+      "what": [
+        "scripts/qa/first-load.mjs — an asset that could not be fetched was pushed to a \"missing\" array and printed as a NOTE; only an over-budget total or a page-fetch error incremented \"failed\". So an unmeasurable asset silently counted as zero bytes. PROVEN with a mock server (.workbuddy-ai/scratch/mock-asset-server.mjs) serving a page whose three /_next/static references all return 404: the guard printed \"JS 0.0 KB ... assets 3 ... PASS (1536 KB)\" plus \"note: 3 asset(s) could not be fetched\" and exited 0. A page whose assets are entirely gone measured nothing and was certified within budget. Now an unfetchable asset marks the route INCOMPLETE, names each missing path, and fails the run. Verified both directions: the mock now exits 1 listing the three paths, while the real app is unchanged and green (/, 877.5 KB; /graph, 818.6 KB; /product/zoom, 1198.4 KB; /admin, 750.9 KB).",
+        "scripts/qa/port-binding.mjs — three SKIP branches printed a '\u2013 SKIP runtime check' line and left the failure counter at 0, so the guard printed 'OK \u2014 all checks passed' and exited 0 with its runtime half unrun. The runtime half IS the guard: it catches a start script of 'next start -p 3000' silently outranking the platform's PORT. PROVEN by forcing the nobuild branch: 3 static checks passed, 1 SKIP printed, 'OK \u2014 all checks passed', exit 0. A fresh clone with no build reported a green port-binding. Now a skip increments its own counter and the guard exits 2 (the suite's 'could not run' convention) with an INCOMPLETE summary that says the runtime half did not run and must not be quoted as evidence. Verified: forced skip exits 2 with the INCOMPLETE message; the restored guard runs all 6 checks green and exits 0.",
+        "PRODUCT_HANDOVER_REPORT.html — port-binding.mjs was absent from the harness table entirely, so the guard was invisible to anyone reading the document. Added, along with the first-load INCOMPLETE behaviour."
+      ],
+      "why": "Both are this project's signature defect: a guard that cannot fail, quoted as evidence for something it never measured. The first-load green would have been quoted for the 1,536 KB performance contract; the port-binding green for a production deployment where PORT is supplied by the platform.",
+      "generalisation": "The class is 'an error was caught and demoted to a warning'. Two shapes found by grepping every guard for catch blocks and for note/skip wording: (a) a failed measurement treated as a zero measurement, (b) a self-skip that leaves the exit code at 0. Both let a guard report success for work it did not do. The runner (T1) now also flags a guard that exits 0 having reported no checks, which catches the same class from outside.",
+      "verified": "Full suite 16/16 green after both fixes (run-all.mjs against 127.0.0.1:3064, 17s). eslint 0 errors, 3 pre-existing warnings. Both guards were falsified on the broken behaviour first and re-run green after the fix, on the same build."
+    },
     "T1_guard_suite_runner": {
       "status": "DONE (2026-09-15)",
       "what": [

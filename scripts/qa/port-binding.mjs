@@ -29,6 +29,14 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 let failures = 0;
+// A skipped check is not a passed check. The static half always runs, but the
+// runtime half is the whole reason this guard exists (the `-p 3000` regression),
+// and on a fresh clone with no build it silently did not run — while the guard
+// still printed "OK — all checks passed" and exited 0. Proven by forcing the
+// nobuild branch: 3 static ✓, 1 SKIP, "OK — all checks passed", exit 0.
+// A skip now exits 2 ("could not run"), which is the suite's convention for
+// exactly this, so it can never be quoted as evidence.
+let skipped = 0;
 const pass = (m) => console.log(`  \u2713 ${m}`);
 const fail = (m) => {
   failures++;
@@ -87,6 +95,7 @@ const nextBin = path.join(root, "node_modules", "next", "dist", "bin", "next");
 
 if (!existsSync(nextBin)) {
   console.log("  \u2013 SKIP runtime check: next binary not found at node_modules/next/dist/bin/next.");
+  skipped += 1;
 } else {
   // Ask the OS for a free port, then close it so the server can claim it.
   const probe = createServer();
@@ -99,6 +108,7 @@ if (!existsSync(nextBin)) {
 
   if (port === 3000) {
     console.log("  \u2013 SKIP runtime check: could not obtain a port other than 3000.");
+    skipped += 1;
   } else {
     // Run the ACTUAL production command from package.json, through a shell,
     // exactly as npm would. Invoking `next start` directly would bypass the
@@ -140,6 +150,7 @@ if (!existsSync(nextBin)) {
 
     if (outcome === "nobuild") {
       console.log("  \u2013 SKIP runtime check: no production build. Run `npm run build` first.");
+      skipped += 1;
     } else if (outcome === "timeout") {
       fail(`server did not report ready within 60s when given PORT=${port}`);
       console.log(
@@ -192,6 +203,15 @@ if (!existsSync(nextBin)) {
       child.kill("SIGTERM");
     }
   }
+}
+
+if (skipped > 0) {
+  console.log(
+    `\nINCOMPLETE — ${skipped} check(s) SKIPPED, ${failures} failed.\n` +
+      `The runtime half of this guard did not run, so it has NOT been verified.\n` +
+      `Run \`npm run build\` and re-run before quoting this as evidence.\n`,
+  );
+  process.exit(2);
 }
 
 console.log(`\n${failures === 0 ? "OK \u2014 all checks passed" : `${failures} check(s) FAILED`}\n`);

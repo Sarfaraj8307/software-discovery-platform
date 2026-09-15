@@ -83,17 +83,33 @@ for (const route of routes) {
   const cssKb = css / KB;
   const withinBudget = jsKb <= JS_BUDGET_KB;
 
+  // An asset we could not fetch is NOT a zero-byte asset. If any asset is
+  // unmeasurable the total is a lower bound, so the budget comparison cannot
+  // certify anything — report INCOMPLETE and fail the run.
+  //
+  // Without this the guard goes green exactly when the page is most broken.
+  // Proven: a mock server serving a page whose three /_next/static references
+  // all return 404 produced "JS 0.0 KB ... PASS (1536 KB)" and exit 0, with the
+  // three failures demoted to a "note". A budget check that passes while
+  // measuring nothing is worse than no check, because it is quoted as evidence.
+  const complete = missing.length === 0;
+
   console.log(
     `${route.padEnd(30)} JS ${jsKb.toFixed(1).padStart(8)} KB   ` +
       `CSS ${cssKb.toFixed(1).padStart(7)} KB   ` +
       `assets ${String(assets.length).padStart(3)}   ` +
-      `${withinBudget ? "PASS" : "OVER BUDGET"} (${JS_BUDGET_KB} KB)`,
+      `${complete ? (withinBudget ? "PASS" : "OVER BUDGET") : "INCOMPLETE"} (${JS_BUDGET_KB} KB)`,
   );
 
-  if (missing.length > 0) {
-    console.log(`  note: ${missing.length} asset(s) could not be fetched`);
+  if (!complete) {
+    console.log(
+      `  FAIL: ${missing.length} of ${assets.length} asset(s) could not be fetched — ` +
+        `the total above is a lower bound, not a measurement`,
+    );
+    for (const asset of missing) console.log(`        ${asset}`);
   }
-  if (!withinBudget) failed++;
+
+  if (!complete || !withinBudget) failed++;
 }
 
 process.exit(failed === 0 ? 0 : 1);
