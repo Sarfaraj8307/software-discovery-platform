@@ -89,7 +89,7 @@
     <p class="lede">A complete technical and product account of the build as it stands today: architecture, every surface, the data model, the quality harness, measured performance, and a prioritised roadmap for what comes next.</p>
     <div class="stamp">
       <span>Next.js 16.3.5 / React 19.3 / TypeScript 5.6 / Tailwind v4</span>
-      <span>57 commits / 20 routes / 10 API endpoints</span>
+      <span>58 commits / 20 routes / 10 API endpoints</span>
       <span>Generated 15 Sep 2026</span>
       <span>HEAD cf068fb</span>
     </div>
@@ -106,13 +106,13 @@
   <table>
     <tbody>
       <tr><th>Status</th><td>Backend productionisation in progress. Visual program (W0–W7) complete. Public catalogue, vendor portal and admin portal all live against an in-memory synthetic dataset.</td></tr>
-      <tr><th>Last completed</th><td><strong>P2.2 — refresh the knowledge-graph artifact.</strong> <code>built_at_commit</code> is now <code>cf068fb</code> (was <code>91a419c</code>, 38 commits behind); 1,207 nodes / 3,074 links / 83 communities. Regeneration exposed a silent self-containment regression in graphify 0.9.61 — fixed by <code>scripts/inline-graph-lib.mjs</code>.</td></tr>
+      <tr><th>Last completed</th><td><strong>P2.2 — refresh the knowledge-graph artifact, plus the guard it exposed the need for.</strong> <code>built_at_commit</code> is now <code>cf068fb</code> (was <code>91a419c</code>, 38 commits behind); 1,207 nodes / 3,074 links / 83 communities. Regeneration silently broke self-containment (graphify 0.9.61 emits vis-network as an external CDN tag); fixed by <code>scripts/inline-graph-lib.mjs</code> and now guarded by <code>scripts/qa/graph-artifact.mjs</code> (15/15, falsification-proven).</td></tr>
       <tr><th>Current</th><td>P2.2 committed and pushed. Nothing in flight.</td></tr>
-      <tr><th>Next logical task</th><td><strong>Promote the graph self-containment check to <code>scripts/qa/graph-artifact.mjs</code></strong> — the one gap P2.2 left. Assert the served viewer has zero external <code>&lt;script src&gt;</code>, contains the inlined library, and that <code>/graph</code> discloses the current HEAD short SHA. Small, and it guards the exact silent regression this cycle found.</td></tr>
+      <tr><th>Next logical task</th><td><strong>Nothing buildable remains unblocked.</strong> Every outstanding item is a decision (see the row below). The nearest code work is whatever the P0.1/P0.4 calls unlock.</td></tr>
       <tr><th>Blocked on a decision</th><td>P0.4 (score/methodology contradiction, HIGH BLAST RADIUS) · P0.1 (persistence store) · P0.2 (auth, after P0.1) · <code>pendingClaims: 4</code> · <code>metadataBase</code> placeholder · <code>og:image</code> (no artwork).</td></tr>
-      <tr><th>Recently changed</th><td><code>public/graphify/graph.json</code> + <code>graph.html</code> · <code>scripts/inline-graph-lib.mjs</code> (new) · <code>scripts/vendor/vis-network-9.1.6.min.js</code> (new) · <code>scripts/graphify-build.sh</code> · <code>eslint.config.mjs</code> · <code>lib/graph-stats.ts</code></td></tr>
+      <tr><th>Recently changed</th><td><code>public/graphify/graph.json</code> + <code>graph.html</code> · <code>scripts/inline-graph-lib.mjs</code> (new) · <code>scripts/vendor/vis-network-9.1.6.min.js</code> (new) · <code>scripts/qa/graph-artifact.mjs</code> (new) · <code>scripts/graphify-build.sh</code> · <code>eslint.config.mjs</code> · <code>lib/graph-stats.ts</code></td></tr>
       <tr><th>Important issues</th><td>Rate limiter (5/min/IP) is shared by every QA guard — running the suite back-to-back returns <strong>429</strong> and looks like a regression; space guards ~13 s apart. <code>rm</code> is blocked by the sandbox delete guard and wipes <code>app/</code> if chained. Never edit a shell script while it is executing (bash reads progressively).</td></tr>
-      <tr><th>Last verification</th><td><strong>PASS.</strong> tsc 0 · eslint 0 errors · next build 0 · 13 guard suites green (og-metadata 80/80, helpful-votes 14/14, lead-ownership 11/11, listing-edit 9/9, moderation-api 7/7, vendor-response 7/7, lead-status 7/7, review-submission 7/7, soft-404 6/6, portal-runtime 6/6, lead-export 6/6, admin-metrics-honesty 6/6, trust-audit PASS) · bundle budget / 877.5 KB, /graph 818.6 KB (budget 1,536 KB).</td></tr>
+      <tr><th>Last verification</th><td><strong>PASS.</strong> tsc 0 · eslint 0 errors · next build 0 · 14 guard suites green (graph-artifact 15/15, og-metadata 80/80, helpful-votes 14/14, lead-ownership 11/11, listing-edit 9/9, moderation-api 7/7, vendor-response 7/7, lead-status 7/7, review-submission 7/7, soft-404 6/6, portal-runtime 6/6, lead-export 6/6, admin-metrics-honesty 6/6, trust-audit PASS) · bundle budget / 877.5 KB, /graph 818.6 KB (budget 1,536 KB).</td></tr>
     </tbody>
   </table>
   </div>
@@ -632,6 +632,7 @@ const dataset: Dataset = (globalForDataset.__dataset ??= seeded);</code></pre>
       <tr><td><code>soft-404.mjs</code></td><td>6 checks: valid product/category/compare slugs 200, invalid variants 404 — the regression guard for the <code>loading.tsx</code> soft-404.</td><td><code>node scripts/qa/soft-404.mjs</code></td></tr>
       <tr><td><code>lead-export.mjs</code></td><td>6 checks: a posted lead's id appears in the exported CSV (end-to-end), <code>text/csv</code> content type, header row, salesforce filename, cross-vendor 403.</td><td><code>node scripts/qa/lead-export.mjs</code></td></tr>
       <tr><td><code>review-submission.mjs</code></td><td>7 checks: wizard 200, submission 201 PENDING, the token is absent from the public page while pending and present in the moderation queue, malformed 422.</td><td><code>node scripts/qa/review-submission.mjs</code></td></tr>
+      <tr><td><code>graph-artifact.mjs</code></td><td>15 checks: the served Graphify viewer has <strong>zero external <code>&lt;script src&gt;</code></strong>, the library is inlined, the payload is embedded, the served viewer is <strong>content-identical</strong> (SHA-256) to the file on disk and byte-for-byte the same length, and <code>/graph</code> discloses the same commit as the artifact on disk (compared against the file, not a hardcoded SHA).</td><td><code>node scripts/qa/graph-artifact.mjs</code></td></tr>
       <tr><td><code>helpful-votes.mjs</code></td><td>14 checks: vote toggles on the server, the cookie is set once and reused, the count returns to baseline on a second click, a fresh cookie increments independently, unknown id 404, GET 405.</td><td><code>node scripts/qa/helpful-votes.mjs</code></td></tr>
       <tr><td><code>first-load.mjs</code></td><td>Initial JS and CSS per route against the 1,536 KB contract.</td><td><code>node scripts/qa/first-load.mjs / /search ...</code></td></tr>
       <tr><td><code>overflow.sh</code></td><td>No horizontal scroll across routes x breakpoints.</td><td><code>bash scripts/qa/overflow.sh</code></td></tr>
@@ -667,6 +668,7 @@ node scripts/qa/portal-runtime.mjs
 node scripts/qa/admin-metrics-honesty.mjs
 node scripts/qa/og-metadata-coverage.mjs
 node scripts/qa/soft-404.mjs
+node scripts/qa/graph-artifact.mjs
 node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/moderation</code></pre>
 
   <div class="note warn">
@@ -716,7 +718,7 @@ node scripts/qa/first-load.mjs / /product/&lt;slug&gt; /vendor/reviews /admin/mo
 
 <section id="history">
   <h2><span class="num">12</span>Build history</h2>
-  <p class="sub">57 commits. The phases, in order, so you can see what was decided and when.</p>
+  <p class="sub">58 commits. The phases, in order, so you can see what was decided and when.</p>
 
   <div class="scroll">
   <table>

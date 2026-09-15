@@ -21,6 +21,11 @@ const config = [
       // describe someone else's code, and drowning the signal is how a real
       // finding gets missed.
       "scripts/vendor/**",
+      // Agent tool state (scratch scripts, state-file backups, probe copies) —
+      // not project source. Without this, a CommonJS helper dropped in here
+      // trips @typescript-eslint/no-require-imports and turns lint red for a
+      // file the project never ships.
+      ".workbuddy-ai/**",
     ],
   },
   ...coreWebVitals,
