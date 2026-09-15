@@ -217,6 +217,20 @@ function tally(output) {
 
 const RATE_LIMITED = /\b429\b|too many requests/i;
 
+/**
+ * A guard that exits 0 while telling you it skipped a check has not passed —
+ * it has PARTIALLY run, and a partial run must never be quoted as evidence.
+ *
+ * port-binding.mjs did exactly this: three SKIP branches printed
+ * "– SKIP runtime check: ..." and left the exit code at 0, so a fresh clone
+ * reported a green port-binding whose runtime half — the entire reason the
+ * guard exists — had never executed. That guard now exits 2 on a skip, which
+ * lands in the ENV bucket. This detector is the backstop for the next guard
+ * that grows a silent skip, because the exit code alone cannot be trusted to
+ * report one.
+ */
+const SKIP_MARKER = /(^|\s)(SKIP|SKIPPED|SKIPPING)\b/i;
+
 const results = [];
 
 for (const guard of selected) {
@@ -259,9 +273,23 @@ for (const guard of selected) {
     !/pass/i.test(last.output) &&
     !/\bok\b/i.test(last.output);
 
-  results.push({ guard, status, checks, failures, countable, durationMs, attempt, output: last.output, suspicious });
+  // Exit 0, but the guard said it skipped something.
+  const skippedCheck = status === "PASS" && SKIP_MARKER.test(last.output);
 
-  const label = suspicious ? "PASS?" : status;
+  results.push({
+    guard,
+    status,
+    checks,
+    failures,
+    countable,
+    durationMs,
+    attempt,
+    output: last.output,
+    suspicious,
+    skippedCheck,
+  });
+
+  const label = skippedCheck ? "SKIPPED" : suspicious ? "PASS?" : status;
   console.log(
     `  ${label.padEnd(8)} ${guard.name.padEnd(24)} ` +
       `checks ${countable ? String(checks).padStart(3) : "n/a"}` +
@@ -284,12 +312,18 @@ for (const guard of selected) {
 
 /* ----------------------------------------------------------------- summary */
 
+/* A guard is only green if it ran and passed. Exit 0 with a skipped check, or
+ * exit 0 having reported no checks at all, is neither. Counting those as PASS
+ * is how a suite ends up certifying a run that never happened. */
+const effective = (r) => (r.skippedCheck ? "SKIPPED" : r.suspicious ? "UNVERIFIED" : r.status);
+
 const counts = results.reduce((acc, r) => {
-  acc[r.status] = (acc[r.status] || 0) + 1;
+  const k = effective(r);
+  acc[k] = (acc[k] || 0) + 1;
   return acc;
 }, {});
 
-const notGreen = results.filter((r) => r.status !== "PASS");
+const notGreen = results.filter((r) => effective(r) !== "PASS");
 
 console.log("");
 console.log(
@@ -303,7 +337,7 @@ console.log(
 if (notGreen.length > 0) {
   console.log("");
   for (const r of notGreen) {
-    console.log(`  ${r.status.padEnd(8)} ${r.guard.name}`);
+    console.log(`  ${effective(r).padEnd(10)} ${r.guard.name}`);
   }
   if (counts.ENV) {
     console.log(
@@ -311,9 +345,19 @@ if (notGreen.length > 0) {
         `${flags.base}, or a slug could not be derived. It is not an app defect.`,
     );
   }
+  if (counts.SKIPPED) {
+    console.log(
+      "\n  SKIPPED means the guard exited 0 while reporting that it skipped a check. " +
+        "The skipped work is unverified — do not quote this run as a full pass.",
+    );
+  }
+  if (counts.UNVERIFIED) {
+    console.log(
+      "\n  UNVERIFIED means the guard exited 0 without reporting any checks at all.",
+    );
+  }
   process.exit(1);
 }
 
-const suspiciousCount = results.filter((r) => r.suspicious).length;
-console.log(`\nPASS — all ${results.length} guards green${suspiciousCount ? ` (${suspiciousCount} reported no checks — see above)` : ""}`);
+console.log(`\nPASS — all ${results.length} guards ran and are green`);
 process.exit(0);
