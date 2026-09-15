@@ -30,6 +30,11 @@
  * originally left out on the assumption that every .sh guard needed a browser;
  * that was wrong and it had been verifying nothing inside the suite.
  *
+ * INCLUDED: contrast-contract and port-binding need no server at all ("self").
+ * contrast-contract reads app/globals.css off disk, so it runs first and still
+ * contributes when the app is down — the moment every http guard can only
+ * report exit 2.
+ *
  * NOT INCLUDED: ab, overflow, shot-route, visual-shots. Those four drive a real
  * browser, which survives roughly 8-11 page checks before wedging and needs the
  * split-run technique described in the handover. Run them separately.
@@ -52,6 +57,9 @@ const HERE = dirname(fileURLToPath(import.meta.url));
  *            drive agent-browser and are excluded — see the note at the top.
  */
 const GUARDS = [
+  /* No server needed, so it runs first and still contributes when the app is
+   * down — which is exactly when the http guards can only report exit 2. */
+  { name: "contrast-contract", kind: "self", file: "contrast-contract.mjs" },
   { name: "smoke", kind: "sh", file: "smoke.sh" },
   { name: "trust-audit", kind: "http", file: "trust-audit.mjs" },
   { name: "og-metadata-coverage", kind: "http", file: "og-metadata-coverage.mjs" },
