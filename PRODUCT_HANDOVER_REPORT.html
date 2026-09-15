@@ -112,7 +112,7 @@
       <tr><th>Blocked on a decision</th><td>P0.4 (score/methodology contradiction, HIGH BLAST RADIUS) · P0.1 (persistence store) · P0.2 (auth, after P0.1) · <code>pendingClaims: 4</code> · <code>metadataBase</code> placeholder · <code>og:image</code> (no artwork).</td></tr>
       <tr><th>Recently changed</th><td><code>public/graphify/graph.json</code> + <code>graph.html</code> · <code>scripts/inline-graph-lib.mjs</code> (new) · <code>scripts/vendor/vis-network-9.1.6.min.js</code> (new) · <code>scripts/qa/graph-artifact.mjs</code> (new) · <code>scripts/graphify-build.sh</code> · <code>eslint.config.mjs</code> · <code>lib/graph-stats.ts</code></td></tr>
       <tr><th>Important issues</th><td>Rate limiter (5/min/IP) is shared by every QA guard — running the suite back-to-back returns <strong>429</strong> and looks like a regression; space guards ~13 s apart. <code>rm</code> is blocked by the sandbox delete guard and wipes <code>app/</code> if chained. Never edit a shell script while it is executing (bash reads progressively).</td></tr>
-      <tr><th>Last verification</th><td><strong>PASS.</strong> tsc 0 · eslint 0 errors · next build 0 · 14 guard suites green (graph-artifact 15/15, og-metadata 80/80, helpful-votes 14/14, lead-ownership 11/11, listing-edit 9/9, moderation-api 7/7, vendor-response 7/7, lead-status 7/7, review-submission 7/7, soft-404 6/6, portal-runtime 6/6, lead-export 6/6, admin-metrics-honesty 6/6, trust-audit PASS) · bundle budget / 877.5 KB, /graph 818.6 KB (budget 1,536 KB).</td></tr>
+      <tr><th>Last verification</th><td><strong>PASS.</strong> tsc 0 · eslint 0 errors · next build 0 · <code>run-all.mjs</code> <strong>17/17 green in 34s</strong> (smoke 25/25, og-metadata 80/80, graph-artifact 15/15, helpful-votes 14/14, lead-ownership 11/11, listing-edit 9/9, moderation-api 7/7, vendor-response 7/7, lead-status 7/7, review-submission 7/7, soft-404 6/6, portal-runtime 6/6, lead-export 6/6, admin-metrics-honesty 6/6, plus trust-audit, first-load and port-binding) · bundle budget / 877.5 KB, /graph 818.6 KB (budget 1,536 KB).</td></tr>
     </tbody>
   </table>
   </div>
@@ -619,8 +619,8 @@ const dataset: Dataset = (globalForDataset.__dataset ??= seeded);</code></pre>
     <caption>Scripts in <code>scripts/qa/</code></caption>
     <thead><tr><th>Script</th><th>What it proves</th><th>Run</th></tr></thead>
     <tbody>
-      <tr><td><code>run-all.mjs</code></td><td><strong>Runs all 16 guards and keeps the three exit codes apart.</strong> Retries on 429 instead of reporting a regression, and labels <em>could not run</em>, <em>skipped</em> and <em>unverified</em> separately from <em>failed</em> — none of the first three count as green. A guard is green only if it ran and passed. <code>--only</code> / <code>--skip</code> / <code>--list</code> for iteration.</td><td><code>node scripts/qa/run-all.mjs --base &lt;url&gt;</code></td></tr>
-      <tr><td><code>smoke.sh</code></td><td>25 routes return the expected status, including a canonical redirect and a genuine 404.</td><td><code>bash scripts/qa/smoke.sh</code></td></tr>
+      <tr><td><code>run-all.mjs</code></td><td><strong>Runs all 17 guards (16 <code>.mjs</code> + <code>smoke.sh</code>) and keeps the three exit codes apart.</strong> Retries on 429 instead of reporting a regression, and labels <em>could not run</em>, <em>skipped</em> and <em>unverified</em> separately from <em>failed</em> — none of the first three count as green. A guard is green only if it ran and passed. <code>--only</code> / <code>--skip</code> / <code>--list</code> for iteration.</td><td><code>node scripts/qa/run-all.mjs --base &lt;url&gt;</code></td></tr>
+      <tr><td><code>smoke.sh</code></td><td>25 routes return the expected status, including a canonical redirect and a genuine 404. <strong>Curl-only — no browser driver</strong> — so it runs inside <code>run-all.mjs</code> like the .mjs guards. It was originally excluded on the wrong assumption that every <code>.sh</code> guard needed a browser, and had been verifying nothing inside the suite.</td><td><code>bash scripts/qa/smoke.sh</code></td></tr>
       <tr><td><code>trust-audit.mjs</code></td><td>JSON-LD <code>reviewCount</code> equals the reviews actually rendered; no surface labels a non-verified number "verified"; no page maps one label to two values.</td><td><code>node scripts/qa/trust-audit.mjs</code></td></tr>
       <tr><td><code>moderation-api.mjs</code></td><td>7 checks: decision accepted, lands on the requested status, invalid action / target rejected, unknown id 404, malformed 400, and the decision surfaces in the admin log.</td><td><code>node scripts/qa/moderation-api.mjs</code></td></tr>
       <tr><td><code>lead-status.mjs</code></td><td>7 checks: status transitions, invalid status 422, unknown id 404, malformed 400, and the admin table renders a control per row.</td><td><code>node scripts/qa/lead-status.mjs</code></td></tr>
@@ -658,10 +658,10 @@ NODE_OPTIONS= npm run build
 # start the server, then run the whole suite in one command:
 node scripts/qa/run-all.mjs --base http://127.0.0.1:3000
 
-# the browser guards are NOT part of the runner — they wedge after ~8-11 page
-# checks, so they need the split-run technique. Run them separately:
-bash scripts/qa/smoke.sh
+# smoke.sh runs inside the runner (curl-only). The four browser guards do not —
+# they wedge after ~8-11 page checks and need the split-run technique:
 bash scripts/qa/overflow.sh
+bash scripts/qa/visual-shots.sh
 
   <div class="note">
     <span class="t">The runner exists because running the suite by hand manufactures false regressions</span>

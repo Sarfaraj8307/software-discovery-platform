@@ -26,10 +26,13 @@
  * language shim whose unlink counter saturates over a long session and makes
  * spawned Node children hang with no output.
  *
- * NOT INCLUDED: the .sh guards (smoke, ab, overflow, shot-route, visual-shots).
- * They drive a real browser, which survives roughly 8-11 page checks before
- * wedging; they need the split-run technique described in the handover. Run
- * them separately.
+ * INCLUDED: smoke.sh — 25 route assertions, curl-only, no browser. It was
+ * originally left out on the assumption that every .sh guard needed a browser;
+ * that was wrong and it had been verifying nothing inside the suite.
+ *
+ * NOT INCLUDED: ab, overflow, shot-route, visual-shots. Those four drive a real
+ * browser, which survives roughly 8-11 page checks before wedging and needs the
+ * split-run technique described in the handover. Run them separately.
  */
 import { spawn } from "node:child_process";
 import { dirname, join } from "node:path";
@@ -44,8 +47,12 @@ const HERE = dirname(fileURLToPath(import.meta.url));
  *   "http" — takes the base URL as argv[2]
  *   "env"  — reads BASE from the environment and takes routes as argv[2..]
  *   "self" — needs no base URL at all; starts whatever it needs itself
+ *   "sh"   — a POSIX shell guard that reads PORT (not a base URL). Only
+ *            smoke.sh qualifies: it is curl-only. The other four .sh guards
+ *            drive agent-browser and are excluded — see the note at the top.
  */
 const GUARDS = [
+  { name: "smoke", kind: "sh", file: "smoke.sh" },
   { name: "trust-audit", kind: "http", file: "trust-audit.mjs" },
   { name: "og-metadata-coverage", kind: "http", file: "og-metadata-coverage.mjs" },
   { name: "soft-404", kind: "http", file: "soft-404.mjs" },
@@ -144,14 +151,27 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 /** Run one guard once. Returns { code, output, timedOut }. */
 function runOnce(guard) {
   return new Promise((resolve) => {
-    const args = [join(HERE, guard.file)];
-    if (guard.kind === "http") args.push(flags.base);
-    if (guard.kind === "env") args.push(...guard.routes);
-
     const env = { ...process.env, NODE_OPTIONS: "" };
-    if (guard.kind === "env") env.BASE = flags.base;
+    let cmd;
+    let args;
 
-    const child = spawn(process.execPath, args, { env, cwd: process.cwd() });
+    if (guard.kind === "sh") {
+      // Shell guards read PORT, not a base URL. smoke.sh defaults to 3000, so
+      // passing the wrong port would silently test nothing.
+      env.PORT = new URL(flags.base).port || "3000";
+      cmd = "sh";
+      args = [join(HERE, guard.file)];
+    } else {
+      args = [join(HERE, guard.file)];
+      if (guard.kind === "http") args.push(flags.base);
+      if (guard.kind === "env") {
+        args.push(...guard.routes);
+        env.BASE = flags.base;
+      }
+      cmd = process.execPath;
+    }
+
+    const child = spawn(cmd, args, { env, cwd: process.cwd() });
 
     let output = "";
     let timedOut = false;
